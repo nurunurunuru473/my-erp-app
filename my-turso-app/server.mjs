@@ -74,3 +74,6 @@ app.post("/api/users", async (req, res) => {
 app.listen(3000, () => {
   console.log("ሰርቨሩ በ http://localhost:3000 ላይ እየሰራ ነው");
 });
+export default app;
+export default app;
+export default app;
