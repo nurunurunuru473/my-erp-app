@@ -1,0 +1,29 @@
+0 verbose cli /data/data/com.termux/files/usr/bin/node /data/data/com.termux/files/usr/bin/npm
+1 info using npm@11.19.1
+2 info using node@v26.4.0
+3 silly config load:file:/data/data/com.termux/files/usr/lib/node_modules/npm/npmrc
+4 silly config load:file:/data/data/com.termux/files/home/my-turso-app/.npmrc
+5 silly config load:file:/data/data/com.termux/files/home/.npmrc
+6 silly config load:file:/data/data/com.termux/files/usr/etc/npmrc
+7 verbose title npm init
+8 verbose argv "init" "--yes"
+9 verbose logfile logs-max:10 dir:/data/data/com.termux/files/home/.npm/_logs/2026-09-14T23_08_45_500Z-
+10 verbose logfile /data/data/com.termux/files/home/.npm/_logs/2026-09-14T23_08_45_500Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly package data {
+12 silly package data   name: 'my-turso-app',
+12 silly package data   version: '1.0.0',
+12 silly package data   description: '',
+12 silly package data   main: 'index.js',
+12 silly package data   scripts: { test: 'echo "Error: no test specified" && exit 1' },
+12 silly package data   keywords: [],
+12 silly package data   author: '',
+12 silly package data   license: 'ISC',
+12 silly package data   type: 'commonjs'
+12 silly package data }
+13 verbose cwd /data/data/com.termux/files/home/my-turso-app
+14 verbose os Linux 4.19.113-27223811
+15 verbose node v26.4.0
+16 verbose npm  v11.19.1
+17 verbose exit 0
+18 info ok
