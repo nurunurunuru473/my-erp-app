@@ -1,10 +1,9 @@
 {
-  "functions": {
-    "api/index.mjs": {
-      "includeFiles": "index.html"
-    }
-  },
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index" }
+  "version": 2,
+  "builds": [
+    { "src": "api/index.mjs", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "api/index.mjs" }
   ]
 }
