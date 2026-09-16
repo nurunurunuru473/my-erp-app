@@ -1,18 +1,12 @@
 {
-  "name": "my-turso-app",
+  "name": "my-erp-app",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "server.mjs",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.mjs"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "optionalDependencies": {
-    "@libsql/client": "^0.18.0",
-    "cors": "^2.8.6",
-    "express": "^5.2.1"
+  "dependencies": {
+    "express": "^4.19.2"
   }
 }
