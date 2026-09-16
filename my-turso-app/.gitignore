@@ -1,0 +1,6 @@
+node_modules/
+.npm/
+.bash_history
+.gitconfig
+*.log
+.env
