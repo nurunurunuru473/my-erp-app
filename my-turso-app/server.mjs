@@ -11,7 +11,10 @@ app.use(express.json());
 // Static ፋይሎችን ማስተናገድ
 app.use(express.static(__dirname));
 
-// ኤፒአይዎች እና ሌሎች ጥያቄዎች እዚህ ይገባሉ...
+// ኤፒአይዎች እና ሌሎች ጥያቄዎች
+app.get('/api/test', (req, res) => {
+  res.json({ message: "Server is running perfectly!" });
+});
 
 // ለማንኛውም ሌላ ጥያቄ index.html ን መመለስ
 app.get('*', (req, res) => {
