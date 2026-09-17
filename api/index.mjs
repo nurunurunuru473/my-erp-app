@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createClient } from '@libsql/client';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -8,10 +9,22 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
 
+// Turso Database Connection
+const db = createClient({
+  url: process.env.TURSO_DATABASE_URL || "",
+  authToken: process.env.TURSO_AUTH_TOKEN || "",
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
-app.get('/api/test', (req, res) => {
-  res.json({ message: "Server is running perfectly!" });
+// Test API Connection
+app.get('/api/test', async (req, res) => {
+  try {
+    const result = await db.execute("SELECT 1;");
+    res.json({ message: "Turso DB Connection Successful!", data: result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get('*', (req, res) => {
