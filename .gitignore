@@ -1,1 +1,5 @@
 node_modules
+.local
+.npm
+.bash_history
+.env

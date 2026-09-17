@@ -16,7 +16,7 @@ const db = createClient({
 
 app.use(express.static(path.join(__dirname, '..')));
 
-// Test DB Route
+// GET /api/test
 app.get('/api/test', async (req, res) => {
   try {
     const result = await db.execute("SELECT 1;");
@@ -34,7 +34,7 @@ app.get('/api/test', async (req, res) => {
   }
 });
 
-// Query Route
+// POST /api/query
 app.post('/api/query', async (req, res) => {
   try {
     const { sql, args } = req.body;
