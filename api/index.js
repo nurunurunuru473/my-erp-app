@@ -14,9 +14,10 @@ const db = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN || "",
 });
 
+// Static ፋይሎችን ማቅረብ
 app.use(express.static(path.join(__dirname, '..')));
 
-// GET /api/test
+// GET /api/test - የቱርሶ ዳታቤዝ ግንኙነት መፈተሻ
 app.get('/api/test', async (req, res) => {
   try {
     const result = await db.execute("SELECT 1;");
@@ -34,7 +35,7 @@ app.get('/api/test', async (req, res) => {
   }
 });
 
-// POST /api/query
+// POST /api/query - ዳታ ወደ Turso ለመላክ እና ለማንበብ
 app.post('/api/query', async (req, res) => {
   try {
     const { sql, args } = req.body;
@@ -45,6 +46,7 @@ app.post('/api/query', async (req, res) => {
   }
 });
 
+// ሌሎችን ጥያቄዎች ወደ index.html መምራት
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));
 });

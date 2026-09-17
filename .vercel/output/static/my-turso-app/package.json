@@ -1,0 +1,12 @@
+{
+  "name": "my-erp-app",
+  "version": "1.0.0",
+  "main": "server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
