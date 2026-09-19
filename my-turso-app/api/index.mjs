@@ -122,3 +122,26 @@ app.get('/api/seasons', async (req, res) => {
     });
   }
 });
+
+app.get('/api/create-users-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Users table created successfully'
+    });
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
