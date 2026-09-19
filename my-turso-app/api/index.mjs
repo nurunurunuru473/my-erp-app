@@ -56,6 +56,36 @@ app.get('/api/test', (req, res) => {
   });
 });
 
+// Create user in Turso
+app.post('/api/users', async (req, res) => {
+  try {
+    const { name, email } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({
+        error: 'Name and email are required'
+      });
+    }
+
+    const data = await tursoQuery(
+      'INSERT INTO users (name, email) VALUES (?, ?)',
+      [name, email]
+    );
+
+    res.json({
+      success: true,
+      data
+    });
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to create user',
+      details: error.message
+    });
+  }
+});
+
 // Get users from Turso
 app.get('/api/users', async (req, res) => {
   try {
