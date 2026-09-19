@@ -11,11 +11,11 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '..')));
 
 app.get('/api/test', (req, res) => {
-res.json({ message: "Server is running perfectly!" });
+  res.json({ message: "Server is running perfectly!" });
 });
 
 app.get('*', (req, res) => {
-res.sendFile(path.join(__dirname, '..', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 export default app;
