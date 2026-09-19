@@ -3,3 +3,6 @@ node_modules
 .npm
 .bash_history
 .env
+.env*
+
+.vercel/
