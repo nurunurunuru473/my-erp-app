@@ -30,7 +30,7 @@ async function tursoQuery(sql, args = []) {
           type: 'execute',
           stmt: {
             sql,
-            args
+            args: args.map(value => ({ type: typeof value === 'number' ? 'integer' : 'text', value: String(value) }))
           }
         },
         {
