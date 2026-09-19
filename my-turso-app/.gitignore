@@ -4,3 +4,4 @@ node_modules/
 .gitconfig
 *.log
 .env
+.env.local
