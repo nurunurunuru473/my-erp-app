@@ -105,3 +105,20 @@ app.get('/api/users', async (req, res) => {
 });
 
 export default app;
+
+app.get('/api/seasons', async (req, res) => {
+  try {
+    const data = await tursoQuery(
+      'SELECT * FROM seasons ORDER BY id DESC'
+    );
+
+    res.json(data);
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load seasons',
+      details: error.message
+    });
+  }
+});
