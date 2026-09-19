@@ -172,3 +172,20 @@ app.get('/api/create-products-table', async (req, res) => {
     });
   }
 });
+
+app.get('/api/products', async (req, res) => {
+  try {
+    const data = await tursoQuery(
+      'SELECT * FROM products ORDER BY id DESC'
+    );
+
+    res.json(data);
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load products',
+      details: error.message
+    });
+  }
+});
