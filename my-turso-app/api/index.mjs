@@ -189,3 +189,47 @@ app.get('/api/products', async (req, res) => {
     });
   }
 });
+app.post('/api/products', async (req, res) => {
+  try {
+    const {
+      name,
+      unit,
+      purchase_price,
+      selling_price,
+      stock
+    } = req.body;
+
+    if (!name) {
+      return res.status(400).json({
+        error: 'Product name is required'
+      });
+    }
+
+    const data = await tursoQuery(
+      `INSERT INTO products
+       (name, unit, purchase_price, selling_price, stock)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        name,
+        unit || 'pcs',
+        Number(purchase_price) || 0,
+        Number(selling_price) || 0,
+        Number(stock) || 0
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Product created successfully',
+      data
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to create product',
+      details: error.message
+    });
+  }
+});
