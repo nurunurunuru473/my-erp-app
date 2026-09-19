@@ -9,7 +9,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json()); 
 
-app.use(express.static(path.join(__dirname, '..'))); 
+// Static files (index.html ያለበትን root directory ለማመልከት)
+const rootDir = path.resolve(__dirname, '..');
+app.use(express.static(rootDir));
 
 // Turso DB Connection
 const db = createClient({
@@ -37,8 +39,9 @@ app.post('/api/query', async (req, res) => {
   }
 });
 
+// ማንኛውም ሌላ request ሲመጣ index.html መላክ
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'index.html'));
+  res.sendFile(path.join(rootDir, 'index.html'));
 }); 
 
 export default app;
