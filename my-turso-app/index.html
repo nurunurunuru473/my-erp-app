@@ -1,4 +1,43 @@
-<!DOCTYPE html>
+<!-- 📦 Products -->
+<div class="card">
+  <h2>📦 የምርት መመዝገቢያ</h2>
+
+  <input id="productName" type="text" placeholder="የምርት ስም">
+
+  <input id="productUnit" type="text" placeholder="Unit (pcs, kg, box...)">
+
+  <input id="purchasePrice" type="number" placeholder="የግዢ ዋጋ">
+
+  <input id="sellingPrice" type="number" placeholder="የሽያጭ ዋጋ">
+
+  <input id="productStock" type="number" placeholder="የመጀመሪያ Stock">
+
+  <button onclick="addProduct()">💾 ምርት መዝግብ</button>
+</div>
+
+<!-- 📋 Products List -->
+<div class="card">
+  <h2>📋 የተመዘገቡ ምርቶች</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>ምርት</th>
+        <th>Unit</th>
+        <th>ግዢ</th>
+        <th>ሽያጭ</th>
+        <th>Stock</th>
+      </tr>
+    </thead>
+
+    <tbody id="productsTable">
+      <tr>
+        <td colspan="6">በመጫን ላይ...</td>
+      </tr>
+    </tbody>
+  </table>
+</div><!DOCTYPE html>
 <html lang="am">
 <head>
   <meta charset="UTF-8">
@@ -128,7 +167,91 @@ loadSeason();
   }
 
   // ገጹ ሲከፈት መረጃዎችን አምጣ
-  loadUsers();
+
+// 📦 Products መረጃ ማምጣት
+async function loadProducts() {
+  try {
+    const res = await fetch("/api/products");
+    const data = await res.json();
+
+    const rows = data.results?.[0]?.response?.result?.rows || [];
+    const table = document.getElementById("productsTable");
+
+    if (!rows.length) {
+      table.innerHTML = `
+        <tr>
+          <td colspan="6">ምንም Product አልተመዘገበም</td>
+        </tr>
+      `;
+      return;
+    }
+
+    table.innerHTML = rows.map(row => `
+      <tr>
+        <td>${row[0].value}</td>
+        <td>${row[1].value}</td>
+        <td>${row[2].value}</td>
+        <td>${row[3].value}</td>
+        <td>${row[4].value}</td>
+        <td>${row[5].value}</td>
+      </tr>
+    `).join("");
+
+  } catch (err) {
+    console.error("Error loading products:", err);
+  }
+}
+
+// 📦 አዲስ Product መመዝገብ
+async function addProduct() {
+  const name = document.getElementById("productName").value;
+  const unit = document.getElementById("productUnit").value;
+  const purchase_price = document.getElementById("purchasePrice").value;
+  const selling_price = document.getElementById("sellingPrice").value;
+  const stock = document.getElementById("productStock").value;
+
+  if (!name) {
+    return alert("እባክዎን የምርት ስም ያስገቡ!");
+  }
+
+  try {
+    const res = await fetch("/api/products", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name,
+        unit,
+        purchase_price,
+        selling_price,
+        stock
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(data.error || "Product ማስገባት አልተሳካም");
+    }
+
+    alert("Product በትክክል ተመዝግቧል!");
+
+    document.getElementById("productName").value = "";
+    document.getElementById("productUnit").value = "";
+    document.getElementById("purchasePrice").value = "";
+    document.getElementById("sellingPrice").value = "";
+    document.getElementById("productStock").value = "";
+
+    loadProducts();
+
+  } catch (err) {
+    console.error("Error adding product:", err);
+    alert("Product ማስገባት ላይ ስህተት ተፈጥሯል!");
+  }
+}
+
+loadProducts();  loadUsers();
 </script>
 
 </body>
