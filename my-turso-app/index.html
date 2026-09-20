@@ -31,7 +31,6 @@
   <input id="productUnit" type="text" placeholder="Unit (pcs, kg, box...)">
   <input id="purchasePrice" type="number" placeholder="የግዢ ዋጋ">
   <input id="sellingPrice" type="number" placeholder="የሽያጭ ዋጋ">
-  <input id="productStock" type="number" placeholder="የመጀመሪያ Stock">
   <button onclick="addProduct()">💾 ምርት መዝግብ</button>
 </div>
 
@@ -186,7 +185,6 @@ async function addProduct() {
   const unit = document.getElementById("productUnit").value;
   const purchase_price = document.getElementById("purchasePrice").value;
   const selling_price = document.getElementById("sellingPrice").value;
-  const stock = document.getElementById("productStock").value;
 
   if (!name) {
     return alert("እባክዎን የምርት ስም ያስገቡ!");
@@ -203,7 +201,6 @@ async function addProduct() {
         unit,
         purchase_price,
         selling_price,
-        stock
       })
     });
 
@@ -219,7 +216,6 @@ async function addProduct() {
     document.getElementById("productUnit").value = "";
     document.getElementById("purchasePrice").value = "";
     document.getElementById("sellingPrice").value = "";
-    document.getElementById("productStock").value = "";
 
 
   } catch (err) {
