@@ -628,3 +628,33 @@ app.post('/api/sales', async (req, res) => {
     });
   }
 })
+// 📋 Recent Purchases
+app.get('/api/recent-purchases', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT
+        purchases.id,
+        products.name AS product_name,
+        purchases.quantity,
+        purchases.unit_price,
+        purchases.supplier,
+        purchases.total,
+        purchases.created_at
+      FROM purchases
+      JOIN products
+        ON purchases.product_id = products.id
+      ORDER BY purchases.id DESC
+      LIMIT 20
+    `);
+
+    res.json(data);
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load recent purchases',
+      details: error.message
+    });
+  }
+});
