@@ -658,3 +658,33 @@ app.get('/api/recent-purchases', async (req, res) => {
     });
   }
 });
+// 📋 Recent Sales
+app.get('/api/recent-sales', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT
+        sales.id,
+        products.name AS product_name,
+        sales.quantity,
+        sales.unit_price,
+        sales.customer,
+        sales.total,
+        sales.created_at
+      FROM sales
+      JOIN products
+        ON sales.product_id = products.id
+      ORDER BY sales.id DESC
+      LIMIT 20
+    `);
+
+    res.json(data);
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load recent sales',
+      details: error.message
+    });
+  }
+});
