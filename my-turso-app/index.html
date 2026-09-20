@@ -77,6 +77,21 @@
   <button onclick="registerExpense()">💾 ወጪ መዝግብ</button>
 </div>
 
+<!-- 🏭 Production -->
+<div class="card">
+  <h2>🏭 የምርት ማምረቻ መመዝገቢያ</h2>
+
+  <select id="productionProduct">
+    <option value="">ምርት ይምረጡ</option>
+  </select>
+
+  <input id="productionQuantity" type="number" min="0.01" step="0.01" placeholder="የተመረተ ብዛት">
+
+  <input id="productionNote" type="text" placeholder="ማስታወሻ">
+
+  <button onclick="registerProduction()">💾 ምርት መዝግብ</button>
+</div>
+
 <!-- 📦 Products -->
 <div class="card">
   <h2>📦 የምርት መመዝገቢያ</h2>
@@ -651,6 +666,87 @@ async function registerExpense() {
     alert("ወጪ ማስገባት ላይ ስህተት ተፈጥሯል!");
   }
 }
+
+
+async function loadProductionProducts() {
+  try {
+    const res = await fetch("/api/products");
+    const data = await res.json();
+
+    const rows = data.results?.[0]?.response?.result?.rows || [];
+    const select = document.getElementById("productionProduct");
+
+    select.innerHTML = '<option value="">ምርት ይምረጡ</option>';
+
+    rows.forEach(row => {
+      const option = document.createElement("option");
+
+      option.value = row[0].value;
+      option.textContent = `${row[1].value} (Stock: ${row[5].value})`;
+
+      select.appendChild(option);
+    });
+  } catch (err) {
+    console.error("Production products error:", err);
+  }
+}
+
+async function registerProduction() {
+  const product_id =
+    document.getElementById("productionProduct").value;
+
+  const quantity =
+    Number(document.getElementById("productionQuantity").value);
+
+  const note =
+    document.getElementById("productionNote").value.trim();
+
+  if (!product_id) {
+    return alert("እባክዎን ምርት ይምረጡ!");
+  }
+
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    return alert("እባክዎን ትክክለኛ የተመረተ ብዛት ያስገቡ!");
+  }
+
+  try {
+    const res = await fetch("/api/production", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        product_id: Number(product_id),
+        quantity,
+        note
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(
+        data.error || "Production ማስገባት አልተሳካም"
+      );
+    }
+
+    alert("Production በትክክል ተመዝግቧል!");
+
+    document.getElementById("productionProduct").value = "";
+    document.getElementById("productionQuantity").value = "";
+    document.getElementById("productionNote").value = "";
+
+    await loadProductionProducts();
+    await loadProducts();
+    await loadDashboard();
+
+  } catch (err) {
+    console.error("Production error:", err);
+    alert("Production ማስገባት ላይ ስህተት ተፈጥሯል!");
+  }
+}
+
+loadProductionProducts();
 
 </script>
 
