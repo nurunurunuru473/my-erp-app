@@ -526,3 +526,105 @@ app.get('/api/create-sales-table', async (req, res) => {
     });
   }
 });
+// 🛍️ Register Sale
+app.post('/api/sales', async (req, res) => {
+  try {
+    const {
+      product_id,
+      quantity,
+      unit_price,
+      customer
+    } = req.body;
+
+    const productId = Number(product_id);
+    const qty = Number(quantity);
+    const price = Number(unit_price);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.status(400).json({
+        error: 'Valid product_id is required'
+      });
+    }
+
+    if (!Number.isFinite(qty) || qty <= 0) {
+      return res.status(400).json({
+        error: 'Valid quantity is required'
+      });
+    }
+
+    if (!Number.isFinite(price) || price < 0) {
+      return res.status(400).json({
+        error: 'Valid unit_price is required'
+      });
+    }
+
+    const productData = await tursoQuery(
+      'SELECT id, name, stock FROM products WHERE id = ?',
+      [productId]
+    );
+
+    const productRows =
+      productData.results?.[0]?.response?.result?.rows || [];
+
+    if (!productRows.length) {
+      return res.status(404).json({
+        error: 'Product not found'
+      });
+    }
+
+    const productName = productRows[0][1].value;
+    const currentStock = Number(productRows[0][2].value);
+
+    if (qty > currentStock) {
+      return res.status(400).json({
+        error: `Insufficient stock. Available stock: ${currentStock}`
+      });
+    }
+
+    const total = qty * price;
+
+    const sale = await tursoQuery(
+      `INSERT INTO sales
+       (product_id, quantity, unit_price, customer, total)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        productId,
+        qty,
+        price,
+        customer || '',
+        total
+      ]
+    );
+
+    await tursoQuery(
+      'UPDATE products SET stock = stock - ? WHERE id = ?',
+      [qty, productId]
+    );
+
+    await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      [
+        'sale',
+        `Sale - ${productName}${customer ? ` - ${customer}` : ''}`,
+        total
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Sale registered successfully',
+      total,
+      sale
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to register sale',
+      details: error.message
+    });
+  }
+})
