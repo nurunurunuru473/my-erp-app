@@ -233,3 +233,71 @@ app.post('/api/products', async (req, res) => {
     });
   }
 });
+// 💰 Finance / Cash Foundation
+app.get('/api/create-finance-tables', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS cash_transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL,
+        description TEXT NOT NULL,
+        amount REAL NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Finance tables created successfully'
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
+
+// 💰 Current Cash / Capital
+app.get('/api/cash-balance', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT COALESCE(SUM(amount), 0) AS balance
+      FROM cash_transactions
+    `);
+
+    res.json(data);
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load cash balance',
+      details: error.message
+    });
+  }
+});
+
+// 📋 Recent Cash Transactions
+app.get('/api/recent-cash-transactions', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT *
+      FROM cash_transactions
+      ORDER BY id DESC
+      LIMIT 20
+    `);
+
+    res.json(data);
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load cash transactions',
+      details: error.message
+    });
+  }
+});
