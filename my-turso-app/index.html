@@ -2,7 +2,7 @@
 </head>
 <body>
 <!-- 📊 Dashboard -->
-<div class="card">
+
   <h2>📊 ERP Dashboard</h2>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;">
@@ -22,6 +22,18 @@
     </div>
 
   </div>
+</div>
+<!-- 🛒 Purchases -->
+<div class="card">
+  <h2>🛒 የግዢ መመዝገቢያ</h2>
+  <select id="purchaseProduct">
+    <option value="">ምርት ይምረጡ</option>
+  </select>
+  <input id="purchaseQuantity" type="number" min="0.01" step="0.01" placeholder="ብዛት">
+  <input id="purchaseUnitPrice" type="number" min="0" step="0.01" placeholder="የአንዱ ዋጋ">
+  <input id="purchaseSupplier" type="text" placeholder="የአቅራቢ ስም">
+  <p>ጠቅላላ ዋጋ: <strong id="purchaseTotal">0 ETB</strong></p>
+  <button onclick="registerPurchase()">💾 ግዢ መዝግብ</button>
 </div>
 <div class="container">
 <!-- 📦 Products -->
@@ -46,7 +58,7 @@
   <p id="season">በመጫን ላይ...</p>
 </div>
   <!-- አዲስ መመዝገቢያ Form -->
-  <div class="card">
+<div class="card">
     <h2>➕ አዲስ ተጠቃሚ መመዝገቢያ (ERP Dashboard)</h2>
     <div class="form-group">
       <input type="text" id="name" placeholder="ሙሉ ስም">
@@ -56,7 +68,7 @@
   </div>
 
   <!-- የተመዘገቡት ዝርዝር Table -->
-  <div class="card">
+<div class="card">
     <h2>📋 የተመዘገቡ ተጠቃሚዎች</h2>
     <table>
       <thead>
@@ -257,6 +269,114 @@ async function loadDashboard() {
 
 loadDashboard();
 loadProducts();  loadUsers();
+
+async function loadPurchaseProducts() {
+  try {
+    const res = await fetch("/api/products");
+    const data = await res.json();
+
+    const rows = data.results?.[0]?.response?.result?.rows || [];
+    const select = document.getElementById("purchaseProduct");
+
+    select.innerHTML = '<option value="">ምርት ይምረጡ</option>';
+
+    rows.forEach(row => {
+      const option = document.createElement("option");
+      option.value = row[0].value;
+      option.textContent = `${row[1].value} (Stock: ${row[5].value})`;
+      option.dataset.price = row[3].value;
+      select.appendChild(option);
+    });
+  } catch (err) {
+    console.error("Purchase products error:", err);
+  }
+}
+
+document.getElementById("purchaseProduct").addEventListener("change", function () {
+  const option = this.options[this.selectedIndex];
+  document.getElementById("purchaseUnitPrice").value =
+    option.dataset.price || "";
+
+  calculatePurchaseTotal();
+});
+
+function calculatePurchaseTotal() {
+  const quantity = Number(document.getElementById("purchaseQuantity").value) || 0;
+  const price = Number(document.getElementById("purchaseUnitPrice").value) || 0;
+  const total = quantity * price;
+
+  document.getElementById("purchaseTotal").textContent =
+    total.toLocaleString() + " ETB";
+}
+
+document.getElementById("purchaseQuantity").addEventListener(
+  "input",
+  calculatePurchaseTotal
+);
+
+document.getElementById("purchaseUnitPrice").addEventListener(
+  "input",
+  calculatePurchaseTotal
+);
+
+async function registerPurchase() {
+  const product_id = document.getElementById("purchaseProduct").value;
+  const quantity = Number(document.getElementById("purchaseQuantity").value);
+  const unit_price = Number(document.getElementById("purchaseUnitPrice").value);
+  const supplier = document.getElementById("purchaseSupplier").value.trim();
+
+  if (!product_id) {
+    return alert("እባክዎን ምርት ይምረጡ!");
+  }
+
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    return alert("እባክዎን ትክክለኛ ብዛት ያስገቡ!");
+  }
+
+  if (!Number.isFinite(unit_price) || unit_price <= 0) {
+    return alert("እባክዎን ትክክለኛ የአንዱ ዋጋ ያስገቡ!");
+  }
+
+  try {
+    const res = await fetch("/api/purchases", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        product_id: Number(product_id),
+        quantity,
+        unit_price,
+        supplier
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(data.error || "ግዢ ማስገባት አልተሳካም");
+    }
+
+    alert("ግዢ በትክክል ተመዝግቧል!");
+
+    document.getElementById("purchaseProduct").value = "";
+    document.getElementById("purchaseQuantity").value = "";
+    document.getElementById("purchaseUnitPrice").value = "";
+    document.getElementById("purchaseSupplier").value = "";
+    document.getElementById("purchaseTotal").textContent = "0 ETB";
+
+    await loadPurchaseProducts();
+    await loadProducts();
+    await loadDashboard();
+
+  } catch (err) {
+    console.error("Purchase error:", err);
+    alert("ግዢ ማስገባት ላይ ስህተት ተፈጥሯል!");
+  }
+}
+
+loadPurchaseProducts();
+
 </script>
 
 </body>
