@@ -301,3 +301,78 @@ app.get('/api/recent-cash-transactions', async (req, res) => {
     });
   }
 });
+// 💰 Income
+app.post('/api/income', async (req, res) => {
+  try {
+    const { description, amount } = req.body;
+
+    if (!description || !amount || Number(amount) <= 0) {
+      return res.status(400).json({
+        error: 'Description and valid amount are required'
+      });
+    }
+
+    const data = await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      [
+        'income',
+        description,
+        Number(amount)
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Income registered successfully',
+      data
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to register income',
+      details: error.message
+    });
+  }
+});
+
+// 💸 Expense
+app.post('/api/expenses', async (req, res) => {
+  try {
+    const { description, amount } = req.body;
+
+    if (!description || !amount || Number(amount) <= 0) {
+      return res.status(400).json({
+        error: 'Description and valid amount are required'
+      });
+    }
+
+    const data = await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      [
+        'expense',
+        description,
+        -Number(amount)
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Expense registered successfully',
+      data
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to register expense',
+      details: error.message
+    });
+  }
+});
