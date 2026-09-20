@@ -36,6 +36,25 @@
   <button onclick="registerPurchase()">💾 ግዢ መዝግብ</button>
 </div>
 <div class="container">
+<!-- 🛍️ Sales -->
+<div class="card">
+  <h2>🛍️ የሽያጭ መመዝገቢያ</h2>
+
+  <select id="saleProduct">
+    <option value="">ምርት ይምረጡ</option>
+  </select>
+
+  <input id="saleQuantity" type="number" min="0.01" step="0.01" placeholder="ብዛት">
+
+  <input id="saleUnitPrice" type="number" min="0" step="0.01" placeholder="የአንዱ ዋጋ">
+
+  <input id="saleCustomer" type="text" placeholder="የደንበኛ ስም">
+
+  <p>ጠቅላላ ዋጋ: <strong id="saleTotal">0 ETB</strong></p>
+
+  <button onclick="registerSale()">💾 ሽያጭ መዝግብ</button>
+</div>
+
 <!-- 📦 Products -->
 <div class="card">
   <h2>📦 የምርት መመዝገቢያ</h2>
@@ -376,6 +395,142 @@ async function registerPurchase() {
 }
 
 loadPurchaseProducts();
+
+
+async function loadSaleProducts() {
+  try {
+    const res = await fetch("/api/products");
+    const data = await res.json();
+
+    const rows = data.results?.[0]?.response?.result?.rows || [];
+    const select = document.getElementById("saleProduct");
+
+    select.innerHTML = '<option value="">ምርት ይምረጡ</option>';
+
+    rows.forEach(row => {
+      const option = document.createElement("option");
+      option.value = row[0].value;
+      option.textContent = `${row[1].value} (Stock: ${row[5].value})`;
+      option.dataset.price = row[4].value;
+      option.dataset.stock = row[5].value;
+      select.appendChild(option);
+    });
+  } catch (err) {
+    console.error("Sale products error:", err);
+  }
+}
+
+document.getElementById("saleProduct").addEventListener("change", function () {
+  const option = this.options[this.selectedIndex];
+
+  document.getElementById("saleUnitPrice").value =
+    option.dataset.price || "";
+
+  calculateSaleTotal();
+});
+
+function calculateSaleTotal() {
+  const quantity =
+    Number(document.getElementById("saleQuantity").value) || 0;
+
+  const price =
+    Number(document.getElementById("saleUnitPrice").value) || 0;
+
+  const total = quantity * price;
+
+  document.getElementById("saleTotal").textContent =
+    total.toLocaleString() + " ETB";
+}
+
+document.getElementById("saleQuantity").addEventListener(
+  "input",
+  calculateSaleTotal
+);
+
+document.getElementById("saleUnitPrice").addEventListener(
+  "input",
+  calculateSaleTotal
+);
+
+async function registerSale() {
+  const product_id =
+    document.getElementById("saleProduct").value;
+
+  const quantity =
+    Number(document.getElementById("saleQuantity").value);
+
+  const unit_price =
+    Number(document.getElementById("saleUnitPrice").value);
+
+  const customer =
+    document.getElementById("saleCustomer").value.trim();
+
+  if (!product_id) {
+    return alert("እባክዎን ምርት ይምረጡ!");
+  }
+
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    return alert("እባክዎን ትክክለኛ ብዛት ያስገቡ!");
+  }
+
+  if (!Number.isFinite(unit_price) || unit_price <= 0) {
+    return alert("እባክዎን ትክክለኛ የአንዱ ዋጋ ያስገቡ!");
+  }
+
+  const selectedOption =
+    document.getElementById("saleProduct").options[
+      document.getElementById("saleProduct").selectedIndex
+    ];
+
+  const stock = Number(selectedOption.dataset.stock) || 0;
+
+  if (quantity > stock) {
+    return alert(
+      `በቂ Stock የለም! ያለው Stock: ${stock}`
+    );
+  }
+
+  try {
+    const res = await fetch("/api/sales", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        product_id: Number(product_id),
+        quantity,
+        unit_price,
+        customer
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(
+        data.error || "ሽያጭ ማስገባት አልተሳካም"
+      );
+    }
+
+    alert("ሽያጭ በትክክል ተመዝግቧል!");
+
+    document.getElementById("saleProduct").value = "";
+    document.getElementById("saleQuantity").value = "";
+    document.getElementById("saleUnitPrice").value = "";
+    document.getElementById("saleCustomer").value = "";
+    document.getElementById("saleTotal").textContent = "0 ETB";
+
+    await loadSaleProducts();
+    await loadProducts();
+    await loadDashboard();
+
+  } catch (err) {
+    console.error("Sale error:", err);
+    alert("ሽያጭ ማስገባት ላይ ስህተት ተፈጥሯል!");
+  }
+}
+
+loadSaleProducts();
 
 </script>
 
