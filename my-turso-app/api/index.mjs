@@ -146,6 +146,41 @@ app.get('/api/create-users-table', async (req, res) => {
   }
 });
 
+app.get('/api/migrate-users-auth', async (req, res) => {
+  try {
+    await tursoQuery(`
+      ALTER TABLE users ADD COLUMN username TEXT
+    `);
+
+    await tursoQuery(`
+      ALTER TABLE users ADD COLUMN password_hash TEXT
+    `);
+
+    await tursoQuery(`
+      ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'
+    `);
+
+    await tursoQuery(`
+      ALTER TABLE users ADD COLUMN active INTEGER NOT NULL DEFAULT 1
+    `);
+
+    await tursoQuery(`
+      ALTER TABLE users ADD COLUMN language TEXT NOT NULL DEFAULT 'am'
+    `);
+
+    res.json({
+      success: true,
+      message: 'Users authentication fields added successfully'
+    });
+
+  } catch (error) {
+    console.error('Migration error:', error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
 app.get('/api/create-products-table', async (req, res) => {
   try {
     await tursoQuery(`
