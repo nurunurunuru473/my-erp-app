@@ -21,6 +21,20 @@
       </p>
     </div>
 
+    <div style="padding:20px;border-radius:12px;background:#fff4e6;">
+      <h3>📈 Sales</h3>
+      <p id="salesTotal" style="font-size:24px;font-weight:bold;">
+        በመጫን ላይ...
+      </p>
+    </div>
+
+    <div style="padding:20px;border-radius:12px;background:#ffecec;">
+      <h3>📉 Expenses</h3>
+      <p id="expensesTotal" style="font-size:24px;font-weight:bold;">
+        በመጫን ላይ...
+      </p>
+    </div>
+
   </div>
 </div>
 <!-- 🛒 Purchases -->
@@ -293,6 +307,28 @@ async function addProduct() {
 }
 async function loadDashboard() {
   try {
+    const salesRes = await fetch("/api/sales-total");
+    const salesData = await salesRes.json();
+
+    const salesRows =
+      salesData.results?.[0]?.response?.result?.rows || [];
+
+    if (salesRows.length) {
+      document.getElementById("salesTotal").textContent =
+        Number(salesRows[0][0].value).toLocaleString() + " ETB";
+    }
+
+    const expensesRes = await fetch("/api/expenses-total");
+    const expensesData = await expensesRes.json();
+
+    const expensesRows =
+      expensesData.results?.[0]?.response?.result?.rows || [];
+
+    if (expensesRows.length) {
+      document.getElementById("expensesTotal").textContent =
+        Number(expensesRows[0][0].value).toLocaleString() + " ETB";
+    }
+
     const cashRes = await fetch("/api/cash-balance");
     const cashData = await cashRes.json();
 

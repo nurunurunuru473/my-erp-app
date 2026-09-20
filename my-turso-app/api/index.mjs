@@ -281,6 +281,27 @@ app.get('/api/cash-balance', async (req, res) => {
 });
 
 // 📋 Recent Cash Transactions
+
+app.get('/api/expenses-total', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT COALESCE(SUM(ABS(amount)), 0) AS total
+      FROM cash_transactions
+      WHERE type = 'expense'
+    `);
+
+    res.json(data);
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load expenses total',
+      details: error.message
+    });
+  }
+});
+
 app.get('/api/recent-cash-transactions', async (req, res) => {
   try {
     const data = await tursoQuery(`
@@ -659,6 +680,26 @@ app.get('/api/recent-purchases', async (req, res) => {
   }
 });
 // 📋 Recent Sales
+
+app.get('/api/sales-total', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT COALESCE(SUM(total), 0) AS total
+      FROM sales
+    `);
+
+    res.json(data);
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load sales total',
+      details: error.message
+    });
+  }
+});
+
 app.get('/api/recent-sales', async (req, res) => {
   try {
     const data = await tursoQuery(`
