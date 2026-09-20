@@ -688,3 +688,29 @@ app.get('/api/recent-sales', async (req, res) => {
     });
   }
 });
+// 🏭 Production Table
+app.get('/api/create-production-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS production (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        quantity REAL NOT NULL,
+        note TEXT,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Production table created successfully'
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
