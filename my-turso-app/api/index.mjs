@@ -787,3 +787,30 @@ app.post('/api/production', async (req, res) => {
     });
   }
 });
+app.get('/api/recent-production', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT
+        production.id,
+        products.name AS product_name,
+        production.quantity,
+        production.note,
+        production.created_at
+      FROM production
+      JOIN products
+        ON production.product_id = products.id
+      ORDER BY production.id DESC
+      LIMIT 20
+    `);
+
+    res.json(data);
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load recent production',
+      details: error.message
+    });
+  }
+});
