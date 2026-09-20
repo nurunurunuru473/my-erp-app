@@ -714,3 +714,76 @@ app.get('/api/create-production-table', async (req, res) => {
     });
   }
 });
+// 🏭 Register Production
+app.post('/api/production', async (req, res) => {
+  try {
+    const {
+      product_id,
+      quantity,
+      note
+    } = req.body;
+
+    const productId = Number(product_id);
+    const qty = Number(quantity);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.status(400).json({
+        error: 'Valid product_id is required'
+      });
+    }
+
+    if (!Number.isFinite(qty) || qty <= 0) {
+      return res.status(400).json({
+        error: 'Valid quantity is required'
+      });
+    }
+
+    const productData = await tursoQuery(
+      'SELECT id, name FROM products WHERE id = ?',
+      [productId]
+    );
+
+    const productRows =
+      productData.results?.[0]?.response?.result?.rows || [];
+
+    if (!productRows.length) {
+      return res.status(404).json({
+        error: 'Product not found'
+      });
+    }
+
+    const productName = productRows[0][1].value;
+
+    const production = await tursoQuery(
+      `INSERT INTO production
+       (product_id, quantity, note)
+       VALUES (?, ?, ?)`,
+      [
+        productId,
+        qty,
+        note || ''
+      ]
+    );
+
+    await tursoQuery(
+      'UPDATE products SET stock = stock + ? WHERE id = ?',
+      [qty, productId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Production registered successfully',
+      product: productName,
+      quantity: qty,
+      production
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to register production',
+      details: error.message
+    });
+  }
+});
