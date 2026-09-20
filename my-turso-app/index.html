@@ -264,7 +264,12 @@ async function addProduct() {
     document.getElementById("sellingPrice").value = "";
     document.getElementById("productStock").value = "";
 
-    loadProducts();
+
+  } catch (err) {
+    console.error("Error adding product:", err);
+    alert("Product ማስገባት ላይ ስህተት ተፈጥሯል!");
+  }
+}
 async function loadDashboard() {
   try {
     const cashRes = await fetch("/api/cash-balance");
@@ -298,13 +303,6 @@ async function loadDashboard() {
 }
 
 loadDashboard();
-
-  } catch (err) {
-    console.error("Error adding product:", err);
-    alert("Product ማስገባት ላይ ስህተት ተፈጥሯል!");
-  }
-}
-
 loadProducts();  loadUsers();
 </script>
 
