@@ -376,3 +376,31 @@ app.post('/api/expenses', async (req, res) => {
     });
   }
 });
+// 🛒 Purchases Table
+app.get('/api/create-purchases-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS purchases (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        quantity REAL NOT NULL,
+        unit_price REAL NOT NULL,
+        supplier TEXT,
+        total REAL NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Purchases table created successfully'
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
