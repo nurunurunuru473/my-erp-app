@@ -62,7 +62,28 @@
   </style>
 </head>
 <body>
+<!-- 📊 Dashboard -->
+<div class="card">
+  <h2>📊 ERP Dashboard</h2>
 
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;">
+
+    <div style="padding:20px;border-radius:12px;background:#eef6ff;">
+      <h3>💰 Cash / Capital</h3>
+      <p id="cashBalance" style="font-size:24px;font-weight:bold;">
+        በመጫን ላይ...
+      </p>
+    </div>
+
+    <div style="padding:20px;border-radius:12px;background:#eefbea;">
+      <h3>📦 Stock</h3>
+      <p id="stockTotal" style="font-size:24px;font-weight:bold;">
+        በመጫን ላይ...
+      </p>
+    </div>
+
+  </div>
+</div>
 <div class="container">
 <div class="card">
   <h2>📅 የትምህርት ዘመን</h2>
@@ -244,6 +265,39 @@ async function addProduct() {
     document.getElementById("productStock").value = "";
 
     loadProducts();
+async function loadDashboard() {
+  try {
+    const cashRes = await fetch("/api/cash-balance");
+    const cashData = await cashRes.json();
+
+    const cashRows =
+      cashData.results?.[0]?.response?.result?.rows || [];
+
+    if (cashRows.length) {
+      document.getElementById("cashBalance").textContent =
+        Number(cashRows[0][0].value).toLocaleString() + " ETB";
+    }
+
+    const productsRes = await fetch("/api/products");
+    const productsData = await productsRes.json();
+
+    const productRows =
+      productsData.results?.[0]?.response?.result?.rows || [];
+
+    const totalStock = productRows.reduce(
+      (total, row) => total + Number(row[5].value),
+      0
+    );
+
+    document.getElementById("stockTotal").textContent =
+      totalStock.toLocaleString();
+
+  } catch (error) {
+    console.error("Dashboard error:", error);
+  }
+}
+
+loadDashboard();
 
   } catch (err) {
     console.error("Error adding product:", err);
