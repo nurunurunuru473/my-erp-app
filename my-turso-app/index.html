@@ -55,6 +55,17 @@
   <button onclick="registerSale()">💾 ሽያጭ መዝግብ</button>
 </div>
 
+<!-- 💰 Income -->
+<div class="card">
+  <h2>💰 የገቢ መመዝገቢያ</h2>
+
+  <input id="incomeDescription" type="text" placeholder="የገቢ ምክንያት">
+
+  <input id="incomeAmount" type="number" min="0.01" step="0.01" placeholder="የገቢ መጠን">
+
+  <button onclick="registerIncome()">💾 ገቢ መዝግብ</button>
+</div>
+
 <!-- 📦 Products -->
 <div class="card">
   <h2>📦 የምርት መመዝገቢያ</h2>
@@ -531,6 +542,55 @@ async function registerSale() {
 }
 
 loadSaleProducts();
+
+
+async function registerIncome() {
+  const description =
+    document.getElementById("incomeDescription").value.trim();
+
+  const amount =
+    Number(document.getElementById("incomeAmount").value);
+
+  if (!description) {
+    return alert("እባክዎን የገቢ ምክንያት ያስገቡ!");
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return alert("እባክዎን ትክክለኛ የገቢ መጠን ያስገቡ!");
+  }
+
+  try {
+    const res = await fetch("/api/income", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        description,
+        amount
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(
+        data.error || "ገቢ ማስገባት አልተሳካም"
+      );
+    }
+
+    alert("ገቢ በትክክል ተመዝግቧል!");
+
+    document.getElementById("incomeDescription").value = "";
+    document.getElementById("incomeAmount").value = "";
+
+    await loadDashboard();
+
+  } catch (err) {
+    console.error("Income error:", err);
+    alert("ገቢ ማስገባት ላይ ስህተት ተፈጥሯል!");
+  }
+}
 
 </script>
 
