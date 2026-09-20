@@ -1,5 +1,5 @@
   </style>
-</head>
+</head
 <body>
 <!-- 📊 Dashboard -->
 
@@ -15,12 +15,11 @@
     </div>
 
     <div style="padding:20px;border-radius:12px;background:#eefbea;">
-      <h3>📦 Stock</h3>
-      <p id="stockTotal" style="font-size:24px;font-weight:bold;">
-        በመጫን ላይ...
-      </p>
-    </div>
-
+  <h3>📦 Stock</h3>
+  <div id="stockProducts">
+    በመጫን ላይ...
+  </div>
+</div>
     <div style="padding:20px;border-radius:12px;background:#fff4e6;">
       <h3>📈 Sales</h3>
       <p id="salesTotal" style="font-size:24px;font-weight:bold;">
@@ -346,15 +345,30 @@ async function loadDashboard() {
     const productRows =
       productsData.results?.[0]?.response?.result?.rows || [];
 
-    const totalStock = productRows.reduce(
-      (total, row) => total + Number(row[5].value),
-      0
-    );
+   
 
-    document.getElementById("stockTotal").textContent =
-      totalStock.toLocaleString();
+const stockProducts = document.getElementById("stockProducts");
 
-  } catch (error) {
+if (!productRows.length) {
+  stockProducts.innerHTML = "ምንም ምርት የለም";
+} else {
+  stockProducts.innerHTML = productRows.map(row => `
+    <div style="
+      background:white;
+      padding:12px;
+      margin-top:10px;
+      border-radius:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    ">
+      <strong>📦 ${row[1].value}</strong>
+      <span style="font-size:20px;font-weight:bold;">
+        ${Number(row[5].value).toLocaleString()} ${row[2].value}
+      </span>
+    </div>
+  `).join("");
+}  } catch (error) {
     console.error("Dashboard error:", error);
   }
 }
