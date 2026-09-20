@@ -404,3 +404,97 @@ app.get('/api/create-purchases-table', async (req, res) => {
     });
   }
 });
+// 🛒 Register Purchase
+app.post('/api/purchases', async (req, res) => {
+  try {
+    const {
+      product_id,
+      quantity,
+      unit_price,
+      supplier
+    } = req.body;
+
+    const productId = Number(product_id);
+    const qty = Number(quantity);
+    const price = Number(unit_price);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.status(400).json({
+        error: 'Valid product_id is required'
+      });
+    }
+
+    if (!Number.isFinite(qty) || qty <= 0) {
+      return res.status(400).json({
+        error: 'Valid quantity is required'
+      });
+    }
+
+    if (!Number.isFinite(price) || price < 0) {
+      return res.status(400).json({
+        error: 'Valid unit_price is required'
+      });
+    }
+
+    const productData = await tursoQuery(
+      'SELECT id, name FROM products WHERE id = ?',
+      [productId]
+    );
+
+    const productRows =
+      productData.results?.[0]?.response?.result?.rows || [];
+
+    if (!productRows.length) {
+      return res.status(404).json({
+        error: 'Product not found'
+      });
+    }
+
+    const productName = productRows[0][1].value;
+    const total = qty * price;
+
+    const purchase = await tursoQuery(
+      `INSERT INTO purchases
+       (product_id, quantity, unit_price, supplier, total)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        productId,
+        qty,
+        price,
+        supplier || '',
+        total
+      ]
+    );
+
+    await tursoQuery(
+      'UPDATE products SET stock = stock + ? WHERE id = ?',
+      [qty, productId]
+    );
+
+    await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      [
+        'purchase',
+        `Purchase - ${productName}${supplier ? ` - ${supplier}` : ''}`,
+        -total
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Purchase registered successfully',
+      total,
+      purchase
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to register purchase',
+      details: error.message
+    });
+  }
+});
