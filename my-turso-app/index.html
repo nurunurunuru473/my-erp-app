@@ -1,64 +1,3 @@
-<!-- 📦 Products -->
-<div class="card">
-  <h2>📦 የምርት መመዝገቢያ</h2>
-
-  <input id="productName" type="text" placeholder="የምርት ስም">
-
-  <input id="productUnit" type="text" placeholder="Unit (pcs, kg, box...)">
-
-  <input id="purchasePrice" type="number" placeholder="የግዢ ዋጋ">
-
-  <input id="sellingPrice" type="number" placeholder="የሽያጭ ዋጋ">
-
-  <input id="productStock" type="number" placeholder="የመጀመሪያ Stock">
-
-  <button onclick="addProduct()">💾 ምርት መዝግብ</button>
-</div>
-
-<!-- 📋 Products List -->
-<div class="card">
-  <h2>📋 የተመዘገቡ ምርቶች</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>ምርት</th>
-        <th>Unit</th>
-        <th>ግዢ</th>
-        <th>ሽያጭ</th>
-        <th>Stock</th>
-      </tr>
-    </thead>
-
-    <tbody id="productsTable">
-      <tr>
-        <td colspan="6">በመጫን ላይ...</td>
-      </tr>
-    </tbody>
-  </table>
-</div><!DOCTYPE html>
-<html lang="am">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERP User Management</title>
-  <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-    body { background-color: #f4f7fe; padding: 20px; color: #333; }
-    .container { max-width: 800px; margin: 0 auto; }
-    .card { background: #ffffff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 25px; }
-    h2 { color: #2b3674; margin-bottom: 15px; font-size: 20px; }
-    .form-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-    input { flex: 1; min-width: 200px; padding: 12px 15px; border: 1px solid #e0e5f2; border-radius: 8px; outline: none; font-size: 14px; }
-    input:focus { border-color: #4318ff; }
-    button { background: #4318ff; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    button:hover { background: #3311cc; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th { background-color: #f7f9fc; color: #a3edd6; text-align: left; padding: 12px; font-size: 13px; color: #a324f2; text-transform: uppercase; }
-    td { padding: 12px; border-bottom: 1px solid #e0e5f2; font-size: 14px; }
-    tr:hover { background-color: #f8f9ff; }
-    .badge { background: #e6faf5; color: #05cd99; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -85,6 +24,24 @@
   </div>
 </div>
 <div class="container">
+<!-- 📦 Products -->
+<div class="card">
+  <h2>📦 የምርት መመዝገቢያ</h2>
+  <input id="productName" type="text" placeholder="የምርት ስም">
+  <input id="productUnit" type="text" placeholder="Unit (pcs, kg, box...)">
+  <input id="purchasePrice" type="number" placeholder="የግዢ ዋጋ">
+  <input id="sellingPrice" type="number" placeholder="የሽያጭ ዋጋ">
+  <input id="productStock" type="number" placeholder="የመጀመሪያ Stock">
+  <button onclick="addProduct()">💾 ምርት መዝግብ</button>
+</div>
+
+<div class="card">
+  <h2>📋 የተመዘገቡ ምርቶች</h2>
+  <table>
+    <thead><tr><th>ID</th><th>ምርት</th><th>Unit</th><th>ግዢ</th><th>ሽያጭ</th><th>Stock</th></tr></thead>
+    <tbody id="productsTable"><tr><td colspan="6">በመጫን ላይ...</td></tr></tbody>
+  </table>
+</div>
 <div class="card">
   <h2>📅 የትምህርት ዘመን</h2>
   <p id="season">በመጫን ላይ...</p>
