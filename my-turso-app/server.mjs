@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
 import express from 'express';
+import api from './api/index.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -138,14 +139,31 @@ app.get('/api/seasons', async (req, res) => {
 
 // Website
 app.use(express.static(__dirname));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
+app.use(api);
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });	
 
+
+app.get('/api/create-users-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Users table created successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});

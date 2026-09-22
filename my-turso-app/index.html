@@ -1,9 +1,75 @@
   </style>
 </head
 <body>
-<!-- 📊 Dashboard -->
 
-  <h2>📊 ERP Dashboard</h2>
+<!-- 🔐 Login Screen -->
+<div id="loginScreen" style="max-width:420px;margin:60px auto;padding:30px;border-radius:16px;background:white;box-shadow:0 8px 30px rgba(0,0,0,.12);">
+
+  <h2 style="text-align:center;">🔐 ERP Login</h2>
+
+  <label>Username</label>
+  <input id="loginUsername" type="text"
+    style="width:100%;padding:12px;margin:8px 0 16px;box-sizing:border-box;">
+
+  <label>Password</label>
+  <input id="loginPassword" type="password"
+    style="width:100%;padding:12px;margin:8px 0 16px;box-sizing:border-box;">
+
+  <button type="button" onclick="loginUser()"
+    style="width:100%;padding:13px;border:0;border-radius:8px;background:#2563eb;color:white;font-size:16px;">
+    Login
+  </button>
+
+  <p id="loginMessage" style="text-align:center;margin-top:15px;"></p>
+</div>
+
+<script>
+async function loginUser() {
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  const message = document.getElementById('loginMessage');
+
+  if (!username || !password) {
+    message.textContent = 'Username እና Password ያስገቡ።';
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        password
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      message.textContent = data.error || 'Login failed';
+      return;
+    }
+
+    document.getElementById('loginScreen').style.display = 'none';
+
+    const dashboard = document.getElementById('dashboard');
+
+    if (dashboard) {
+      dashboard.style.display = 'block';
+    }
+
+  } catch (error) {
+    message.textContent = 'Server connection error';
+  }
+}
+</script><!-- 📊 Dashboard -->
+
+<div id="dashboard" style="display:none;">  
+<h2>📊 ERP Dashboard</h2>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;">
 
@@ -35,7 +101,6 @@
     </div>
 
   </div>
-</div>
 <!-- 🛒 Purchases -->
 <div class="card">
   <h2>🛒 የግዢ መመዝገቢያ</h2>
@@ -125,7 +190,6 @@
 <div class="card">
   <h2>📅 የትምህርት ዘመን</h2>
   <p id="season">በመጫን ላይ...</p>
-</div>
   <!-- አዲስ መመዝገቢያ Form -->
 <div class="card">
     <h2>➕ አዲስ ተጠቃሚ መመዝገቢያ (ERP Dashboard)</h2>
@@ -799,6 +863,7 @@ async function registerProduction() {
 loadProductionProducts();
 
 </script>
-
+</div>
+</div>
 </body>
 </html>

@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.local' });
+import crypto from 'node:crypto';
 import express from 'express';
 
 const app = express();
@@ -6,7 +10,7 @@ app.use(express.json());
 
 const TURSO_URL = process.env.TURSO_URL;
 const TURSO_TOKEN = process.env.TURSO_TOKEN;
-
+const AUTH_SECRET = process.env.AUTH_SECRET;
 function tursoEndpoint() {
   let url = TURSO_URL;
 
@@ -16,7 +20,324 @@ function tursoEndpoint() {
 
   return url.replace(/\/$/, '') + '/v2/pipeline';
 }
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
 
+  const hash = crypto.scryptSync(
+    password,
+    salt,
+    64
+  ).toString('hex');
+
+  return `${salt}:${hash}`;
+}
+function verifyPassword(password, stored) {
+  const [salt, key] = String(stored || '').split(':');
+
+  if (!salt || !key || key.length !== 128) {
+    return false;
+  }
+
+  const derived = crypto.scryptSync(
+    password,
+    salt,
+    64
+  ).toString('hex');
+
+  return crypto.timingSafeEqual(
+    Buffer.from(derived, 'hex'),
+    Buffer.from(key, 'hex')
+  );
+}
+function createAuthToken(user) {
+  const payload = {
+    id: user.id,
+    role: user.role,
+    exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7)
+  };
+
+  const encoded = Buffer
+    .from(JSON.stringify(payload))
+    .toString('base64url');
+
+  const signature = crypto
+    .createHmac('sha256', AUTH_SECRET)
+    .update(encoded)
+    .digest('base64url');
+
+  return `${encoded}.${signature}`;
+}
+function parseCookies(req) {
+  const header = req.headers.cookie || '';
+
+  return Object.fromEntries(
+    header
+      .split(';')
+      .map(part => part.trim())
+      .filter(Boolean)
+      .map(part => {
+        const index = part.indexOf('=');
+
+        if (index === -1) {
+          return [part, ''];
+        }
+
+        return [
+          part.slice(0, index),
+          decodeURIComponent(part.slice(index + 1))
+        ];
+      })
+  );
+}
+function verifyAuthToken(token) {
+  if (!token) {
+    return null;
+  }
+
+  const parts = token.split('.');
+
+  if (parts.length !== 2) {
+    return null;
+  }
+
+  const [encoded, signature] = parts;
+
+  const expectedSignature = crypto
+    .createHmac('sha256', AUTH_SECRET)
+    .update(encoded)
+    .digest('base64url');
+
+  if (signature !== expectedSignature) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(
+      Buffer.from(encoded, 'base64url').toString('utf8')
+    );
+
+    if (!payload.id || !payload.exp) {
+      return null;
+    }
+
+    if (payload.exp < Math.floor(Date.now() / 1000)) {
+      return null;
+    }
+
+    return payload;
+  } catch {
+    return null;
+  }
+}
+function requireAuth(req, res, next) {
+  const cookies = parseCookies(req);
+  const token = cookies.auth_token;
+
+  const user = verifyAuthToken(token);
+
+  if (!user) {
+    return res.status(401).json({
+      error: 'Authentication required'
+    });
+  }
+
+  req.user = user;
+  next();
+}
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({
+        error: 'Username and password are required'
+      });
+    }
+
+    const data = await tursoQuery(
+      `SELECT id, name, email, username, password_hash, role, active, language
+       FROM users
+       WHERE username = ?
+       LIMIT 1`,
+      [username.trim()]
+    );
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      return res.status(401).json({
+        error: 'Invalid username or password'
+      });
+    }
+
+    const row = rows[0];
+
+    const user = {
+      id: Number(row[0].value),
+      name: row[1].value,
+      email: row[2].value,
+      username: row[3].value,
+      password_hash: row[4].value,
+      role: row[5].value,
+      active: Number(row[6].value),
+      language: row[7].value
+    };
+
+    if (!user.active) {
+      return res.status(403).json({
+        error: 'This account is disabled'
+      });
+    }
+
+    if (!verifyPassword(password, user.password_hash)) {
+      return res.status(401).json({
+        error: 'Invalid username or password'
+      });
+    }
+
+    const token = createAuthToken(user);
+
+    res.setHeader(
+      'Set-Cookie',
+      `auth_token=${encodeURIComponent(token)}; HttpOnly; ${process.env.VERCEL === "1" || process.env.NODE_ENV === "production" ? "Secure; " : ""}SameSite=Lax; Path=/; Max-Age=604800`
+    );
+
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        language: user.language
+      }
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+
+    res.status(500).json({
+      error: 'Login failed',
+      details: error.message
+    });
+  }
+});
+app.get('/api/me', requireAuth, async (req, res) => {
+  try {
+    const data = await tursoQuery(
+      `SELECT id, name, email, username, role, active, language
+       FROM users
+       WHERE id = ?
+       LIMIT 1`,
+      [req.user.id]
+    );
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+
+    const row = rows[0];
+
+    res.json({
+      authenticated: true,
+      user: {
+        id: Number(row[0].value),
+        name: row[1].value,
+        email: row[2].value,
+        username: row[3].value,
+        role: row[4].value,
+        active: Number(row[5].value),
+        language: row[6].value
+      }
+    });
+
+  } catch (error) {
+    console.error('Me error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load current user',
+      details: error.message
+    });
+  }
+});
+app.post('/api/logout', (req, res) => {
+  res.setHeader(
+    'Set-Cookie',
+    'auth_token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0'
+  );
+
+  res.json({
+    success: true,
+    message: 'Logged out successfully'
+  });
+});
+app.post('/api/bootstrap-admin', async (req, res) => {
+  try {
+    const { name, username, password, email } = req.body;
+
+    if (!name || !username || !password) {
+      return res.status(400).json({
+        error: 'Name, username and password are required'
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        error: 'Password must be at least 8 characters'
+      });
+    }
+
+    const existing = await tursoQuery(
+      `SELECT id FROM users
+       WHERE role = 'admin'
+       LIMIT 1`
+    );
+
+    const existingRows =
+      existing.results?.[0]?.response?.result?.rows || [];
+
+    if (existingRows.length) {
+      return res.status(403).json({
+        error: 'Admin account already exists'
+      });
+    }
+
+    const passwordHash = hashPassword(password);
+
+    const data = await tursoQuery(
+      `INSERT INTO users
+       (name, email, username, password_hash, role, active, language)
+       VALUES (?, ?, ?, ?, 'admin', 1, 'am')`,
+      [
+        name.trim(),
+        email?.trim() || '',
+        username.trim(),
+        passwordHash
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Admin account created successfully',
+      data
+    });
+
+  } catch (error) {
+    console.error('Bootstrap admin error:', error);
+
+    res.status(500).json({
+      error: 'Failed to create admin',
+      details: error.message
+    });
+  }
+});
 async function tursoQuery(sql, args = []) {
   const response = await fetch(tursoEndpoint(), {
     method: 'POST',
