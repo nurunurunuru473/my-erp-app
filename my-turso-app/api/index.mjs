@@ -128,7 +128,8 @@ function verifyAuthToken(token) {
   } catch {
     return null;
   }
-}
+  }
+
 function requireAuth(req, res, next) {
   const cookies = parseCookies(req);
   const token = cookies.auth_token;
@@ -137,13 +138,24 @@ function requireAuth(req, res, next) {
 
   if (!user) {
     return res.status(401).json({
-      error: 'Authentication required'
+      error: "Authentication required"
     });
   }
 
   req.user = user;
   next();
 }
+
+function requireAdmin(req, res, next) {
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({
+      error: "Admin access required"
+    });
+  }
+
+  next();
+}
+
 app.post('/api/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -378,27 +390,141 @@ app.get('/api/test', (req, res) => {
 });
 
 // Create user in Turso
-app.post('/api/users', async (req, res) => {
+app.post('/api/register', async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const {
+      name,
+      email,
+      username,
+      password,
+      language = 'am'
+    } = req.body;
 
-    if (!name || !email) {
+    if (!name || !username || !password) {
       return res.status(400).json({
-        error: 'Name and email are required'
+        error: 'Name, username and password are required'
       });
     }
 
-    const data = await tursoQuery(
-      'INSERT INTO users (name, email) VALUES (?, ?)',
-      [name, email]
+    if (password.length < 8) {
+      return res.status(400).json({
+        error: 'Password must be at least 8 characters'
+      });
+    }
+
+    const existing = await tursoQuery(
+      'SELECT id FROM users WHERE username = ? LIMIT 1',
+      [username.trim()]
+    );
+
+    const existingRows =
+      existing.results?.[0]?.response?.result?.rows || [];
+
+    if (existingRows.length) {
+      return res.status(409).json({
+        error: 'Username already exists'
+      });
+    }
+
+    const passwordHash = hashPassword(password);
+
+    await tursoQuery(
+      `INSERT INTO users
+       (name, email, username, password_hash, role, active, language)
+       VALUES (?, ?, ?, ?, 'user', 1, ?)`,
+      [
+        name.trim(),
+        email?.trim() || '',
+        username.trim(),
+        passwordHash,
+        language === 'en' ? 'en' : 'am'
+      ]
     );
 
     res.json({
       success: true,
+      message: 'Account created successfully'
+    });
+
+  } catch (error) {
+    console.error('Register error:', error);
+
+    res.status(500).json({
+      error: 'Failed to create account',
+      details: error.message
+    });
+  }
+});
+
+app.post('/api/users', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const {
+      name,
+      email,
+      username,
+      password,
+      role = 'user',
+      active = 1,
+      language = 'am'
+    } = req.body;
+
+    if (!name || !username || !password) {
+      return res.status(400).json({
+        error: 'Name, username and password are required'
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        error: 'Password must be at least 8 characters'
+      });
+    }
+
+    if (!['admin', 'user'].includes(role)) {
+      return res.status(400).json({
+        error: 'Invalid role'
+      });
+    }
+
+    const existing = await tursoQuery(
+      'SELECT id FROM users WHERE username = ? LIMIT 1',
+      [username.trim()]
+    );
+
+    const existingRows =
+      existing.results?.[0]?.response?.result?.rows || [];
+
+    if (existingRows.length) {
+      return res.status(409).json({
+        error: 'Username already exists'
+      });
+    }
+
+    const passwordHash = hashPassword(password);
+
+    const data = await tursoQuery(
+      `INSERT INTO users
+       (name, email, username, password_hash, role, active, language)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name.trim(),
+        email?.trim() || '',
+        username.trim(),
+        passwordHash,
+        role,
+        Number(active) ? 1 : 0,
+        language === 'en' ? 'en' : 'am'
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'User created successfully',
       data
     });
+
   } catch (error) {
-    console.error('Turso error:', error);
+    console.error('Create user error:', error);
 
     res.status(500).json({
       error: 'Failed to create user',
@@ -408,10 +534,10 @@ app.post('/api/users', async (req, res) => {
 });
 
 // Get users from Turso
-app.get('/api/users', async (req, res) => {
+app.get('/api/users', requireAuth, requireAdmin, async (req, res) => {
   try {
     const data = await tursoQuery(
-      'SELECT * FROM users'
+      'SELECT id, name, email, username, role, active, language FROM users'
     );
 
     res.json(data);
@@ -420,6 +546,116 @@ app.get('/api/users', async (req, res) => {
 
     res.status(500).json({
       error: 'Failed to load users',
+      details: error.message
+    });
+  }
+});
+// Admin: Enable / Disable user
+app.patch('/api/users/:id/status', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const active = Number(req.body.active);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        error: 'Invalid user ID'
+      });
+    }
+
+    if (active !== 0 && active !== 1) {
+      return res.status(400).json({
+        error: 'Active must be 0 or 1'
+      });
+    }
+
+    if (userId === req.user.id) {
+      return res.status(400).json({
+        error: 'You cannot disable your own account'
+      });
+    }
+
+    const existing = await tursoQuery(
+      'SELECT id FROM users WHERE id = ? LIMIT 1',
+      [userId]
+    );
+
+    const rows =
+      existing.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+
+    await tursoQuery(
+      'UPDATE users SET active = ? WHERE id = ?',
+      [active, userId]
+    );
+
+    res.json({
+      success: true,
+      message: active === 1
+        ? 'User enabled successfully'
+        : 'User disabled successfully'
+    });
+
+  } catch (error) {
+    console.error('User status error:', error);
+
+    res.status(500).json({
+      error: 'Failed to update user status',
+      details: error.message
+    });
+  }
+});
+
+// Admin: Delete user
+app.delete('/api/users/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        error: 'Invalid user ID'
+      });
+    }
+
+    if (userId === req.user.id) {
+      return res.status(400).json({
+        error: 'You cannot delete your own account'
+      });
+    }
+
+    const existing = await tursoQuery(
+      'SELECT id FROM users WHERE id = ? LIMIT 1',
+      [userId]
+    );
+
+    const rows =
+      existing.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+
+    await tursoQuery(
+      'DELETE FROM users WHERE id = ?',
+      [userId]
+    );
+
+    res.json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('User delete error:', error);
+
+    res.status(500).json({
+      error: 'Failed to delete user',
       details: error.message
     });
   }

@@ -1,5 +1,5 @@
   </style>
-</head
+</head>
 <body>
 
 <!-- 🔐 Login Screen -->
@@ -12,32 +12,149 @@
     style="width:100%;padding:12px;margin:8px 0 16px;box-sizing:border-box;">
 
   <label>Password</label>
+  <div style="position:relative;">
   <input id="loginPassword" type="password"
-    style="width:100%;padding:12px;margin:8px 0 16px;box-sizing:border-box;">
+    style="width:100%;padding:12px;margin:8px 0 16px;box-sizing:border-box;padding-right:90px;">
+  <button type="button" onclick="toggleLoginPassword()"
+    style="position:absolute;right:6px;top:6px;padding:7px 10px;border:0;border-radius:6px;background:#eee;color:#333;">
+    Show
+  </button>
+</div>
 
   <button type="button" onclick="loginUser()"
     style="width:100%;padding:13px;border:0;border-radius:8px;background:#2563eb;color:white;font-size:16px;">
     Login
   </button>
 
+  <button type="button" onclick="showCreateUserForm()" style="width:100%;padding:11px;margin-top:10px;border:1px solid #2563eb;border-radius:8px;background:white;color:#2563eb;font-size:15px;">Create New Account</button>
   <p id="loginMessage" style="text-align:center;margin-top:15px;"></p>
+
+<div id="createUserForm" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid #ddd;">
+  <h3 style="text-align:center;">👤 Create New Account</h3>
+
+  <input id="newName" type="text" placeholder="Full Name"
+    style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+  <input id="newEmail" type="email" placeholder="Email"
+    style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+  <input id="newUsername" type="text" placeholder="Username"
+    style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+  <input id="newPassword" type="password" placeholder="Password"
+    style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+  <input id="newPasswordConfirm" type="password" placeholder="Confirm Password"
+    style="width:100%;padding:12px;margin:6px 0 10px;box-sizing:border-box;">
+
+  <button type="button" onclick="createNewUser()"
+    style="width:100%;padding:13px;border:0;border-radius:8px;background:#16a34a;color:white;font-size:16px;">
+    Create Account
+  </button>
+
+  <button type="button" onclick="hideCreateUserForm()"
+    style="width:100%;padding:11px;margin-top:8px;border:1px solid #999;border-radius:8px;background:white;color:#333;font-size:15px;">
+    ← Back to Login
+  </button>
+
+  <p id="createUserMessage" style="text-align:center;margin-top:12px;"></p>
+</div>
 </div>
 
 <script>
+function showCreateUserForm() {
+  document.getElementById('createUserForm').style.display = 'block';
+  document.getElementById('createUserMessage').textContent = '';
+}
+
+async function createNewUser() {
+  const name = document.getElementById('newName').value.trim();
+  const email = document.getElementById('newEmail').value.trim();
+  const username = document.getElementById('newUsername').value.trim();
+  const password = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('newPasswordConfirm').value;
+  const message = document.getElementById('createUserMessage');
+
+  if (!name || !username || !password) {
+    message.textContent = 'Name, Username እና Password ያስፈልጋሉ።';
+    message.style.color = '#dc2626';
+    return;
+  }
+
+  if (password.length < 8) {
+    message.textContent = 'Password ቢያንስ 8 characters መሆን አለበት።';
+    message.style.color = '#dc2626';
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    message.textContent = 'Passwords አይመሳሰሉም።';
+    message.style.color = '#dc2626';
+    return;
+  }
+
+  message.textContent = 'Creating account...';
+  message.style.color = '#2563eb';
+
+  try {
+    const response = await fetch('/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        username,
+        password,
+        language: 'am'
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      message.textContent = data.error || 'Account creation failed';
+      message.style.color = '#dc2626';
+      return;
+    }
+
+    message.textContent = 'Account created successfully. Please login.';
+    message.style.color = '#16a34a';
+
+    document.getElementById('newName').value = '';
+    document.getElementById('newEmail').value = '';
+    document.getElementById('newUsername').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('newPasswordConfirm').value = '';
+
+  } catch (error) {
+    message.textContent = 'Server connection error';
+    message.style.color = '#dc2626';
+  }
+}
+
+function hideCreateUserForm() {
+  document.getElementById('createUserForm').style.display = 'none';
+  document.getElementById('createUserMessage').textContent = '';
+}
+
+
 async function loginUser() {
   const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
-
   const message = document.getElementById('loginMessage');
 
   if (!username || !password) {
     message.textContent = 'Username እና Password ያስገቡ።';
+    message.style.color = '#dc2626';
     return;
   }
 
   try {
     const response = await fetch('/api/login', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -51,8 +168,12 @@ async function loginUser() {
 
     if (!response.ok) {
       message.textContent = data.error || 'Login failed';
+      message.style.color = '#dc2626';
       return;
     }
+
+    window.currentUser = data.user;
+    message.textContent = '';
 
     document.getElementById('loginScreen').style.display = 'none';
 
@@ -62,10 +183,207 @@ async function loginUser() {
       dashboard.style.display = 'block';
     }
 
+    const adminUserManagement =
+      document.getElementById('adminUserManagement');
+
+    if (data.user && data.user.role === 'admin') {
+      if (adminUserManagement) {
+        adminUserManagement.style.display = 'block';
+      }
+
+      loadAdminUsers();
+    } else {
+      if (adminUserManagement) {
+        adminUserManagement.style.display = 'none';
+      }
+    }
+
   } catch (error) {
+    console.error('Login error:', error);
     message.textContent = 'Server connection error';
+    message.style.color = '#dc2626';
   }
 }
+
+function toggleLoginPassword() {
+  const input = document.getElementById('loginPassword');
+  const button = event.currentTarget;
+
+  if (input.type === 'password') {
+    input.type = 'text';
+    button.textContent = 'Hide';
+  } else {
+    input.type = 'password';
+    button.textContent = 'Show';
+  }
+}
+
+
+async function loadAdminUsers() {
+  const box = document.getElementById('adminUserManagement');
+  const tbody = document.getElementById('adminUserTable');
+  const message = document.getElementById('adminUserMessage');
+
+  if (!box || !tbody) return;
+
+  try {
+    const response = await fetch('/api/users', {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to load users');
+    }
+
+    const rows = data.results?.[0]?.response?.result?.rows || [];
+
+    tbody.innerHTML = '';
+
+    if (!rows.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align:center;">No users found</td>
+        </tr>
+      `;
+      return;
+    }
+
+    rows.forEach(row => {
+      const id = row[0]?.value ?? '';
+      const name = row[1]?.value ?? '';
+      const email = row[2]?.value ?? '';
+      const username = row[3]?.value ?? '';
+      const role = row[4]?.value ?? '';
+      const active = Number(row[5]?.value ?? 0);
+
+      const isCurrentUser =
+        window.currentUser &&
+        Number(window.currentUser.id) === Number(id);
+
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td>#${id}</td>
+        <td><b></b></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>
+          <span class="badge">
+            ${active ? 'Active' : 'Disabled'}
+          </span>
+        </td>
+        <td></td>
+      `;
+
+      tr.children[1].querySelector('b').textContent = name;
+      tr.children[2].textContent = email;
+      tr.children[3].textContent = username;
+      tr.children[4].textContent = role;
+
+      const actions = tr.children[6];
+
+      if (isCurrentUser) {
+        const current = document.createElement('span');
+        current.style.color = '#777';
+        current.textContent = 'Current Admin';
+        actions.appendChild(current);
+      } else {
+        const statusButton = document.createElement('button');
+        statusButton.type = 'button';
+        statusButton.textContent = active ? 'Disable' : 'Enable';
+        statusButton.style.cssText =
+          'padding:7px 10px;margin:2px;border:0;border-radius:6px;background:#2563eb;color:white;';
+
+        statusButton.addEventListener('click', () => {
+          toggleUserStatus(Number(id), active);
+        });
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.textContent = 'Delete';
+        deleteButton.style.cssText =
+          'padding:7px 10px;margin:2px;border:0;border-radius:6px;background:#dc2626;color:white;';
+
+        deleteButton.addEventListener('click', () => {
+          deleteUser(Number(id), name);
+        });
+
+        actions.appendChild(statusButton);
+        actions.appendChild(deleteButton);
+      }
+
+      tbody.appendChild(tr);
+    });
+
+    message.textContent = '';
+
+  } catch (error) {
+    console.error('Admin users error:', error);
+    message.textContent = error.message;
+    message.style.color = '#dc2626';
+  }
+}
+
+async function toggleUserStatus(userId, currentStatus) {
+  const newStatus = currentStatus ? 0 : 1;
+
+  try {
+    const response = await fetch(`/api/users/${userId}/status`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        active: newStatus
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || 'Failed to update user status');
+      return;
+    }
+
+    await loadAdminUsers();
+
+  } catch (error) {
+    console.error('Status update error:', error);
+    alert('Server connection error');
+  }
+}
+
+async function deleteUser(userId, userName) {
+  if (!confirm(`Delete ${userName}?`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/users/${userId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || 'Failed to delete user');
+      return;
+    }
+
+    await loadAdminUsers();
+
+  } catch (error) {
+    console.error('Delete user error:', error);
+    alert('Server connection error');
+  }
+}
+
 </script><!-- 📊 Dashboard -->
 
 <div id="dashboard" style="display:none;">  
@@ -200,23 +518,36 @@ async function loginUser() {
     </div>
   </div>
 
-  <!-- የተመዘገቡት ዝርዝር Table -->
-<div class="card">
-    <h2>📋 የተመዘገቡ ተጠቃሚዎች</h2>
-    <table>
+  
+<!-- 👥 Admin User Management -->
+<div id="adminUserManagement" class="card" style="display:none;margin-top:20px;">
+  <h2>👥 User Management</h2>
+
+  <div style="overflow-x:auto;">
+    <table style="width:100%;">
       <thead>
         <tr>
           <th>ID</th>
-          <th>ስም</th>
-          <th>ኢሜይል</th>
-          <th>ሁኔታ</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
-      <tbody id="userTable">
-        <!-- ዳታው እዚህ ይገባል -->
+      <tbody id="adminUserTable">
+        <tr>
+          <td colspan="6" style="text-align:center;">Loading...</td>
+        </tr>
       </tbody>
     </table>
   </div>
+
+  <p id="adminUserMessage" style="text-align:center;margin-top:12px;"></p>
+</div>
+
+
 </div>
 
 <script>

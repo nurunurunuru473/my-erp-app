@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
 import express from 'express';
+import crypto from 'node:crypto';
 import api from './api/index.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -15,6 +16,18 @@ app.use(express.json());
 
 const TURSO_URL = process.env.TURSO_URL;
 const TURSO_TOKEN = process.env.TURSO_TOKEN;
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+
+  const hash = crypto.scryptSync(
+    password,
+    salt,
+    64
+  ).toString('hex');
+
+  return `${salt}:${hash}`;
+}
 
 function tursoEndpoint() {
   let url = TURSO_URL;
@@ -39,7 +52,10 @@ async function tursoQuery(sql, args = []) {
           type: 'execute',
           stmt: {
             sql,
-            args
+            args: args.map(value => ({
+              type: typeof value === 'number' ? 'integer' : 'text',
+              value: String(value)
+            }))
           }
         },
         {
@@ -63,22 +79,6 @@ app.get('/api/test', (req, res) => {
   res.json({
     message: 'Server is running perfectly!'
   });
-});
-
-// Users API
-app.get('/api/users', async (req, res) => {
-  try {
-    const data = await tursoQuery(
-      'SELECT * FROM users'
-    );
-
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to load users',
-      details: error.message
-    });
-  }
 });
 
 // Create seasons table
@@ -133,6 +133,73 @@ app.get('/api/seasons', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       error: error.message
+    });
+  }
+});
+
+// Public User Registration
+app.post('/api/register', async (req, res) => {
+  try {
+    const {
+      name,
+      email,
+      username,
+      password,
+      language = 'am'
+    } = req.body;
+
+    if (!name || !username || !password) {
+      return res.status(400).json({
+        error: 'Name, username and password are required'
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        error: 'Password must be at least 8 characters'
+      });
+    }
+
+    const existing = await tursoQuery(
+      'SELECT id FROM users WHERE username = ? LIMIT 1',
+      [username.trim()]
+    );
+
+    const existingRows =
+      existing.results?.[0]?.response?.result?.rows || [];
+
+    if (existingRows.length) {
+      return res.status(409).json({
+        error: 'Username already exists'
+      });
+    }
+
+    const passwordHash = hashPassword(password);
+
+    await tursoQuery(
+      `INSERT INTO users
+       (name, email, username, password_hash, role, active, language)
+       VALUES (?, ?, ?, ?, 'user', 1, ?)`,
+      [
+        name.trim(),
+        email?.trim() || '',
+        username.trim(),
+        passwordHash,
+        language === 'en' ? 'en' : 'am'
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Account created successfully'
+    });
+
+  } catch (error) {
+    console.error('Register error:', error);
+
+    res.status(500).json({
+      error: 'Failed to create account',
+      details: error.message
     });
   }
 });
