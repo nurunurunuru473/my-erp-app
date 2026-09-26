@@ -661,6 +661,400 @@ app.delete('/api/users/:id', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
+
+// 🔧 Sales cost-price migration
+app.get('/api/upgrade-sales-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      ALTER TABLE sales
+      ADD COLUMN cost_price REAL NOT NULL DEFAULT 0
+    `);
+  } catch (error) {
+    if (!String(error.message).includes('duplicate column name')) {
+      return res.status(500).json({
+        error: 'Failed to add sales cost_price',
+        details: error.message
+      });
+    }
+  }
+
+  try {
+    await tursoQuery(`
+      UPDATE sales
+      SET cost_price = (
+        SELECT purchase_price
+        FROM products
+        WHERE products.id = sales.product_id
+      )
+      WHERE cost_price = 0
+    `);
+
+    res.json({
+      success: true,
+      message: 'Sales cost_price migration completed successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to update sales cost_price',
+      details: error.message
+    });
+  }
+});
+
+
+// 💼 Capital Transactions
+
+// 💼 Register Capital
+app.post('/api/capital', async (req, res) => {
+  try {
+    const { description, amount } = req.body;
+    const value = Number(amount);
+
+    if (!description || !Number.isFinite(value) || value <= 0) {
+      return res.status(400).json({
+        error: 'Description and valid amount are required'
+      });
+    }
+
+    const capital = await tursoQuery(
+      `INSERT INTO capital_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      ['capital', description, value]
+    );
+
+    await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      ['capital', `Capital - ${description}`, value]
+    );
+
+    res.json({
+      success: true,
+      message: 'Capital registered successfully',
+      capital
+    });
+  } catch (error) {
+    console.error('Capital error:', error);
+
+    res.status(500).json({
+      error: 'Failed to register capital',
+      details: error.message
+    });
+  }
+});
+
+// 💼 Owner Withdrawal
+app.post('/api/withdrawal', async (req, res) => {
+  try {
+    const { description, amount } = req.body;
+    const value = Number(amount);
+
+    if (!description || !Number.isFinite(value) || value <= 0) {
+      return res.status(400).json({
+        error: 'Description and valid amount are required'
+      });
+    }
+
+    const withdrawal = await tursoQuery(
+      `INSERT INTO capital_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      ['withdrawal', description, -value]
+    );
+
+    await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      ['withdrawal', `Withdrawal - ${description}`, -value]
+    );
+
+    res.json({
+      success: true,
+      message: 'Withdrawal registered successfully',
+      withdrawal
+    });
+  } catch (error) {
+    console.error('Withdrawal error:', error);
+
+    res.status(500).json({
+      error: 'Failed to register withdrawal',
+      details: error.message
+    });
+  }
+});
+
+// 💼 Capital Transactions
+app.get('/api/capital-transactions', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT *
+      FROM capital_transactions
+      ORDER BY id DESC
+      LIMIT 50
+    `);
+
+    res.json(data);
+  } catch (error) {
+    console.error('Capital transactions error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load capital transactions',
+      details: error.message
+    });
+  }
+});
+
+
+// 📊 Capital & Profit Summary
+app.get('/api/capital-profit', async (req, res) => {
+  try {
+    const salesData = await tursoQuery(`
+      SELECT
+        COALESCE(SUM(total), 0) AS revenue,
+        COALESCE(SUM(quantity * cost_price), 0) AS cogs
+      FROM sales
+    `);
+
+    const expenseData = await tursoQuery(`
+      SELECT COALESCE(SUM(ABS(amount)), 0) AS expenses
+      FROM cash_transactions
+      WHERE type = 'expense'
+    `);
+
+    const capitalData = await tursoQuery(`
+      SELECT
+        COALESCE(SUM(CASE WHEN type = 'capital' THEN amount ELSE 0 END), 0) AS capital_in,
+        COALESCE(SUM(CASE WHEN type = 'withdrawal' THEN ABS(amount) ELSE 0 END), 0) AS withdrawals
+      FROM capital_transactions
+    `);
+
+    const cashData = await tursoQuery(`
+      SELECT COALESCE(SUM(amount), 0) AS cash
+      FROM cash_transactions
+    `);
+
+    const stockData = await tursoQuery(`
+      SELECT COALESCE(SUM(stock * purchase_price), 0) AS stock_value
+      FROM products
+    `);
+
+    const salesRows =
+      salesData.results?.[0]?.response?.result?.rows || [];
+
+    const expenseRows =
+      expenseData.results?.[0]?.response?.result?.rows || [];
+
+    const capitalRows =
+      capitalData.results?.[0]?.response?.result?.rows || [];
+
+    const cashRows =
+      cashData.results?.[0]?.response?.result?.rows || [];
+
+    const stockRows =
+      stockData.results?.[0]?.response?.result?.rows || [];
+
+    const revenue = Number(salesRows[0]?.[0]?.value || 0);
+    const cogs = Number(salesRows[0]?.[1]?.value || 0);
+    const expenses = Number(expenseRows[0]?.[0]?.value || 0);
+    const capitalIn = Number(capitalRows[0]?.[0]?.value || 0);
+    const withdrawals = Number(capitalRows[0]?.[1]?.value || 0);
+    const cash = Number(cashRows[0]?.[0]?.value || 0);
+    const stockValue = Number(stockRows[0]?.[0]?.value || 0);
+
+    const grossProfit = revenue - cogs;
+    const netProfit = grossProfit - expenses;
+    const ownerEquity = capitalIn + netProfit - withdrawals;
+
+    res.json({
+      success: true,
+      summary: {
+        revenue,
+        cogs,
+        gross_profit: grossProfit,
+        expenses,
+        net_profit: netProfit,
+        capital_in: capitalIn,
+        withdrawals,
+        cash,
+        stock_value: stockValue,
+        owner_equity: ownerEquity
+      }
+    });
+
+  } catch (error) {
+    console.error('Capital & Profit error:', error);
+
+    res.status(500).json({
+      error: 'Failed to calculate capital and profit',
+      details: error.message
+    });
+  }
+});
+
+app.get('/api/create-capital-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS capital_transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL,
+        description TEXT NOT NULL,
+        amount REAL NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Capital table created successfully'
+    });
+  } catch (error) {
+    console.error('Capital table error:', error);
+
+    res.status(500).json({
+      error: 'Failed to create capital table',
+      details: error.message
+    });
+  }
+});
+// 💳 Create Customer Payments Table
+app.get('/api/create-customer-payments-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS customer_payments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        customer TEXT NOT NULL,
+        sale_id INTEGER,
+        description TEXT NOT NULL,
+        amount REAL NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Customer payments table created successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to create customer payments table',
+      details: error.message
+    });
+  }
+});
+
+// 💳 Register Customer Credit Payment
+app.post('/api/customer-payments', async (req, res) => {
+  try {
+    const {
+      customer,
+      sale_id = null,
+      description = 'Customer Credit Payment',
+      amount
+    } = req.body;
+
+    const paymentAmount = Number(amount);
+
+    if (!customer || !customer.trim()) {
+      return res.status(400).json({
+        error: 'Customer name is required'
+      });
+    }
+
+    if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+      return res.status(400).json({
+        error: 'Payment amount must be greater than 0'
+      });
+    }
+
+    await tursoQuery(
+      `INSERT INTO customer_payments
+       (customer, sale_id, description, amount)
+       VALUES (?, ?, ?, ?)`,
+      [
+        customer.trim(),
+        sale_id,
+        description,
+        paymentAmount
+      ]
+    );
+
+    await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES ('customer_payment', ?, ?)`,
+      [
+        `Customer Payment - ${customer.trim()}`,
+        paymentAmount
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Customer payment recorded successfully',
+      customer: customer.trim(),
+      amount: paymentAmount
+    });
+
+  } catch (error) {
+    console.error('Customer payment error:', error);
+
+    res.status(500).json({
+      error: 'Failed to record customer payment',
+      details: error.message
+    });
+  }
+});
+// 📒 Customer Credit Balances
+app.get('/api/customer-credits', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT
+        r.customer,
+        COALESCE(SUM(r.amount), 0) AS credit_total,
+        COALESCE((
+          SELECT SUM(p.amount)
+          FROM customer_payments p
+          WHERE p.customer = r.customer
+        ), 0) AS paid_total
+      FROM customer_receivables r
+      GROUP BY r.customer
+      ORDER BY r.customer
+    `);
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    const credits = rows.map(row => {
+      const customer = row[0]?.value || '';
+      const creditTotal = Number(row[1]?.value || 0);
+      const paidTotal = Number(row[2]?.value || 0);
+
+      return {
+        customer,
+        credit_total: creditTotal,
+        paid_total: paidTotal,
+        outstanding: Math.max(creditTotal - paidTotal, 0)
+      };
+    }).filter(item => item.outstanding > 0);
+
+    res.json({
+      success: true,
+      credits
+    });
+
+  } catch (error) {
+    console.error('Customer credits error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load customer credits',
+      details: error.message
+    });
+  }
+});
+
 export default app;
 
 app.get('/api/seasons', async (req, res) => {
@@ -1031,6 +1425,18 @@ app.post('/api/purchases', async (req, res) => {
     const qty = Number(quantity);
     const price = Number(unit_price);
 
+    if (!['cash', 'credit'].includes(payment_type)) {
+      return res.status(400).json({
+        error: 'Invalid payment_type'
+      });
+    }
+
+    if (payment_type === 'credit' && !customer) {
+      return res.status(400).json({
+        error: 'Customer name is required for credit sale'
+      });
+    }
+
     if (!Number.isInteger(productId) || productId <= 0) {
       return res.status(400).json({
         error: 'Valid product_id is required'
@@ -1122,6 +1528,7 @@ app.get('/api/create-sales-table', async (req, res) => {
         unit_price REAL NOT NULL,
         customer TEXT,
         total REAL NOT NULL,
+        payment_type TEXT NOT NULL DEFAULT 'cash',
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -1139,6 +1546,83 @@ app.get('/api/create-sales-table', async (req, res) => {
     });
   }
 });
+// 🔄 Add payment_type to existing sales table
+app.get('/api/upgrade-sales-payment-type', async (req, res) => {
+  try {
+    try {
+      await tursoQuery(`
+        ALTER TABLE sales
+        ADD COLUMN payment_type TEXT NOT NULL DEFAULT 'cash'
+      `);
+    } catch (error) {
+      if (!String(error.message).toLowerCase().includes('duplicate column')) {
+        throw error;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Sales payment_type migration completed successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to migrate sales payment_type',
+      details: error.message
+    });
+  }
+});
+
+// 💳 Customer Receivables Table
+app.get('/api/create-receivables-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS customer_receivables (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sale_id INTEGER,
+        customer TEXT NOT NULL,
+        description TEXT NOT NULL,
+        amount REAL NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+// 💳 Create Supplier Debts Table
+app.get('/api/create-supplier-debts-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS supplier_debts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        purchase_id INTEGER,
+        supplier TEXT NOT NULL,
+        description TEXT NOT NULL,
+        amount REAL NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Supplier debts table created successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to create supplier debts table',
+      details: error.message
+    });
+  }
+});
+    res.json({
+      success: true,
+      message: 'Customer receivables table created successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to create receivables table',
+      details: error.message
+    });
+  }
+});
+
 // 🛍️ Register Sale
 app.post('/api/sales', async (req, res) => {
   try {
@@ -1146,7 +1630,8 @@ app.post('/api/sales', async (req, res) => {
       product_id,
       quantity,
       unit_price,
-      customer
+      customer,
+      payment_type = 'cash'
     } = req.body;
 
     const productId = Number(product_id);
@@ -1172,7 +1657,7 @@ app.post('/api/sales', async (req, res) => {
     }
 
     const productData = await tursoQuery(
-      'SELECT id, name, stock FROM products WHERE id = ?',
+      'SELECT id, name, stock, purchase_price FROM products WHERE id = ?',
       [productId]
     );
 
@@ -1187,6 +1672,7 @@ app.post('/api/sales', async (req, res) => {
 
     const productName = productRows[0][1].value;
     const currentStock = Number(productRows[0][2].value);
+    const costPrice = Number(productRows[0][3].value) || 0;
 
     if (qty > currentStock) {
       return res.status(400).json({
@@ -1198,14 +1684,16 @@ app.post('/api/sales', async (req, res) => {
 
     const sale = await tursoQuery(
       `INSERT INTO sales
-       (product_id, quantity, unit_price, customer, total)
-       VALUES (?, ?, ?, ?, ?)`,
+       (product_id, quantity, unit_price, cost_price, customer, total, payment_type)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         productId,
         qty,
         price,
+        costPrice,
         customer || '',
-        total
+        total,
+        payment_type
       ]
     );
 
@@ -1214,21 +1702,36 @@ app.post('/api/sales', async (req, res) => {
       [qty, productId]
     );
 
-    await tursoQuery(
-      `INSERT INTO cash_transactions
-       (type, description, amount)
-       VALUES (?, ?, ?)`,
-      [
-        'sale',
-        `Sale - ${productName}${customer ? ` - ${customer}` : ''}`,
-        total
-      ]
-    );
+    if (payment_type === 'cash') {
+      await tursoQuery(
+        `INSERT INTO cash_transactions
+         (type, description, amount)
+         VALUES (?, ?, ?)`,
+        [
+          'sale',
+          `Sale - ${productName}${customer ? ` - ${customer}` : ''}`,
+          total
+        ]
+      );
+    } else {
+      await tursoQuery(
+        `INSERT INTO customer_receivables
+         (sale_id, customer, description, amount)
+         VALUES (?, ?, ?, ?)`,
+        [
+          sale.results?.[0]?.response?.result?.last_insert_rowid || null,
+          customer,
+          `Credit Sale - ${productName}`,
+          total
+        ]
+      );
+    }
 
     res.json({
       success: true,
       message: 'Sale registered successfully',
       total,
+      payment_type,
       sale
     });
 
@@ -1273,6 +1776,86 @@ app.get('/api/recent-purchases', async (req, res) => {
 });
 // 📋 Recent Sales
 
+
+app.get('/api/dashboard-sales-summary', async (req, res) => {
+  try {
+    const salesData = await tursoQuery(`
+      SELECT
+        COALESCE(SUM(
+          CASE
+            WHEN date(created_at, '+3 hours') = date('now', '+3 hours')
+            THEN total
+            ELSE 0
+          END
+        ), 0) AS sales_today,
+
+        COUNT(
+          CASE
+            WHEN date(created_at, '+3 hours') = date('now', '+3 hours')
+            THEN 1
+          END
+        ) AS sales_count_today,
+
+        COALESCE(SUM(
+          CASE
+            WHEN date(created_at, '+3 hours') = date('now', '+3 hours')
+             AND payment_type = 'cash'
+            THEN total
+            ELSE 0
+          END
+        ), 0) AS sales_collected_today
+
+      FROM sales
+    `);
+
+    const creditData = await tursoQuery(`
+  SELECT
+    COALESCE((SELECT SUM(amount) FROM customer_receivables), 0)
+    -
+    COALESCE((SELECT SUM(amount) FROM customer_payments), 0)
+    AS credit_total
+`);
+const paymentData = await tursoQuery(`
+  SELECT
+    COALESCE(SUM(amount), 0) AS customer_payments_today
+  FROM customer_payments
+  WHERE date(created_at, '+3 hours') = date('now', '+3 hours')
+`);
+    const salesRows =
+      salesData.results?.[0]?.response?.result?.rows || [];
+
+    const creditRows =
+      creditData.results?.[0]?.response?.result?.rows || [];
+
+const paymentRows =
+  paymentData.results?.[0]?.response?.result?.rows || [];
+
+const paymentRow = paymentRows[0] || [];
+    const salesRow = salesRows[0] || [];
+    const creditRow = creditRows[0] || [];
+
+    res.json({
+      success: true,
+      summary: {
+        sales_today: Number(salesRow[0]?.value || 0),
+        sales_count_today: Number(salesRow[1]?.value || 0),
+        sales_collected_today:
+  Number(salesRow[2]?.value || 0) +
+  Number(paymentRow[0]?.value || 0),
+        credit_today: Number(creditRow[0]?.value || 0)
+      }
+    });
+
+  } catch (error) {
+    console.error('Dashboard sales summary error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load dashboard sales summary',
+      details: error.message
+    });
+  }
+});
+
 app.get('/api/sales-total', async (req, res) => {
   try {
     const data = await tursoQuery(`
@@ -1300,6 +1883,7 @@ app.get('/api/recent-sales', async (req, res) => {
         products.name AS product_name,
         sales.quantity,
         sales.unit_price,
+        sales.cost_price,
         sales.customer,
         sales.total,
         sales.created_at

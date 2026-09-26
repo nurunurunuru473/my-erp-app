@@ -1,4 +1,1064 @@
-  </style>
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+/* ===== ERP MOBILE DASHBOARD ===== */
+.erp-app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding-bottom: 92px;
+  background: #f4f7f7;
+  min-height: 100vh;
+}
+
+.erp-header {
+  background: linear-gradient(135deg, #063f43, #087f78);
+  color: #fff;
+  padding: 18px 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 0 0 24px 24px;
+}
+
+.erp-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.erp-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.16);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.erp-brand-name {
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.erp-brand-sub {
+  font-size: 11px;
+  opacity: .78;
+  margin-top: 2px;
+}
+
+.erp-notification {
+  border: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: rgba(255,255,255,.14);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.erp-view {
+  display: none;
+  padding: 18px 16px;
+}
+
+.erp-view.active {
+  display: block;
+}
+
+.erp-welcome {
+  margin-bottom: 18px;
+}
+
+.erp-small-label {
+  color: #6b7b7d;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.erp-welcome h2 {
+  margin: 0;
+  color: #123b3e;
+  font-size: 22px;
+}
+
+.erp-revenue {
+  background: linear-gradient(135deg, #075b5a, #0b9185);
+  color: #fff;
+  border-radius: 22px;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(7,91,90,.16);
+}
+
+.erp-revenue-label {
+  font-size: 12px;
+  opacity: .82;
+}
+
+.erp-revenue-value {
+  font-size: 30px;
+  font-weight: 800;
+  margin: 7px 0;
+}
+
+.erp-online {
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.erp-online::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #8ff3bd;
+}
+
+.erp-season-chip {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.13);
+  font-size: 11px;
+}
+
+.erp-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+  margin: 14px 0;
+}
+
+.erp-kpi {
+  background: #fff;
+  border: 1px solid #e7eeee;
+  border-radius: 18px;
+  padding: 15px;
+  box-shadow: 0 5px 16px rgba(24,55,57,.055);
+}
+
+.erp-kpi-icon {
+  font-size: 20px;
+  margin-bottom: 9px;
+}
+
+.erp-kpi-label {
+  color: #718184;
+  font-size: 11px;
+}
+
+.erp-kpi-value {
+  color: #183f42;
+  font-size: 18px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.erp-start-sale {
+  width: 100%;
+  border: 0;
+  border-radius: 17px;
+  padding: 15px;
+  background: #0a817a;
+  color: #fff;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(10,129,122,.18);
+}
+
+.erp-section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 2px 11px;
+}
+
+.erp-section-title h3 {
+  margin: 0;
+  color: #173f42;
+  font-size: 15px;
+}
+
+.erp-section-title span {
+  color: #7a8a8c;
+  font-size: 11px;
+}
+
+.erp-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.erp-action-card {
+  background: #fff;
+  border: 1px solid #e7eeee;
+  border-radius: 18px;
+  padding: 16px;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 5px 15px rgba(24,55,57,.05);
+}
+
+.erp-action-card strong {
+  display: block;
+  color: #24494b;
+  font-size: 13px;
+  margin-top: 9px;
+}
+
+.erp-action-card small {
+  color: #829093;
+  font-size: 10px;
+}
+
+.erp-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #e9f6f4;
+  color: #087c76;
+  font-size: 18px;
+}
+
+.erp-empty {
+  background: #fff;
+  border: 1px dashed #d8e4e4;
+  border-radius: 18px;
+  padding: 25px 16px;
+  text-align: center;
+  color: #879496;
+  font-size: 12px;
+}
+
+.erp-page-title {
+  margin: 2px 0 17px;
+}
+
+.erp-page-title h2 {
+  margin: 0;
+  color: #173f42;
+  font-size: 21px;
+}
+
+.erp-page-title p {
+  margin: 5px 0 0;
+  color: #7b898b;
+  font-size: 12px;
+}
+
+.erp-primary-btn {
+  border: 0;
+  background: #087f78;
+  color: #fff;
+  border-radius: 13px;
+  padding: 12px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.erp-tabs {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 14px;
+}
+
+.erp-tabs button {
+  flex: 0 0 auto;
+  border: 1px solid #dce7e7;
+  background: #fff;
+  color: #667779;
+  border-radius: 999px;
+  padding: 9px 13px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.erp-tabs button.active {
+  background: #087f78;
+  border-color: #087f78;
+  color: #fff;
+}
+
+.erp-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.erp-stat {
+  background: #fff;
+  border-radius: 15px;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #e5eded;
+}
+
+.erp-stat strong {
+  display: block;
+  color: #173f42;
+  font-size: 16px;
+}
+
+.erp-stat span {
+  color: #829092;
+  font-size: 9px;
+}
+
+.erp-form-card,
+.erp-table-card,
+.erp-menu-section {
+  background: #fff;
+  border: 1px solid #e4eded;
+  border-radius: 19px;
+  padding: 16px;
+  box-shadow: 0 5px 15px rgba(24,55,57,.045);
+  margin-bottom: 13px;
+}
+
+.erp-form-card h3,
+.erp-menu-section h3 {
+  margin: 0 0 13px;
+  color: #24494b;
+  font-size: 14px;
+}
+
+.erp-form-card input,
+.erp-form-card select,
+.erp-form-card textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  padding: 12px;
+  border: 1px solid #dbe7e7;
+  border-radius: 12px;
+  background: #f9fbfb;
+  color: #24494b;
+  font-size: 14px;
+  outline: none;
+}
+
+.erp-form-card input:focus,
+.erp-form-card select:focus,
+.erp-form-card textarea:focus {
+  border-color: #0a817a;
+  background: #fff;
+}
+
+.erp-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  margin-top: 2px;
+  border-top: 1px solid #edf2f2;
+  color: #526466;
+}
+
+.erp-total strong {
+  color: #087c76;
+  font-size: 18px;
+}
+
+.erp-stock-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 13px;
+}
+
+.erp-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 13px;
+  border: 1px solid #dce7e7;
+  border-radius: 13px;
+  background: #fff;
+  margin-bottom: 12px;
+}
+
+.erp-table-card {
+  overflow-x: auto;
+}
+
+.erp-table-card table {
+  min-width: 520px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.erp-table-card th,
+.erp-table-card td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #edf2f2;
+  text-align: left;
+  font-size: 11px;
+}
+
+.erp-table-card th {
+  color: #6e7d7f;
+  font-weight: 700;
+}
+
+.erp-table-card td {
+  color: #294b4d;
+}
+
+.erp-menu-section {
+  padding: 13px;
+}
+
+.erp-menu-section h3 {
+  padding: 2px 3px 8px;
+  margin-bottom: 4px;
+}
+
+.erp-menu-card {
+  width: 100%;
+  box-sizing: border-box;
+  border: 0;
+  background: #fff;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  text-align: left;
+  color: #294b4d;
+  overflow: hidden;
+}
+
+.erp-menu-card > button {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  min-height: 58px;
+  margin: 0;
+  padding: 12px 8px;
+  border: 0;
+  border-bottom: 1px solid #eef3f3;
+  border-radius: 0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  color: #294b4d;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.erp-menu-card > button:last-child {
+  border-bottom: 0;
+}
+
+.erp-menu-card > button:active {
+  background: #e8f5f3;
+}
+
+.erp-menu-card > button .erp-icon {
+  flex: 0 0 40px;
+}
+
+.erp-menu-card > button span:nth-child(2) {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.erp-menu-card > button span:nth-child(2) b,
+.erp-menu-card > button span:nth-child(2) small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.erp-menu-card > button > strong {
+  flex: 0 0 auto;
+  color: #a0abad;
+}
+
+.erp-menu-card:last-child {
+  border-bottom: 0;
+}
+
+.erp-menu-card span:last-child {
+  margin-left: auto;
+  color: #a0abad;
+}
+
+.erp-two-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.erp-signout-card {
+  width: 100%;
+  border: 1px solid #f0dcdc;
+  background: #fff;
+  color: #b33d3d;
+  border-radius: 16px;
+  padding: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.erp-bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(720px, 100%);
+  height: 72px;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  background: rgba(255,255,255,.98);
+  border-top: 1px solid #e3ecec;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  align-items: center;
+  z-index: 50;
+  box-shadow: 0 -5px 20px rgba(20,55,57,.08);
+}
+
+.erp-nav-item {
+  width: 100%;
+  height: 58px;
+  padding: 4px 2px;
+  margin: 0;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #819092;
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.erp-nav-item.active {
+  color: #087f78;
+  background: #e8f5f3;
+}
+
+.erp-nav-icon {
+  width: 34px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  font-size: 19px;
+  line-height: 1;
+  transition: background-color .15s ease, transform .15s ease;
+}
+
+.erp-nav-item.active .erp-nav-icon {
+  background: #d2eee9;
+  transform: none;
+}
+
+.erp-plus {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+  border-radius: 16px;
+  border: 4px solid #f4f7f7;
+  background: #087f78;
+  color: #fff;
+  font-size: 27px;
+  font-weight: 300;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(8,127,120,.28);
+  transform: none;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.erp-plus:active {
+  transform: scale(.94);
+  box-shadow: 0 4px 12px rgba(8,127,120,.22);
+}
+
+@media (max-width: 380px) {
+  .erp-bottom-nav {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .erp-nav-item {
+    height: 58px;
+    font-size: 9px;
+  }
+
+  .erp-nav-icon {
+    width: 32px;
+    height: 29px;
+    font-size: 18px;
+  }
+
+  .erp-plus {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (min-width: 721px) {
+  .erp-app {
+    box-shadow: 0 0 35px rgba(20,55,57,.08);
+  }
+
+  .erp-bottom-nav {
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .erp-view {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .erp-kpi-value {
+    font-size: 16px;
+  }
+
+  .erp-revenue-value {
+    font-size: 27px;
+  }
+}
+
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.erp-app {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.erp-view {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.customer-credits-view {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #f4f7f7;
+  overflow-y: auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.customer-credits-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.customer-credits-header button {
+  border: 0;
+  background: #ffffff;
+  color: #29595b;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.customer-credits-header span {
+  display: block;
+  font-size: 11px;
+  color: #789091;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.customer-credits-header h2 {
+  margin: 3px 0 0;
+  color: #244b4d;
+  font-size: 22px;
+}
+
+.customer-credits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.customer-credit-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(25, 70, 72, .08);
+}
+
+.customer-credit-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.customer-credit-top h3 {
+  margin: 4px 0 0;
+  color: #244b4d;
+  font-size: 17px;
+}
+
+.customer-credit-top > strong {
+  color: #d97706;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.customer-credit-label {
+  font-size: 10px;
+  color: #8a9b9c;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.customer-credit-details {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 14px 0;
+  padding: 10px;
+  background: #f6f9f9;
+  border-radius: 10px;
+  color: #647778;
+  font-size: 12px;
+}
+
+.customer-credit-card .erp-primary-btn {
+  margin-top: 2px;
+}
+</style>
+
+<style>
+.quick-actions {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+.quick-actions-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+}
+.quick-actions-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #f4f7f7;
+  border-radius: 24px 24px 0 0;
+  padding: 14px 18px 24px;
+  box-shadow: 0 -10px 35px rgba(0,0,0,.18);
+}
+.quick-actions-handle {
+  width: 42px;
+  height: 5px;
+  border-radius: 10px;
+  background: #c7d2d1;
+  margin: 0 auto 14px;
+}
+.quick-actions-sheet h3 {
+  margin: 0;
+  color: #123c3a;
+  font-size: 20px;
+}
+.quick-actions-sheet > p {
+  margin: 5px 0 16px;
+  color: #6b7c7a;
+  font-size: 13px;
+}
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.quick-actions-grid button {
+  min-height: 92px;
+  border: 1px solid #dce6e5;
+  border-radius: 16px;
+  background: #fff;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0,0,0,.05);
+}
+.quick-actions-grid button span {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+.quick-actions-grid button strong {
+  display: block;
+  color: #123c3a;
+  font-size: 14px;
+}
+.quick-actions-grid button small {
+  color: #71817f;
+  font-size: 11px;
+}
+.quick-actions-close {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border: 0;
+  border-radius: 13px;
+  background: #dfe9e8;
+  color: #31504e;
+  font-weight: 700;
+  cursor: pointer;
+}
+</style>
+
+
+<style>
+.erp-admin-users {
+  width: min(100%, 1100px);
+  margin: 20px auto 100px;
+  padding: 20px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #dbe7e5;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(15, 61, 58, .08);
+}
+
+.erp-admin-users-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 18px;
+}
+
+.erp-section-kicker {
+  display: inline-block;
+  margin-bottom: 5px;
+  color: #087f78;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.erp-admin-users h2 {
+  margin: 0;
+  color: #123c3a;
+  font-size: 21px;
+}
+
+.erp-admin-users-header p {
+  margin: 5px 0 0;
+  color: #71817f;
+  font-size: 13px;
+}
+
+.erp-users-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e1ebea;
+  border-radius: 15px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.erp-users-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.erp-users-table th {
+  padding: 12px 10px;
+  background: #edf5f4;
+  color: #31504e;
+  border-bottom: 1px solid #d8e5e3;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.erp-users-table td {
+  padding: 11px 10px;
+  border-bottom: 1px solid #edf1f0;
+  color: #405553;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.erp-users-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.erp-users-table tbody tr:hover {
+  background: #f8fbfb;
+}
+
+.erp-users-table button {
+  min-height: 36px;
+  padding: 7px 11px;
+  margin: 2px;
+  border: 0;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.erp-users-table button:first-child {
+  background: #e1f4ef;
+  color: #087f78;
+}
+
+.erp-users-table button:last-child {
+  background: #fee8e7;
+  color: #c0392b;
+}
+
+.erp-users-loading {
+  padding: 25px !important;
+  text-align: center;
+  color: #71817f !important;
+}
+
+.erp-admin-message {
+  min-height: 18px;
+  margin: 12px 0 0;
+  color: #087f78;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .erp-admin-users {
+    width: calc(100% - 20px);
+    margin: 12px auto 90px;
+    padding: 13px;
+    border-radius: 17px;
+  }
+
+  .erp-admin-users-header {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .erp-admin-users h2 {
+    font-size: 18px;
+  }
+
+  .erp-admin-users-header p {
+    font-size: 12px;
+  }
+
+  .erp-users-table-wrap {
+    overflow-x: visible;
+    border: 0;
+  }
+
+  .erp-users-table {
+    width: 100%;
+    min-width: 0;
+    display: block;
+    background: transparent;
+  }
+
+  .erp-users-table thead {
+    display: none;
+  }
+
+  .erp-users-table tbody {
+    display: block;
+  }
+
+  .erp-users-table tbody tr {
+    display: block;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid #e1ebea;
+    border-radius: 14px;
+    box-shadow: 0 3px 10px rgba(15, 61, 58, .06);
+  }
+
+  .erp-users-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid #edf1f0;
+    font-size: 12px;
+    min-width: 0;
+    text-align: right;
+  }
+
+  .erp-users-table td::before {
+    flex: 0 0 auto;
+    color: #71817f;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: left;
+  }
+
+  .erp-users-table td:nth-child(1)::before { content: "ID"; }
+  .erp-users-table td:nth-child(2)::before { content: "Name"; }
+  .erp-users-table td:nth-child(3)::before { content: "Email"; }
+  .erp-users-table td:nth-child(4)::before { content: "Username"; }
+  .erp-users-table td:nth-child(5)::before { content: "Role"; }
+  .erp-users-table td:nth-child(6)::before { content: "Status"; }
+  .erp-users-table td:nth-child(7)::before { content: "Actions"; }
+
+  .erp-users-table td:last-child {
+    border-bottom: 0;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .erp-users-table td > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .erp-users-table button {
+    min-height: 38px;
+    padding: 8px 12px;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -63,6 +1123,15 @@
 
 <script>
 function showCreateUserForm() {
+  document.getElementById('loginUsername').parentElement.previousElementSibling?.remove?.();
+  document.getElementById('loginUsername').style.display = 'none';
+  document.getElementById('loginPassword').parentElement.style.display = 'none';
+  document.querySelector('#loginScreen > h2').style.display = 'none';
+  document.querySelector('#loginScreen > label')?.style.setProperty('display', 'none');
+  document.querySelector('#loginScreen > button[onclick="loginUser()"]').style.display = 'none';
+  document.querySelector('#loginScreen > button[onclick="showCreateUserForm()"]').style.display = 'none';
+  document.getElementById('loginMessage').style.display = 'none';
+
   document.getElementById('createUserForm').style.display = 'block';
   document.getElementById('createUserMessage').textContent = '';
 }
@@ -137,6 +1206,14 @@ async function createNewUser() {
 function hideCreateUserForm() {
   document.getElementById('createUserForm').style.display = 'none';
   document.getElementById('createUserMessage').textContent = '';
+
+  document.querySelector('#loginScreen > h2').style.display = '';
+  document.getElementById('loginUsername').style.display = '';
+  document.getElementById('loginPassword').parentElement.style.display = '';
+  document.querySelector('#loginScreen > label').style.display = '';
+  document.querySelector('#loginScreen > button[onclick="loginUser()"]').style.display = '';
+  document.querySelector('#loginScreen > button[onclick="showCreateUserForm()"]').style.display = '';
+  document.getElementById('loginMessage').style.display = '';
 }
 
 
@@ -186,16 +1263,8 @@ async function loginUser() {
     const adminUserManagement =
       document.getElementById('adminUserManagement');
 
-    if (data.user && data.user.role === 'admin') {
-      if (adminUserManagement) {
-        adminUserManagement.style.display = 'block';
-      }
-
-      loadAdminUsers();
-    } else {
-      if (adminUserManagement) {
-        adminUserManagement.style.display = 'none';
-      }
+    if (adminUserManagement) {
+      adminUserManagement.style.display = 'none';
     }
 
   } catch (error) {
@@ -218,6 +1287,34 @@ function toggleLoginPassword() {
   }
 }
 
+
+function erpShowView(viewName) {
+  const adminUserManagement = document.getElementById('adminUserManagement');
+  if (adminUserManagement) {
+    adminUserManagement.style.display = 'none';
+  }
+
+  const views = document.querySelectorAll('.erp-view');
+  views.forEach(view => view.classList.remove('active'));
+
+  const target = document.getElementById(viewName);
+  if (target) {
+    target.classList.add('active');
+  }
+
+  const navItems = document.querySelectorAll('.erp-bottom-nav button[data-view]');
+  navItems.forEach(item => item.classList.remove('active'));
+
+  const activeNav = document.querySelector(
+    `.erp-bottom-nav button[data-view="${viewName}"]`
+  );
+
+  if (activeNav) {
+    activeNav.classList.add('active');
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 async function loadAdminUsers() {
   const box = document.getElementById('adminUserManagement');
@@ -251,8 +1348,9 @@ async function loadAdminUsers() {
       return;
     }
 
-    rows.forEach(row => {
+    rows.forEach((row, index) => {
       const id = row[0]?.value ?? '';
+      const displayId = index + 1;
       const name = row[1]?.value ?? '';
       const email = row[2]?.value ?? '';
       const username = row[3]?.value ?? '';
@@ -266,7 +1364,7 @@ async function loadAdminUsers() {
       const tr = document.createElement('tr');
 
       tr.innerHTML = `
-        <td>#${id}</td>
+        <td>#${displayId}</td>
         <td><b></b></td>
         <td></td>
         <td></td>
@@ -384,169 +1482,689 @@ async function deleteUser(userId, userName) {
   }
 }
 
+
+function openNewUserView() {
+  let view = document.getElementById('newUserView');
+
+  if (!view) {
+    view = document.createElement('div');
+    view.id = 'newUserView';
+    view.style.cssText = `
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      background:#f4f8f8;
+      overflow-y:auto;
+      padding:0 14px 30px;
+      box-sizing:border-box;
+    `;
+
+    view.innerHTML = `
+      <div style="
+        max-width:520px;
+        margin:0 auto;
+        min-height:100%;
+      ">
+        <div style="
+          display:flex;
+          align-items:center;
+          gap:12px;
+          padding:16px 2px;
+          position:sticky;
+          top:0;
+          z-index:2;
+          background:#f4f8f8;
+        ">
+          <button
+            type="button"
+            onclick="closeNewUserView()"
+            style="
+              border:0;
+              background:#fff;
+              color:#294b4d;
+              width:44px;
+              height:44px;
+              border-radius:12px;
+              font-size:22px;
+              box-shadow:0 2px 8px rgba(0,0,0,.08);
+            "
+          >←</button>
+
+          <div>
+            <div style="
+              font-size:12px;
+              color:#7b8c8e;
+              font-weight:700;
+              letter-spacing:.5px;
+            ">USER MANAGEMENT</div>
+            <h2 style="
+              margin:2px 0 0;
+              color:#294b4d;
+              font-size:21px;
+            ">👤 New User</h2>
+          </div>
+        </div>
+
+        <div id="newUserFormHost" style="
+          background:#fff;
+          border-radius:18px;
+          padding:18px;
+          box-shadow:0 4px 16px rgba(0,0,0,.07);
+        "></div>
+      </div>
+    `;
+
+    document.body.appendChild(view);
+
+    const form = document.getElementById('createUserForm');
+    const host = document.getElementById('newUserFormHost');
+
+    if (form && host) {
+      form.style.display = 'block';
+      form.style.marginTop = '0';
+      form.style.paddingTop = '0';
+      form.style.borderTop = '0';
+      host.appendChild(form);
+    }
+  }
+
+  view.style.display = 'block';
+
+  if (!window.newUserHistoryOpen) {
+    window.newUserHistoryOpen = true;
+    history.pushState({ newUser: true }, '', '#new-user');
+  }
+
+  setTimeout(() => {
+    const name = document.getElementById('newName');
+    if (name) {
+      name.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      name.focus();
+    }
+  }, 150);
+}
+
+function closeNewUserView(fromPopState = false) {
+  const view = document.getElementById('newUserView');
+  const form = document.getElementById('createUserForm');
+  const loginScreen = document.getElementById('loginScreen');
+
+  if (form && loginScreen) {
+    form.style.display = 'none';
+    form.style.marginTop = '20px';
+    form.style.paddingTop = '20px';
+    form.style.borderTop = '1px solid #ddd';
+    loginScreen.appendChild(form);
+  }
+
+  if (view) {
+    view.style.display = 'none';
+  }
+
+  window.newUserHistoryOpen = false;
+
+  if (!fromPopState && location.hash === '#new-user') {
+    history.back();
+  }
+
+  erpShowView('erpHomeView');
+}
+
+window.addEventListener('popstate', function () {
+  if (window.newUserHistoryOpen) {
+    closeNewUserView(true);
+  }
+});
+
 </script><!-- 📊 Dashboard -->
 
-<div id="dashboard" style="display:none;">  
-<h2>📊 ERP Dashboard</h2>
+<div id="dashboard" style="display:none;">
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;">
+  <div class="erp-app">
 
-    <div style="padding:20px;border-radius:12px;background:#eef6ff;">
-      <h3>💰 Cash / Capital</h3>
-      <p id="cashBalance" style="font-size:24px;font-weight:bold;">
-        በመጫን ላይ...
-      </p>
+    <!-- TOP HEADER -->
+    <header class="erp-header">
+      <div class="erp-brand">
+        <div class="erp-logo">N</div>
+        <div>
+          <div class="erp-brand-name">My ERP</div>
+          <div class="erp-brand-sub">Business Management</div>
+        </div>
+      </div>
+      <button class="erp-notification" type="button" onclick="alert('No new notifications')">♧</button>
+    </header>
+
+    <!-- HOME VIEW -->
+    <section id="erpHomeView" class="erp-view active">
+
+      <div class="erp-welcome">
+        <div>
+          <div class="erp-small-label">TODAY'S REVENUE</div>
+          <div class="erp-revenue">
+            <span id="cashBalance">0</span>
+            <small>ETB</small>
+          </div>
+          <div class="erp-online">● <span id="erpUserName">Online</span></div>
+        </div>
+        <div class="erp-season-chip">
+          <span>Season</span>
+          <strong id="season">2018 E.C.</strong>
+        </div>
+      </div>
+
+      <div class="erp-kpi-grid">
+        <div class="erp-kpi">
+          <span>SALES TODAY</span>
+          <strong id="salesTotal">0</strong>
+          <small>ETB</small>
+        </div>
+        <div class="erp-kpi">
+          <span>SALES COLLECTED</span>
+          <strong id="salesCollected">0</strong>
+          <small>ETB</small>
+        </div>
+        <div class="erp-kpi">
+          <span>NUMBER OF SALES</span>
+          <strong id="salesCount">0</strong>
+          <small>Sales</small>
+        </div>
+        <div class="erp-kpi">
+          <span>CREDIT</span>
+          <strong id="salesCredit">0</strong>
+          <small>ETB</small>
+        </div>
+      </div>
+
+      <button class="erp-start-sale" type="button" onclick="erpShowView('erpSalesView')">
+        <span>
+          <small>Ready to sell?</small>
+          <b>Start New Sale</b>
+        </span>
+        <strong>＋</strong>
+      </button>
+
+      <div class="erp-section-title">
+        <h2>Quick Actions</h2>
+      </div>
+
+      <div class="erp-action-grid">
+        <button type="button" onclick="erpShowView('erpSalesView')">
+          <span class="erp-icon green">🛒</span>
+          <b>New Sale</b>
+          <small>Record a sale</small>
+        </button>
+
+        <button type="button" onclick="erpShowView('erpStockView')">
+          <span class="erp-icon blue">📦</span>
+          <b>Stock</b>
+          <small>Products & quantities</small>
+        </button>
+
+        <button type="button" onclick="erpShowView('erpMoreView')">
+          <span class="erp-icon purple">👥</span>
+          <b>Customers</b>
+          <small>Customer profiles</small>
+        </button>
+
+        <button type="button" onclick="erpShowView('erpMoreView')">
+          <span class="erp-icon red">💸</span>
+          <b>Expenses</b>
+          <small>Track expenses</small>
+        </button>
+      </div>
+
+      <div class="erp-section-title">
+        <h2>Recent Sales</h2>
+        <button type="button" onclick="erpShowView('erpSalesView')">View all</button>
+      </div>
+
+      <div class="erp-empty">
+        <div class="erp-empty-icon">🛒</div>
+        <p>No sales recorded today yet.</p>
+      </div>
+    </section>
+
+    <!-- SALES VIEW -->
+    <section id="erpSalesView" class="erp-view">
+
+      <div class="erp-page-title">
+        <h1>Sales</h1>
+        <button class="erp-primary-btn" type="button" onclick="document.getElementById('saleProduct').focus()">＋ New Sale</button>
+      </div>
+
+      <div class="erp-tabs">
+        <button class="active" type="button">Today</button>
+        <button type="button">Yesterday</button>
+        <button type="button">This Week</button>
+        <button type="button">This Month</button>
+        <button type="button">All</button>
+      </div>
+
+      <div class="erp-stat-row">
+        <div><span>REVENUE</span><b>0</b></div>
+        <div><span>SALES</span><b>0</b></div>
+        <div><span>CREDIT</span><b>0</b></div>
+      </div>
+
+      <div class="erp-stat-row">
+        <div><span>SALES COLLECTED</span><b>0</b></div>
+        <div><span>CREDIT RETURN</span><b>0</b></div>
+        <div><span>EXPENSES</span><b>0</b></div>
+      </div>
+
+      <div class="erp-form-card">
+        <h2>🛍️ New Sale</h2>
+
+        <select id="saleProduct">
+          <option value="">Select Product</option>
+        </select>
+
+        <input id="saleQuantity" type="number" min="0.01" step="0.01" placeholder="Quantity">
+
+        <input id="saleUnitPrice" type="number" min="0" step="0.01" placeholder="Unit Price">
+
+        <input id="saleCustomer" type="text" placeholder="Customer name">
+
+        <select id="salePaymentType">
+          <option value="cash">💵 Cash Sale</option>
+          <option value="credit">📒 Credit Sale</option>
+        </select>
+
+        <p class="erp-total">Total: <strong id="saleTotal">0 ETB</strong></p>
+
+        <button class="erp-primary-btn full" type="button" onclick="registerSale()">💾 Record Sale</button>
+      </div>
+
+      <div class="erp-empty">
+        <div class="erp-empty-icon">🛒</div>
+        <p>No sales found for the selected filters.</p>
+      </div>
+    </section>
+
+    <!-- STOCK VIEW -->
+    <section id="erpStockView" class="erp-view">
+
+      <div class="erp-page-title">
+        <h1>Stock</h1>
+        <button class="erp-primary-btn" type="button" onclick="document.getElementById('productName').focus()">＋ Add Stock</button>
+      </div>
+
+      <div class="erp-tabs">
+        <button class="active" type="button">All Products</button>
+        <button type="button">Low Stock</button>
+        <button type="button">Out of stock</button>
+      </div>
+
+      <div class="erp-stock-stats">
+        <div><span>HEALTHY</span><b id="healthyStockCount">0</b></div>
+        <div><span>LOW STOCK</span><b id="lowStockCount" class="orange">0</b></div>
+        <div><span>PRODUCTS</span><b id="totalProductsCount">0</b></div>
+      </div>
+
+      <div class="erp-search">⌕ <span>Filter products...</span></div>
+
+      <div class="erp-empty">
+        <div class="erp-empty-icon">📦</div>
+        <h3>No products found.</h3>
+        <p>Add your first product to start managing stock.</p>
+      </div>
+
+      <div class="erp-two-buttons">
+        <button type="button" onclick="document.getElementById('productName').focus()">📦 Products</button>
+        <button type="button">↶ History</button>
+      </div>
+
+      <div class="erp-form-card">
+        <h2>📦 Add Product</h2>
+
+        <input id="productName" type="text" placeholder="Product name">
+        <input id="productUnit" type="text" placeholder="Unit (pcs, kg, box...)">
+        <input id="purchasePrice" type="number" placeholder="Purchase price">
+        <input id="sellingPrice" type="number" placeholder="Selling price">
+        <input id="openingStock" type="number" min="0" step="0.01" placeholder="Opening stock quantity">
+
+        <button class="erp-primary-btn full" type="button" onclick="addProduct()">💾 Save Product</button>
+      </div>
+
+      <div class="erp-form-card">
+        <h2>🛒 Purchase / Add Stock</h2>
+
+        <select id="purchaseProduct">
+          <option value="">Select Product</option>
+        </select>
+
+        <input id="purchaseQuantity" type="number" min="0.01" step="0.01" placeholder="Quantity">
+        <input id="purchaseUnitPrice" type="number" min="0" step="0.01" placeholder="Unit price">
+        <input id="purchaseSupplier" type="text" placeholder="Supplier name">
+
+        <p class="erp-total">Total: <strong id="purchaseTotal">0 ETB</strong></p>
+
+        <button class="erp-primary-btn full" type="button" onclick="registerPurchase()">💾 Record Purchase</button>
+      </div>
+
+      <div class="erp-table-card">
+        <h2>📋 Products</h2>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Product</th>
+                <th>Unit</th>
+                <th>Purchase</th>
+                <th>Sale</th>
+                <th>Stock</th>
+              </tr>
+            </thead>
+            <tbody id="productsTable">
+              <tr><td colspan="6">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- MORE VIEW -->
+    <section id="erpMoreView" class="erp-view">
+
+      <div class="erp-page-title">
+        <h1>More</h1>
+      </div>
+
+      <div class="erp-menu-section">
+        <label>INVENTORY</label>
+        <div class="erp-menu-card">
+          <button type="button" onclick="erpShowView('erpStockView')">
+            <span class="erp-icon green">📦</span>
+            <span><b>Stock</b><small>See products and quantities</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button" onclick="erpShowView('erpStockView')">
+            <span class="erp-icon green">＋</span>
+            <span><b>Add Stock</b><small>Add products and quantities</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button" onclick="erpShowView('erpStockView')">
+            <span class="erp-icon blue">▦</span>
+            <span><b>Products</b><small>Manage your products</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button">
+            <span class="erp-icon gray">↶</span>
+            <span><b>History</b><small>View stock movements</small></span>
+            <strong>›</strong>
+          </button>
+        </div>
+      </div>
+
+      <div class="erp-menu-section">
+        <label>CUSTOMERS</label>
+        <div class="erp-menu-card">
+          <button type="button">
+            <span class="erp-icon blue">👥</span>
+            <span><b>Customers</b><small>Customer list and profiles</small></span>
+            <strong>›</strong>
+          <button type="button" onclick="openCustomerCredits()">
+  <span class="erp-icon yellow">▤</span>
+  <span><b>Credits</b><small>Collect outstanding credit</small></span>
+  <strong>›</strong>
+</button>
+     
+        </div>
+      </div>
+
+      <div class="erp-menu-section">
+        <label>SUPPLIERS</label>
+        <div class="erp-menu-card">
+          <button type="button">
+            <span class="erp-icon purple">🚚</span>
+            <span><b>Suppliers</b><small>Suppliers and purchase credit</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button">
+            <span class="erp-icon red">⚠</span>
+            <span><b>Debts</b><small>Supplier outstanding debts</small></span>
+            <strong>›</strong>
+          </button>
+        </div>
+      </div>
+
+      <div class="erp-menu-section">
+        <label>MONEY</label>
+        <div class="erp-menu-card">
+          <button type="button">
+            <span class="erp-icon red">↘</span>
+            <span><b>Expenses</b><small>Track business expenses</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button">
+            <span class="erp-icon blue">↔</span>
+            <span><b>Cash In / Out</b><small>Manage cash movement</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button">
+            <span class="erp-icon green">▣</span>
+            <span><b>Payment Balances</b><small>Track payments and balances</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button" onclick="openCapitalProfitView()">
+            <span class="erp-icon teal">↗</span>
+            <span><b>Capital & Profit</b><small>Capital, cost, and profit</small></span>
+            <strong>›</strong>
+          </button>
+        </div>
+      </div>
+
+      <div class="erp-menu-section">
+        <label>SETTINGS</label>
+        <div class="erp-menu-card">
+          <button type="button" onclick="openUserManagement()">
+            <span class="erp-icon gray">♙</span>
+            <span><b>Members</b><small>Manage members and roles</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button" onclick="openSettingsView()">
+            <span class="erp-icon gray">⚙</span>
+            <span><b>Settings</b><small>Application settings</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button">
+            <span class="erp-icon gray">↶</span>
+            <span><b>Corrections</b><small>Correct recorded transactions</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button">
+            <span class="erp-icon gray">⇩</span>
+            <span><b>Exports</b><small>Export business reports</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button">
+            <span class="erp-icon gray">?</span>
+            <span><b>User Guide</b><small>Learn how to use ERP</small></span>
+            <strong>›</strong>
+          </button>
+        </div>
+      </div>
+
+      <div class="erp-form-card">
+        <h2>💰 Income</h2>
+        <input id="incomeDescription" type="text" placeholder="Income description">
+        <input id="incomeAmount" type="number" min="0.01" step="0.01" placeholder="Income amount">
+        <button class="erp-primary-btn full" type="button" onclick="registerIncome()">💾 Record Income</button>
+      </div>
+
+      <div class="erp-form-card">
+        <h2>💸 Expense</h2>
+        <input id="expenseDescription" type="text" placeholder="Expense description">
+        <input id="expenseAmount" type="number" min="0.01" step="0.01" placeholder="Expense amount">
+        <button class="erp-primary-btn full" type="button" onclick="registerExpense()">💾 Record Expense</button>
+      </div>
+
+      <div class="erp-form-card">
+        <h2>🏭 Production</h2>
+        <select id="productionProduct">
+          <option value="">Select Product</option>
+        </select>
+        <input id="productionQuantity" type="number" min="0.01" step="0.01" placeholder="Produced quantity">
+        <input id="productionNote" type="text" placeholder="Note">
+        <button class="erp-primary-btn full" type="button" onclick="registerProduction()">💾 Record Production</button>
+      </div>
+
+      <div id="erpAdminMount"></div>
+
+      <div class="erp-signout-card">
+        <button type="button" onclick="logoutUser ? logoutUser() : location.reload()">
+          <span class="erp-icon red">⇥</span>
+          <span><b>Sign out</b><small id="erpSignoutName">Current user</small></span>
+          <strong>›</strong>
+        </button>
+      </div>
+    </section>
+
+    <!-- BOTTOM NAVIGATION -->
+    
+    <div id="quickActions" class="quick-actions" style="display:none;">
+      <div class="quick-actions-backdrop" onclick="toggleQuickActions()"></div>
+
+      <div class="quick-actions-sheet">
+        <div class="quick-actions-handle"></div>
+        <h3>⚡ Quick Actions</h3>
+        <p>የሚፈልጉትን ተግባር ይምረጡ</p>
+
+        <div class="quick-actions-grid">
+          <button type="button" onclick="quickAction('sale')">
+            <span>🛒</span>
+            <strong>አዲስ ሽያጭ</strong>
+            <small>New Sale</small>
+          </button>
+
+          <button type="button" onclick="quickAction('purchase')">
+            <span>📦</span>
+            <strong>አዲስ ግዢ</strong>
+            <small>Add Stock</small>
+          </button>
+
+          <button type="button" onclick="quickAction('user')">
+            <span>👤</span>
+            <strong>አዲስ ተጠቃሚ</strong>
+            <small>New User</small>
+          </button>
+
+          <button type="button" onclick="quickAction('income')">
+            <span>💰</span>
+            <strong>ገቢ</strong>
+            <small>Cash In</small>
+          </button>
+
+          <button type="button" onclick="quickAction('expense')">
+            <span>💸</span>
+            <strong>ወጪ</strong>
+            <small>Expense</small>
+          </button>
+
+          <button type="button" onclick="quickAction('userManagement')">
+            <span>👥</span>
+            <strong>User Management</strong>
+            <small>Manage Users</small>
+          </button>
+        </div>
+
+        <button type="button" class="quick-actions-close" onclick="toggleQuickActions()">
+          ዝጋ
+        </button>
+      </div>
     </div>
 
-    <div style="padding:20px;border-radius:12px;background:#eefbea;">
-  <h3>📦 Stock</h3>
-  <div id="stockProducts">
-    በመጫን ላይ...
+  <nav class="erp-bottom-nav">
+    <button class="erp-nav-item active" type="button" data-view="erpHomeView" onclick="erpShowView('erpHomeView')">
+      <span class="erp-nav-icon">⌂</span>
+      <small>Home</small>
+    </button>
+
+    <button class="erp-nav-item" type="button" data-view="erpSalesView" onclick="erpShowView('erpSalesView')">
+      <span class="erp-nav-icon">▣</span>
+      <small>Sales</small>
+    </button>
+
+    <button class="erp-plus" type="button" onclick="toggleQuickActions()">＋</button>
+
+    <button class="erp-nav-item" type="button" data-view="erpStockView" onclick="erpShowView('erpStockView')">
+      <span class="erp-nav-icon">◇</span>
+      <small>Stock</small>
+    </button>
+
+    <button class="erp-nav-item" type="button" data-view="erpMoreView" onclick="erpShowView('erpMoreView')">
+      <span class="erp-nav-icon">•••</span>
+      <small>More</small>
+    </button>
+  </nav>
+
   </div>
-</div>
-    <div style="padding:20px;border-radius:12px;background:#fff4e6;">
-      <h3>📈 Sales</h3>
-      <p id="salesTotal" style="font-size:24px;font-weight:bold;">
-        በመጫን ላይ...
-      </p>
+
+  <section id="settingsView" style="display:none;min-height:100vh;background:#f4f8f8;padding:0 14px 30px;box-sizing:border-box;">
+  <div style="max-width:520px;margin:0 auto;">
+    <div style="display:flex;align-items:center;gap:12px;padding:16px 2px;position:sticky;top:0;z-index:2;background:#f4f8f8;">
+      <button type="button" onclick="closeSettingsView()" style="width:42px;height:42px;border:0;border-radius:12px;background:#fff;color:#294b4d;font-size:22px;">←</button>
+      <div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#71817f;">SETTINGS</div>
+        <h2 style="margin:2px 0 0;color:#294b4d;font-size:20px;">⚙ Settings</h2>
+      </div>
     </div>
 
-    <div style="padding:20px;border-radius:12px;background:#ffecec;">
-      <h3>📉 Expenses</h3>
-      <p id="expensesTotal" style="font-size:24px;font-weight:bold;">
-        በመጫን ላይ...
-      </p>
-    </div>
+    <div class="erp-menu-card" style="margin-top:8px;border-radius:16px;">
+      <div style="padding:16px 12px;border-bottom:1px solid #eef3f3;">
+        <b style="color:#294b4d;">Language / ቋንቋ</b>
+        <small style="display:block;margin-top:4px;color:#71817f;">Choose application language</small>
+      </div>
 
-  </div>
-<!-- 🛒 Purchases -->
-<div class="card">
-  <h2>🛒 የግዢ መመዝገቢያ</h2>
-  <select id="purchaseProduct">
-    <option value="">ምርት ይምረጡ</option>
-  </select>
-  <input id="purchaseQuantity" type="number" min="0.01" step="0.01" placeholder="ብዛት">
-  <input id="purchaseUnitPrice" type="number" min="0" step="0.01" placeholder="የአንዱ ዋጋ">
-  <input id="purchaseSupplier" type="text" placeholder="የአቅራቢ ስም">
-  <p>ጠቅላላ ዋጋ: <strong id="purchaseTotal">0 ETB</strong></p>
-  <button onclick="registerPurchase()">💾 ግዢ መዝግብ</button>
-</div>
-<div class="container">
-<!-- 🛍️ Sales -->
-<div class="card">
-  <h2>🛍️ የሽያጭ መመዝገቢያ</h2>
+      <button type="button" onclick="setLanguage('am')">
+        <span class="erp-icon teal">አማ</span>
+        <span><b>አማርኛ</b><small>Amharic</small></span>
+        <strong>›</strong>
+      </button>
 
-  <select id="saleProduct">
-    <option value="">ምርት ይምረጡ</option>
-  </select>
-
-  <input id="saleQuantity" type="number" min="0.01" step="0.01" placeholder="ብዛት">
-
-  <input id="saleUnitPrice" type="number" min="0" step="0.01" placeholder="የአንዱ ዋጋ">
-
-  <input id="saleCustomer" type="text" placeholder="የደንበኛ ስም">
-
-  <p>ጠቅላላ ዋጋ: <strong id="saleTotal">0 ETB</strong></p>
-
-  <button onclick="registerSale()">💾 ሽያጭ መዝግብ</button>
-</div>
-
-<!-- 💰 Income -->
-<div class="card">
-  <h2>💰 የገቢ መመዝገቢያ</h2>
-
-  <input id="incomeDescription" type="text" placeholder="የገቢ ምክንያት">
-
-  <input id="incomeAmount" type="number" min="0.01" step="0.01" placeholder="የገቢ መጠን">
-
-  <button onclick="registerIncome()">💾 ገቢ መዝግብ</button>
-</div>
-
-<!-- 💸 Expenses -->
-<div class="card">
-  <h2>💸 የወጪ መመዝገቢያ</h2>
-
-  <input id="expenseDescription" type="text" placeholder="የወጪ ምክንያት">
-
-  <input id="expenseAmount" type="number" min="0.01" step="0.01" placeholder="የወጪ መጠን">
-
-  <button onclick="registerExpense()">💾 ወጪ መዝግብ</button>
-</div>
-
-<!-- 🏭 Production -->
-<div class="card">
-  <h2>🏭 የምርት ማምረቻ መመዝገቢያ</h2>
-
-  <select id="productionProduct">
-    <option value="">ምርት ይምረጡ</option>
-  </select>
-
-  <input id="productionQuantity" type="number" min="0.01" step="0.01" placeholder="የተመረተ ብዛት">
-
-  <input id="productionNote" type="text" placeholder="ማስታወሻ">
-
-  <button onclick="registerProduction()">💾 ምርት መዝግብ</button>
-</div>
-
-<!-- 📦 Products -->
-<div class="card">
-  <h2>📦 የምርት መመዝገቢያ</h2>
-  <input id="productName" type="text" placeholder="የምርት ስም">
-  <input id="productUnit" type="text" placeholder="Unit (pcs, kg, box...)">
-  <input id="purchasePrice" type="number" placeholder="የግዢ ዋጋ">
-  <input id="sellingPrice" type="number" placeholder="የሽያጭ ዋጋ">
-  <button onclick="addProduct()">💾 ምርት መዝግብ</button>
-</div>
-
-<div class="card">
-  <h2>📋 የተመዘገቡ ምርቶች</h2>
-  <table>
-    <thead><tr><th>ID</th><th>ምርት</th><th>Unit</th><th>ግዢ</th><th>ሽያጭ</th><th>Stock</th></tr></thead>
-    <tbody id="productsTable"><tr><td colspan="6">በመጫን ላይ...</td></tr></tbody>
-  </table>
-</div>
-<div class="card">
-  <h2>📅 የትምህርት ዘመን</h2>
-  <p id="season">በመጫን ላይ...</p>
-  <!-- አዲስ መመዝገቢያ Form -->
-<div class="card">
-    <h2>➕ አዲስ ተጠቃሚ መመዝገቢያ (ERP Dashboard)</h2>
-    <div class="form-group">
-      <input type="text" id="name" placeholder="ሙሉ ስም">
-      <input type="email" id="email" placeholder="ኢሜይል አድራሻ">
-      <button onclick="addUser()">መዝግብ</button>
+      <button type="button" onclick="setLanguage('en')">
+        <span class="erp-icon teal">EN</span>
+        <span><b>English</b><small>English</small></span>
+        <strong>›</strong>
+      </button>
     </div>
   </div>
+</section>
 
-  
-<!-- 👥 Admin User Management -->
-<div id="adminUserManagement" class="card" style="display:none;margin-top:20px;">
-  <h2>👥 User Management</h2>
+<section id="adminUserManagement" class="erp-admin-users" style="display:none;">
+    <div class="erp-admin-users-header">
+      <div>
+        <span class="erp-section-kicker">ADMIN</span>
+        <h2>👥 User Management</h2>
+        <p>Manage registered users and account status.</p>
+      </div>
+      <button type="button" class="erp-users-back" onclick="closeUserManagement()">← More</button>
+    </div>
 
-  <div style="overflow-x:auto;">
-    <table style="width:100%;">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Username</th>
-          <th>Role</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="adminUserTable">
-        <tr>
-          <td colspan="6" style="text-align:center;">Loading...</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <div class="erp-users-table-wrap">
+      <table class="erp-users-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminUserTable">
+          <tr>
+            <td colspan="7" class="erp-users-loading">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <p id="adminUserMessage" style="text-align:center;margin-top:12px;"></p>
-</div>
-
+    <p id="adminUserMessage" class="erp-admin-message"></p>
+  </section>
 
 </div>
 
@@ -571,6 +2189,51 @@ async function loadSeason() {
 }
 
 loadSeason();
+
+
+async function restoreSession() {
+  try {
+    const response = await fetch('/api/me', {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      return;
+    }
+
+    const data = await response.json();
+
+    if (!data.user) {
+      return;
+    }
+
+    window.currentUser = data.user;
+
+    const loginScreen = document.getElementById('loginScreen');
+    const dashboard = document.getElementById('dashboard');
+
+    if (loginScreen) {
+      loginScreen.style.display = 'none';
+    }
+
+    if (dashboard) {
+      dashboard.style.display = 'block';
+    }
+
+    const adminUserManagement =
+      document.getElementById('adminUserManagement');
+
+    if (adminUserManagement) {
+      adminUserManagement.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Session restore error:', error);
+  }
+}
+
+restoreSession();
+
   // መረጃዎችን ከBackend አምጥቶ Table ውስጥ መሙላት
   async function loadUsers() {
     try {
@@ -650,6 +2313,23 @@ async function loadProducts() {
       </tr>
     `).join("");
 
+    const healthyCount = rows.filter(row => Number(row[5].value) > 0).length;
+    const lowStockCount = rows.filter(row => {
+      const stock = Number(row[5].value);
+      return stock > 0 && stock <= 5;
+    }).length;
+
+    const healthyEl = document.getElementById("healthyStockCount");
+    const lowEl = document.getElementById("lowStockCount");
+    const totalEl = document.getElementById("totalProductsCount");
+
+    if (healthyEl) healthyEl.textContent = healthyCount;
+    if (lowEl) lowEl.textContent = lowStockCount;
+    if (totalEl) totalEl.textContent = rows.length;
+
+    const emptyBox = document.querySelector("#erpStockView .erp-empty");
+    if (emptyBox) emptyBox.style.display = "none";
+
   } catch (err) {
     console.error("Error loading products:", err);
   }
@@ -661,6 +2341,7 @@ async function addProduct() {
   const unit = document.getElementById("productUnit").value;
   const purchase_price = document.getElementById("purchasePrice").value;
   const selling_price = document.getElementById("sellingPrice").value;
+  const stock = Number(document.getElementById("openingStock").value) || 0;
 
   if (!name) {
     return alert("እባክዎን የምርት ስም ያስገቡ!");
@@ -677,6 +2358,7 @@ async function addProduct() {
         unit,
         purchase_price,
         selling_price,
+        stock
       })
     });
 
@@ -692,6 +2374,7 @@ async function addProduct() {
     document.getElementById("productUnit").value = "";
     document.getElementById("purchasePrice").value = "";
     document.getElementById("sellingPrice").value = "";
+    document.getElementById("openingStock").value = "";
 
 
   } catch (err) {
@@ -701,15 +2384,36 @@ async function addProduct() {
 }
 async function loadDashboard() {
   try {
-    const salesRes = await fetch("/api/sales-total");
+    const salesRes = await fetch("/api/dashboard-sales-summary");
     const salesData = await salesRes.json();
 
-    const salesRows =
-      salesData.results?.[0]?.response?.result?.rows || [];
+    if (salesData.success && salesData.summary) {
+      const summary = salesData.summary;
 
-    if (salesRows.length) {
-      document.getElementById("salesTotal").textContent =
-        Number(salesRows[0][0].value).toLocaleString() + " ETB";
+      const salesTotal = document.getElementById("salesTotal");
+      const salesCollected = document.getElementById("salesCollected");
+      const salesCount = document.getElementById("salesCount");
+      const salesCredit = document.getElementById("salesCredit");
+
+      if (salesTotal) {
+        salesTotal.textContent =
+          Number(summary.sales_today || 0).toLocaleString();
+      }
+
+      if (salesCollected) {
+        salesCollected.textContent =
+          Number(summary.sales_collected_today || 0).toLocaleString();
+      }
+
+      if (salesCount) {
+        salesCount.textContent =
+          Number(summary.sales_count_today || 0).toLocaleString();
+      }
+
+      if (salesCredit) {
+        salesCredit.textContent =
+          Number(summary.credit_today || 0).toLocaleString();
+      }
     }
 
     const expensesRes = await fetch("/api/expenses-total");
@@ -947,6 +2651,9 @@ async function registerSale() {
   const customer =
     document.getElementById("saleCustomer").value.trim();
 
+  const payment_type =
+    document.getElementById("salePaymentType").value;
+
   if (!product_id) {
     return alert("እባክዎን ምርት ይምረጡ!");
   }
@@ -982,7 +2689,8 @@ async function registerSale() {
         product_id: Number(product_id),
         quantity,
         unit_price,
-        customer
+        customer,
+        payment_type
       })
     });
 
@@ -1000,6 +2708,7 @@ async function registerSale() {
     document.getElementById("saleQuantity").value = "";
     document.getElementById("saleUnitPrice").value = "";
     document.getElementById("saleCustomer").value = "";
+    document.getElementById("salePaymentType").value = "cash";
     document.getElementById("saleTotal").textContent = "0 ETB";
 
     await loadSaleProducts();
@@ -1196,5 +2905,501 @@ loadProductionProducts();
 </script>
 </div>
 </div>
+<script>
+
+function toggleQuickActions() {
+  const panel = document.getElementById('quickActions');
+  if (!panel) return;
+
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+}
+
+function closeUserManagement() {
+  const moreView = document.getElementById('erpMoreView');
+  const adminUserManagement = document.getElementById('adminUserManagement');
+  const erpApp = document.querySelector('.erp-app');
+
+  if (erpApp) {
+    erpApp.style.display = '';
+  }
+
+  if (adminUserManagement) {
+    adminUserManagement.style.display = 'none';
+  }
+
+  if (moreView) {
+    moreView.style.display = '';
+    erpShowView('erpMoreView');
+  }
+}
+
+
+function openSettingsView() {
+  const erpApp = document.querySelector('.erp-app');
+  const settingsView = document.getElementById('settingsView');
+
+  if (erpApp) erpApp.style.display = 'none';
+
+  if (settingsView) {
+    settingsView.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function closeSettingsView() {
+  const erpApp = document.querySelector('.erp-app');
+  const settingsView = document.getElementById('settingsView');
+
+  if (settingsView) settingsView.style.display = 'none';
+  if (erpApp) erpApp.style.display = '';
+
+  erpShowView('erpMoreView');
+}
+
+function setLanguage(language) {
+  localStorage.setItem('erpLanguage', language);
+
+  if (language === 'en') {
+    alert('English selected');
+  } else {
+    alert('አማርኛ ተመርጧል');
+  }
+}
+
+function openUserManagement() {
+  const moreView = document.getElementById('erpMoreView');
+  const adminUserManagement = document.getElementById('adminUserManagement');
+  const erpApp = document.querySelector('.erp-app');
+
+  if (erpApp) {
+    erpApp.style.display = 'none';
+  }
+
+  if (moreView) {
+    moreView.style.display = 'none';
+  }
+
+  if (adminUserManagement) {
+    adminUserManagement.style.display = 'block';
+    if (typeof loadAdminUsers === 'function') {
+      loadAdminUsers();
+    }
+    adminUserManagement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+function openCustomerCredits() {
+  const existing = document.getElementById('customerCreditsView');
+
+  if (existing) {
+    existing.style.display = 'block';
+    loadCustomerCredits();
+    return;
+  }
+
+  const view = document.createElement('section');
+  view.id = 'customerCreditsView';
+  view.className = 'customer-credits-view';
+
+  view.innerHTML = `
+    <div class="customer-credits-header">
+      <button type="button" onclick="closeCustomerCredits()">← Back</button>
+      <div>
+        <span>CUSTOMERS</span>
+        <h2>Customer Credits</h2>
+      </div>
+    </div>
+
+    <div id="customerCreditsList" class="customer-credits-list">
+      <p>Loading...</p>
+    </div>
+  `;
+
+  document.body.appendChild(view);
+  loadCustomerCredits();
+}
+async function loadCustomerCredits() {
+  const list = document.getElementById('customerCreditsList');
+
+  if (!list) return;
+
+  list.innerHTML = '<p>Loading...</p>';
+
+  try {
+    const response = await fetch('/api/customer-credits');
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to load customer credits');
+    }
+
+    if (!data.credits || data.credits.length === 0) {
+      list.innerHTML = `
+        <div class="erp-empty">
+          <div class="erp-empty-icon">✓</div>
+          <p>No outstanding customer credit.</p>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = data.credits.map(item => `
+      <div class="customer-credit-card">
+        <div class="customer-credit-top">
+          <div>
+            <span class="customer-credit-label">CUSTOMER</span>
+            <h3>${item.customer}</h3>
+          </div>
+          <strong>${Number(item.outstanding).toLocaleString()} ETB</strong>
+        </div>
+
+        <div class="customer-credit-details">
+          <span>Credit: ${Number(item.credit_total).toLocaleString()} ETB</span>
+          <span>Paid: ${Number(item.paid_total).toLocaleString()} ETB</span>
+        </div>
+
+        <button
+          type="button"
+          class="erp-primary-btn full"
+          onclick="openCustomerPayment('${item.customer.replace(/'/g, "\\'")}', ${item.outstanding})"
+        >
+          💵 Collect Payment
+        </button>
+      </div>
+    `).join('');
+
+  } catch (error) {
+    console.error('Customer credits error:', error);
+
+    list.innerHTML = `
+      <div class="erp-empty">
+        <p>Failed to load customer credits.</p>
+      </div>
+    `;
+  }
+}
+
+function closeCustomerCredits() {
+  const view = document.getElementById('customerCreditsView');
+
+  if (view) {
+    view.remove();
+  }
+}
+function openCustomerPayment(customer, outstanding) {
+  const amount = prompt(
+    `${customer}\nOutstanding Credit: ${Number(outstanding).toLocaleString()} ETB\n\nEnter payment amount:`
+  );
+
+  if (amount === null) return;
+
+  const paymentAmount = Number(amount);
+
+  if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+    alert('Please enter a valid payment amount.');
+    return;
+  }
+
+  if (paymentAmount > Number(outstanding)) {
+    alert('Payment cannot be greater than the outstanding credit.');
+    return;
+  }
+
+  submitCustomerPayment(customer, paymentAmount);
+}
+
+async function submitCustomerPayment(customer, amount) {
+  try {
+    const response = await fetch('/api/customer-payments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        customer,
+        description: 'Customer Credit Payment',
+        amount
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Payment failed');
+    }
+
+    alert(
+      `${Number(amount).toLocaleString()} ETB payment recorded successfully.`
+    );
+
+    await loadCustomerCredits();
+
+    if (typeof loadDashboard === 'function') {
+      loadDashboard();
+    }
+
+  } catch (error) {
+    console.error('Customer payment error:', error);
+    alert(error.message || 'Failed to record payment.');
+  }
+}
+function quickAction(action) {
+  const panel = document.getElementById('quickActions');
+
+  if (panel) {
+    panel.style.display = 'none';
+  }
+
+  const focusField = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.focus();
+      }, 150);
+    }
+  };
+
+  if (action === 'sale') {
+    erpShowView('erpSalesView');
+    focusField('saleProduct');
+    return;
+  }
+
+  if (action === 'purchase') {
+    erpShowView('erpStockView');
+    focusField('purchaseProduct');
+    return;
+  }
+
+  if (action === 'income' || action === 'expense') {
+    erpShowView('erpMoreView');
+
+    const moreView = document.getElementById('erpMoreView');
+    if (moreView) {
+      const sections = moreView.querySelectorAll(':scope > .erp-menu-section');
+      const forms = moreView.querySelectorAll(':scope > .erp-form-card');
+
+      sections.forEach(section => {
+        section.style.display = 'none';
+      });
+
+      forms.forEach(form => {
+        form.style.display = 'none';
+      });
+
+      const targetId = action === 'income' ? 'incomeDescription' : 'expenseDescription';
+      const target = document.getElementById(targetId);
+
+      if (target) {
+        const targetForm = target.closest('.erp-form-card');
+        if (targetForm) {
+          targetForm.style.display = 'block';
+        }
+      }
+    }
+
+    focusField(action === 'income' ? 'incomeDescription' : 'expenseDescription');
+    return;
+  }
+
+  if (action === 'user') {
+    openNewUserView();
+    return;
+  }
+
+  if (action === 'userManagement') {
+    openUserManagement();
+    return;
+  }
+}
+
+
+function openCapitalProfitView() {
+  let view = document.getElementById('capitalProfitView');
+
+  if (!view) {
+    view = document.createElement('section');
+    view.id = 'capitalProfitView';
+    view.style.cssText = `
+      min-height:100vh;
+      background:#f4f8f8;
+      padding:0 14px 30px;
+      box-sizing:border-box;
+    `;
+
+    view.innerHTML = `
+      <div style="max-width:520px;margin:0 auto;">
+        <div style="
+          display:flex;
+          align-items:center;
+          gap:12px;
+          padding:16px 2px;
+          position:sticky;
+          top:0;
+          z-index:2;
+          background:#f4f8f8;
+        ">
+          <button type="button"
+            onclick="closeCapitalProfitView()"
+            style="
+              width:42px;
+              height:42px;
+              border:0;
+              border-radius:12px;
+              background:#fff;
+              color:#294b4d;
+              font-size:22px;
+            ">←</button>
+
+          <div>
+            <div style="
+              font-size:11px;
+              font-weight:800;
+              letter-spacing:1px;
+              color:#71817f;
+            ">MONEY</div>
+
+            <h2 style="
+              margin:2px 0 0;
+              color:#294b4d;
+              font-size:20px;
+            ">📊 Capital & Profit</h2>
+          </div>
+        </div>
+
+        <div id="capitalProfitContent">
+          <p style="text-align:center;color:#71817f;padding:30px 0;">
+            Loading...
+          </p>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(view);
+  }
+
+  const erpApp = document.querySelector('.erp-app');
+  if (erpApp) erpApp.style.display = 'none';
+
+  view.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  loadCapitalProfit();
+}
+
+function closeCapitalProfitView() {
+  const view = document.getElementById('capitalProfitView');
+  const erpApp = document.querySelector('.erp-app');
+
+  if (view) view.style.display = 'none';
+  if (erpApp) erpApp.style.display = '';
+
+  erpShowView('erpMoreView');
+}
+
+async function loadCapitalProfit() {
+  const content = document.getElementById('capitalProfitContent');
+  if (!content) return;
+
+  try {
+    const response = await fetch('/api/capital-profit', {
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to load capital and profit');
+    }
+
+    const s = data.summary;
+
+    const money = value =>
+      Number(value || 0).toLocaleString() + ' ETB';
+
+    content.innerHTML = `
+      <div style="
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+      ">
+
+        <div class="erp-kpi">
+          <span>REVENUE</span>
+          <strong>${money(s.revenue)}</strong>
+        </div>
+
+        <div class="erp-kpi">
+          <span>COGS</span>
+          <strong>${money(s.cogs)}</strong>
+        </div>
+
+        <div class="erp-kpi">
+          <span>GROSS PROFIT</span>
+          <strong>${money(s.gross_profit)}</strong>
+        </div>
+
+        <div class="erp-kpi">
+          <span>EXPENSES</span>
+          <strong>${money(s.expenses)}</strong>
+        </div>
+
+        <div class="erp-kpi" style="border:2px solid #0f766e;">
+          <span>NET PROFIT</span>
+          <strong style="color:#0f766e;">${money(s.net_profit)}</strong>
+        </div>
+
+        <div class="erp-kpi">
+          <span>CASH</span>
+          <strong>${money(s.cash)}</strong>
+        </div>
+
+        <div class="erp-kpi">
+          <span>STOCK VALUE</span>
+          <strong>${money(s.stock_value)}</strong>
+        </div>
+
+        <div class="erp-kpi">
+          <span>OWNER EQUITY</span>
+          <strong>${money(s.owner_equity)}</strong>
+        </div>
+      </div>
+
+      <div style="
+        margin-top:14px;
+        background:#fff;
+        border-radius:16px;
+        padding:16px;
+        box-shadow:0 4px 14px rgba(0,0,0,.05);
+      ">
+        <div style="display:flex;justify-content:space-between;padding:9px 0;">
+          <span>Capital In</span>
+          <strong>${money(s.capital_in)}</strong>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;padding:9px 0;">
+          <span>Withdrawals</span>
+          <strong>${money(s.withdrawals)}</strong>
+        </div>
+      </div>
+    `;
+  } catch (error) {
+    console.error('Capital & Profit error:', error);
+
+    content.innerHTML = `
+      <div style="
+        background:#fff;
+        border-radius:16px;
+        padding:20px;
+        color:#b91c1c;
+      ">
+        Capital & Profit መረጃ መጫን አልተቻለም።
+      </div>
+    `;
+  }
+}
+
+</script>
 </body>
 </html>
