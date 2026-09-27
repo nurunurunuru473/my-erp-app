@@ -1837,6 +1837,11 @@ window.addEventListener('popstate', function () {
         <input id="purchaseUnitPrice" type="number" min="0" step="0.01" placeholder="Unit price">
         <input id="purchaseSupplier" type="text" placeholder="Supplier name">
 
+        <select id="purchasePaymentType">
+          <option value="cash">💵 Cash Purchase</option>
+          <option value="credit">📒 Credit Purchase</option>
+        </select>
+
         <p class="erp-total">Total: <strong id="purchaseTotal">0 ETB</strong></p>
 
         <button class="erp-primary-btn full" type="button" onclick="registerPurchase()">💾 Record Purchase</button>
@@ -1916,12 +1921,12 @@ window.addEventListener('popstate', function () {
       <div class="erp-menu-section">
         <label>SUPPLIERS</label>
         <div class="erp-menu-card">
-          <button type="button">
+          <button type="button" onclick="openSuppliers()">
             <span class="erp-icon purple">🚚</span>
             <span><b>Suppliers</b><small>Suppliers and purchase credit</small></span>
             <strong>›</strong>
           </button>
-          <button type="button">
+          <button type="button" onclick="openSupplierDebts()">
             <span class="erp-icon red">⚠</span>
             <span><b>Debts</b><small>Supplier outstanding debts</small></span>
             <strong>›</strong>
@@ -2529,6 +2534,7 @@ async function registerPurchase() {
   const quantity = Number(document.getElementById("purchaseQuantity").value);
   const unit_price = Number(document.getElementById("purchaseUnitPrice").value);
   const supplier = document.getElementById("purchaseSupplier").value.trim();
+  const payment_type = document.getElementById("purchasePaymentType").value;
 
   if (!product_id) {
     return alert("እባክዎን ምርት ይምረጡ!");
@@ -2552,7 +2558,8 @@ async function registerPurchase() {
         product_id: Number(product_id),
         quantity,
         unit_price,
-        supplier
+        supplier,
+        payment_type
       })
     });
 
@@ -3398,6 +3405,429 @@ async function loadCapitalProfit() {
       </div>
     `;
   }
+}
+
+
+function openSuppliers() {
+  let view = document.getElementById('suppliersView');
+
+  if (view) {
+    view.style.display = 'block';
+    loadSuppliers();
+    return;
+  }
+
+  view = document.createElement('section');
+  view.id = 'suppliersView';
+  view.className = 'customer-credits-view';
+
+  view.innerHTML = `
+    <div class="customer-credits-header">
+      <button type="button" onclick="closeSuppliers()">← Back</button>
+      <div>
+        <span>SUPPLIERS</span>
+        <h2>Suppliers</h2>
+      </div>
+    </div>
+
+    <div id="suppliersList" class="customer-credits-list">
+      <p>Loading...</p>
+    </div>
+  `;
+
+  document.body.appendChild(view);
+  loadSuppliers();
+}
+
+async function loadSuppliers() {
+  const list = document.getElementById('suppliersList');
+
+  if (!list) return;
+
+  list.innerHTML = '<p>Loading...</p>';
+
+  try {
+    const debtResponse = await fetch('/api/supplier-debts');
+    const debtData = await debtResponse.json();
+
+    if (!debtResponse.ok || !debtData.success) {
+      throw new Error(debtData.error || 'Failed to load suppliers');
+    }
+
+    const paymentResponse = await fetch('/api/supplier-payments');
+    const paymentData = await paymentResponse.json();
+
+    const debts = debtData.debts || [];
+    const payments = paymentData.success
+      ? (paymentData.payments || [])
+      : [];
+
+    if (debts.length === 0) {
+      list.innerHTML = `
+        <div class="erp-empty">
+          <div class="erp-empty-icon">🚚</div>
+          <p>No supplier credit records yet.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const suppliers = {};
+
+    debts.forEach(item => {
+      const name = item.supplier || 'Unknown Supplier';
+
+      if (!suppliers[name]) {
+        suppliers[name] = {
+          supplier: name,
+          total: 0,
+          paid: 0,
+          count: 0
+        };
+      }
+
+      suppliers[name].total += Number(item.amount) || 0;
+      suppliers[name].count += 1;
+    });
+
+    payments.forEach(payment => {
+      const name = payment.supplier || 'Unknown Supplier';
+
+      if (!suppliers[name]) {
+        suppliers[name] = {
+          supplier: name,
+          total: 0,
+          paid: 0,
+          count: 0
+        };
+      }
+
+      suppliers[name].paid += Number(payment.amount) || 0;
+    });
+
+    const supplierList = Object.values(suppliers);
+
+    list.innerHTML = supplierList.map(item => {
+      const outstanding = Math.max(
+        item.total - item.paid,
+        0
+      );
+
+      return `
+        <div class="customer-credit-card">
+          <div class="customer-credit-top">
+            <div>
+              <span class="customer-credit-label">SUPPLIER</span>
+              <h3>🚚 ${escapeHtml(item.supplier)}</h3>
+            </div>
+            <strong>${outstanding.toLocaleString()} ETB</strong>
+          </div>
+
+          <div class="customer-credit-details">
+            <span>Credit Purchases: ${item.count}</span>
+            <span>Outstanding: ${outstanding.toLocaleString()} ETB</span>
+          </div>
+
+          <button
+            type="button"
+            class="erp-primary-btn full"
+            onclick="openSupplierDebts('${escapeJs(item.supplier)}')"
+          >
+            📒 View Debt
+          </button>
+        </div>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error('Suppliers error:', error);
+
+    list.innerHTML = `
+      <div class="erp-empty">
+        <p>Failed to load suppliers.</p>
+      </div>
+    `;
+  }
+}
+
+function closeSuppliers() {
+  const view = document.getElementById('suppliersView');
+
+  if (view) {
+    view.remove();
+  }
+}
+
+function openSupplierDebts(selectedSupplier = '') {
+  let view = document.getElementById('supplierDebtsView');
+
+  if (view) {
+    view.style.display = 'block';
+    loadSupplierDebts(selectedSupplier);
+    return;
+  }
+
+  view = document.createElement('section');
+  view.id = 'supplierDebtsView';
+  view.className = 'customer-credits-view';
+
+  view.innerHTML = `
+    <div class="customer-credits-header">
+      <button type="button" onclick="closeSupplierDebts()">← Back</button>
+      <div>
+        <span>SUPPLIERS</span>
+        <h2>Supplier Debts</h2>
+      </div>
+    </div>
+
+    <div id="supplierDebtsList" class="customer-credits-list">
+      <p>Loading...</p>
+    </div>
+  `;
+
+  document.body.appendChild(view);
+  loadSupplierDebts(selectedSupplier);
+}
+
+async function loadSupplierDebts(selectedSupplier = '') {
+  const list = document.getElementById('supplierDebtsList');
+
+  if (!list) return;
+
+  list.innerHTML = '<p>Loading...</p>';
+
+  try {
+    const response = await fetch('/api/supplier-debts');
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to load supplier debts');
+    }
+
+    let debts = data.debts || [];
+
+    if (selectedSupplier) {
+      debts = debts.filter(
+        item => item.supplier === selectedSupplier
+      );
+    }
+
+    if (debts.length === 0) {
+      list.innerHTML = `
+        <div class="erp-empty">
+          <div class="erp-empty-icon">✓</div>
+          <p>No outstanding supplier debt.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const paymentResponse = await fetch('/api/supplier-payments');
+    const paymentData = await paymentResponse.json();
+
+    const paymentMap = {};
+
+    if (paymentData.success) {
+      const paymentList = paymentData.payments || [];
+
+      paymentList.forEach(payment => {
+        const supplier = payment.supplier;
+
+        if (!paymentMap[supplier]) {
+          paymentMap[supplier] = 0;
+        }
+
+        paymentMap[supplier] += Number(payment.amount) || 0;
+      });
+    }
+
+    const grouped = {};
+
+    debts.forEach(item => {
+      const supplier = item.supplier || 'Unknown Supplier';
+
+      if (!grouped[supplier]) {
+        grouped[supplier] = {
+          supplier,
+          credit: 0,
+          payments: paymentMap[supplier] || 0,
+          debts: []
+        };
+      }
+
+      grouped[supplier].credit += Number(item.amount) || 0;
+      grouped[supplier].debts.push(item);
+    });
+
+    const groups = Object.values(grouped);
+
+    list.innerHTML = groups.map(group => {
+      const outstanding = Math.max(
+        group.credit - group.payments,
+        0
+      );
+
+      return `
+        <div class="customer-credit-card">
+          <div class="customer-credit-top">
+            <div>
+              <span class="customer-credit-label">SUPPLIER</span>
+              <h3>🚚 ${escapeHtml(group.supplier)}</h3>
+            </div>
+            <strong>${outstanding.toLocaleString()} ETB</strong>
+          </div>
+
+          <div class="customer-credit-details">
+            <span>Credit: ${group.credit.toLocaleString()} ETB</span>
+            <span>Paid: ${group.payments.toLocaleString()} ETB</span>
+          </div>
+
+          ${group.debts.map(debt => `
+            <div style="
+              margin-top:10px;
+              padding:10px;
+              background:#f6f9f9;
+              border-radius:10px;
+              font-size:12px;
+              color:#647778;
+            ">
+              <strong>${escapeHtml(debt.description)}</strong><br>
+              ${Number(debt.amount).toLocaleString()} ETB
+            </div>
+          `).join('')}
+
+          ${
+            outstanding > 0
+              ? `
+                <button
+                  type="button"
+                  class="erp-primary-btn full"
+                  style="margin-top:12px;"
+                  onclick="openSupplierPayment('${escapeJs(group.supplier)}', ${outstanding})"
+                >
+                  💵 Pay Supplier
+                </button>
+              `
+              : `
+                <div style="
+                  margin-top:12px;
+                  padding:10px;
+                  text-align:center;
+                  background:#e8f5e9;
+                  border-radius:10px;
+                  color:#2e7d32;
+                  font-weight:700;
+                ">
+                  ✓ Fully Paid
+                </div>
+              `
+          }
+        </div>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error('Supplier debts error:', error);
+
+    list.innerHTML = `
+      <div class="erp-empty">
+        <p>Failed to load supplier debts.</p>
+      </div>
+    `;
+  }
+}
+
+function closeSupplierDebts() {
+  const view = document.getElementById('supplierDebtsView');
+
+  if (view) {
+    view.remove();
+  }
+}
+
+function openSupplierPayment(supplier, outstanding) {
+  const amount = prompt(
+    `${supplier}\nOutstanding Debt: ${Number(outstanding).toLocaleString()} ETB\n\nEnter payment amount:`
+  );
+
+  if (amount === null) return;
+
+  const paymentAmount = Number(amount);
+
+  if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+    alert('Please enter a valid payment amount.');
+    return;
+  }
+
+  if (paymentAmount > Number(outstanding)) {
+    alert('Payment cannot be greater than the outstanding supplier debt.');
+    return;
+  }
+
+  submitSupplierPayment(
+    supplier,
+    paymentAmount
+  );
+}
+
+async function submitSupplierPayment(supplier, amount) {
+  try {
+    const response = await fetch('/api/supplier-payments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        supplier,
+        description: 'Supplier Debt Payment',
+        amount
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.error || 'Supplier payment failed'
+      );
+    }
+
+    alert(
+      `${Number(amount).toLocaleString()} ETB supplier payment recorded successfully.`
+    );
+
+    await loadSupplierDebts(supplier);
+
+    if (typeof loadSuppliers === 'function') {
+      await loadSuppliers();
+    }
+
+    if (typeof loadDashboard === 'function') {
+      loadDashboard();
+    }
+
+  } catch (error) {
+    console.error('Supplier payment error:', error);
+
+    alert(
+      error.message || 'Failed to record supplier payment.'
+    );
+  }
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function escapeJs(value) {
+  return String(value ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'");
 }
 
 </script>

@@ -1411,6 +1411,32 @@ app.get('/api/create-purchases-table', async (req, res) => {
     });
   }
 });
+// 🔄 Add payment_type to existing purchases table
+app.get('/api/upgrade-purchases-payment-type', async (req, res) => {
+  try {
+    try {
+      await tursoQuery(`
+        ALTER TABLE purchases
+        ADD COLUMN payment_type TEXT NOT NULL DEFAULT 'cash'
+      `);
+    } catch (error) {
+      if (!String(error.message).toLowerCase().includes('duplicate column')) {
+        throw error;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Purchases payment_type migration completed successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to migrate purchases payment_type',
+      details: error.message
+    });
+  }
+});
+
 // 🛒 Register Purchase
 app.post('/api/purchases', async (req, res) => {
   try {
@@ -1418,24 +1444,13 @@ app.post('/api/purchases', async (req, res) => {
       product_id,
       quantity,
       unit_price,
-      supplier
+      supplier,
+      payment_type = 'cash'
     } = req.body;
 
     const productId = Number(product_id);
     const qty = Number(quantity);
     const price = Number(unit_price);
-
-    if (!['cash', 'credit'].includes(payment_type)) {
-      return res.status(400).json({
-        error: 'Invalid payment_type'
-      });
-    }
-
-    if (payment_type === 'credit' && !customer) {
-      return res.status(400).json({
-        error: 'Customer name is required for credit sale'
-      });
-    }
 
     if (!Number.isInteger(productId) || productId <= 0) {
       return res.status(400).json({
@@ -1455,6 +1470,18 @@ app.post('/api/purchases', async (req, res) => {
       });
     }
 
+    if (!['cash', 'credit'].includes(payment_type)) {
+      return res.status(400).json({
+        error: 'Invalid payment_type'
+      });
+    }
+
+    if (payment_type === 'credit' && (!supplier || !supplier.trim())) {
+      return res.status(400).json({
+        error: 'Supplier name is required for credit purchase'
+      });
+    }
+
     const productData = await tursoQuery(
       'SELECT id, name FROM products WHERE id = ?',
       [productId]
@@ -1470,41 +1497,61 @@ app.post('/api/purchases', async (req, res) => {
     }
 
     const productName = productRows[0][1].value;
+    const supplierName = (supplier || '').trim();
     const total = qty * price;
 
     const purchase = await tursoQuery(
       `INSERT INTO purchases
-       (product_id, quantity, unit_price, supplier, total)
-       VALUES (?, ?, ?, ?, ?)`,
+       (product_id, quantity, unit_price, supplier, total, payment_type)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [
         productId,
         qty,
         price,
-        supplier || '',
-        total
+        supplierName,
+        total,
+        payment_type
       ]
     );
+
+    const purchaseId =
+      purchase.results?.[0]?.response?.result?.last_insert_rowid || null;
 
     await tursoQuery(
       'UPDATE products SET stock = stock + ? WHERE id = ?',
       [qty, productId]
     );
 
-    await tursoQuery(
-      `INSERT INTO cash_transactions
-       (type, description, amount)
-       VALUES (?, ?, ?)`,
-      [
-        'purchase',
-        `Purchase - ${productName}${supplier ? ` - ${supplier}` : ''}`,
-        -total
-      ]
-    );
+    if (payment_type === 'cash') {
+      await tursoQuery(
+        `INSERT INTO cash_transactions
+         (type, description, amount)
+         VALUES (?, ?, ?)`,
+        [
+          'purchase',
+          `Purchase - ${productName}${supplierName ? ` - ${supplierName}` : ''}`,
+          -total
+        ]
+      );
+    } else {
+      await tursoQuery(
+        `INSERT INTO supplier_debts
+         (purchase_id, supplier, description, amount)
+         VALUES (?, ?, ?, ?)`,
+        [
+          purchaseId,
+          supplierName,
+          `Credit Purchase - ${productName}`,
+          total
+        ]
+      );
+    }
 
     res.json({
       success: true,
       message: 'Purchase registered successfully',
       total,
+      payment_type,
       purchase
     });
 
@@ -1586,6 +1633,93 @@ app.get('/api/create-receivables-table', async (req, res) => {
       )
     `);
 
+    res.json({
+      success: true,
+      message: 'Customer receivables table created successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to create receivables table',
+      details: error.message
+    });
+  }
+});
+
+
+// 💵 Create Supplier Payments Table
+app.get('/api/create-supplier-payments-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS supplier_payments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        supplier TEXT NOT NULL,
+        purchase_id INTEGER,
+        description TEXT NOT NULL,
+        amount REAL NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Supplier payments table created successfully'
+    });
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to create supplier payments table',
+      details: error.message
+    });
+  }
+});
+
+// 💳 Supplier Debts List
+app.get('/api/supplier-debts', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT
+        id,
+        purchase_id,
+        supplier,
+        description,
+        amount,
+        created_at
+      FROM supplier_debts
+      ORDER BY id DESC
+    `);
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    const debts = rows.map(row => ({
+      id: Number(row[0].value),
+      purchase_id: row[1].value === null ? null : Number(row[1].value),
+      supplier: row[2].value,
+      description: row[3].value,
+      amount: Number(row[4].value),
+      created_at: row[5].value
+    }));
+
+    const total = debts.reduce((sum, debt) => sum + debt.amount, 0);
+
+    res.json({
+      success: true,
+      total,
+      count: debts.length,
+      debts
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load supplier debts',
+      details: error.message
+    });
+  }
+});
+
 // 💳 Create Supplier Debts Table
 app.get('/api/create-supplier-debts-table', async (req, res) => {
   try {
@@ -1611,13 +1745,138 @@ app.get('/api/create-supplier-debts-table', async (req, res) => {
     });
   }
 });
+
+// 💵 Supplier Payments
+app.get('/api/supplier-payments', async (req, res) => {
+  try {
+    const supplier = String(req.query.supplier || '').trim();
+
+    const data = await tursoQuery(`
+      SELECT id, supplier, purchase_id, description, amount, created_at
+      FROM supplier_payments
+      ${supplier ? 'WHERE supplier = ?' : ''}
+      ORDER BY id DESC
+    `, supplier ? [supplier] : []);
+
+    const rows = data.results?.[0]?.response?.result?.rows || [];
+
+    const payments = rows.map(row => ({
+      id: Number(row[0].value),
+      supplier: row[1].value,
+      purchase_id: row[2].value === null ? null : Number(row[2].value),
+      description: row[3].value,
+      amount: Number(row[4].value),
+      created_at: row[5].value
+    }));
+
+    const total = payments.reduce((sum, payment) => sum + payment.amount, 0);
+
     res.json({
       success: true,
-      message: 'Customer receivables table created successfully'
+      total,
+      count: payments.length,
+      payments
     });
   } catch (error) {
+    console.error('Turso error:', error);
+
     res.status(500).json({
-      error: 'Failed to create receivables table',
+      error: 'Failed to load supplier payments',
+      details: error.message
+    });
+  }
+});
+
+// 💵 Register Supplier Payment
+app.post('/api/supplier-payments', async (req, res) => {
+  try {
+    const {
+      supplier,
+      purchase_id = null,
+      description = 'Supplier Debt Payment',
+      amount
+    } = req.body;
+
+    const paymentAmount = Number(amount);
+
+    if (!supplier || !supplier.trim()) {
+      return res.status(400).json({
+        error: 'Supplier name is required'
+      });
+    }
+
+    if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+      return res.status(400).json({
+        error: 'Payment amount must be greater than 0'
+      });
+    }
+
+    const debtData = await tursoQuery(
+      `SELECT COALESCE(SUM(amount), 0)
+       FROM supplier_debts
+       WHERE supplier = ?`,
+      [supplier.trim()]
+    );
+
+    const debtRows =
+      debtData.results?.[0]?.response?.result?.rows || [];
+
+    const totalDebt = Number(debtRows[0]?.[0]?.value || 0);
+
+    const paymentData = await tursoQuery(
+      `SELECT COALESCE(SUM(amount), 0)
+       FROM supplier_payments
+       WHERE supplier = ?`,
+      [supplier.trim()]
+    );
+
+    const paymentRows =
+      paymentData.results?.[0]?.response?.result?.rows || [];
+
+    const totalPaid = Number(paymentRows[0]?.[0]?.value || 0);
+    const outstanding = Math.max(totalDebt - totalPaid, 0);
+
+    if (paymentAmount > outstanding) {
+      return res.status(400).json({
+        error: `Payment exceeds outstanding supplier debt. Outstanding: ${outstanding}`
+      });
+    }
+
+    await tursoQuery(
+      `INSERT INTO supplier_payments
+       (supplier, purchase_id, description, amount)
+       VALUES (?, ?, ?, ?)`,
+      [
+        supplier.trim(),
+        purchase_id,
+        description,
+        paymentAmount
+      ]
+    );
+
+    await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES ('supplier_payment', ?, ?)`,
+      [
+        `Supplier Payment - ${supplier.trim()}`,
+        -paymentAmount
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Supplier payment recorded successfully',
+      supplier: supplier.trim(),
+      amount: paymentAmount,
+      outstanding_after_payment: outstanding - paymentAmount
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to record supplier payment',
       details: error.message
     });
   }
