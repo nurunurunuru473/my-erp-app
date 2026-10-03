@@ -501,7 +501,7 @@
 
 .erp-two-buttons {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 9px;
 }
 
@@ -761,6 +761,568 @@ body {
 .customer-credit-card .erp-primary-btn {
   margin-top: 2px;
 }
+
+
+/* 📱 Sales Records responsive layout */
+#salesList {
+  width: 100%;
+  min-width: 0;
+}
+
+#salesList .erp-form-card {
+  min-width: 0;
+}
+
+#salesList table {
+  width: 100%;
+  min-width: 720px;
+}
+
+#salesList th,
+#salesList td {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+#salesList > .erp-form-card > div {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 600px) {
+  #salesList {
+    margin-top: 12px;
+  }
+
+  #salesList .erp-form-card {
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  #salesList table {
+    min-width: 680px;
+    font-size: 12px;
+  }
+
+  #salesList th,
+  #salesList td {
+    padding: 8px !important;
+    line-height: 1.35;
+  }
+
+  #salesList h2 {
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+}
+
+
+
+/* 📱 Responsive Sales Statistics */
+.erp-stat-row {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.erp-stat-row > div {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.erp-stat-row > div span {
+  display: block;
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 500;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.erp-stat-row > div b {
+  display: block;
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 500;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 600px) {
+  .erp-stat-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .erp-stat-row > div {
+    padding: 9px;
+  }
+
+  .erp-stat-row > div span {
+    font-size: 10px;
+  }
+
+  .erp-stat-row > div b {
+    font-size: 15px;
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 380px) {
+  .erp-stat-row {
+    grid-template-columns: 1fr;
+  }
+
+  .erp-stat-row > div {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .erp-stat-row > div span {
+    flex: 1;
+  }
+
+  .erp-stat-row > div b {
+    text-align: right;
+  }
+}
+
+
+/* Dedicated Stock History page */
+.stock-history-header {
+  margin-bottom: 16px;
+}
+
+.stock-history-back-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: #294b4d;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.stock-history-header h1 {
+  margin: 12px 0 0;
+  font-size: 24px;
+  color: #173f42;
+}
+
+.stock-history-page-card {
+  overflow: hidden;
+}
+
+.stock-history-page-scroll {
+  max-height: 430px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.stock-history-page-scroll table {
+  min-width: 520px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stock-history-page-scroll th,
+.stock-history-page-scroll td {
+  padding: 7px 6px;
+  border-bottom: 1px solid #edf2f2;
+  text-align: left;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.stock-history-page-scroll th {
+  color: #6e7d7f;
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
+}
+
+.stock-history-page-scroll td {
+  color: #294b4d;
+}
+#purchaseHistoryPageTable td:nth-child(5),
+#purchaseHistoryPageTable td:nth-child(6) {
+  min-width: 105px;
+  white-space: nowrap;
+}
+
+#purchaseHistoryPageTable td:nth-child(6) {
+  font-weight: 700;
+}
+
+
+
+/* STOCK NAVIGATION */
+.stock-navigation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.stock-nav-card {
+  min-height: 112px;
+  padding: 16px;
+  border: 1px solid #e5eeee;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(23, 63, 66, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stock-nav-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(23, 63, 66, 0.10);
+}
+
+.stock-nav-card:active {
+  transform: scale(0.98);
+}
+
+.stock-nav-icon {
+  font-size: 27px;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.stock-nav-title {
+  color: #173f42;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.stock-nav-subtitle {
+  margin-top: 5px;
+  color: #718184;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+@media (max-width: 520px) {
+  .stock-navigation-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .stock-nav-card {
+    min-height: 105px;
+    padding: 13px;
+    border-radius: 14px;
+  }
+
+  .stock-nav-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .stock-nav-title {
+    font-size: 13px;
+  }
+
+  .stock-nav-subtitle {
+    font-size: 10px;
+  }
+}
+
+@media (min-width: 700px) {
+  .stock-navigation-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ERP Edit User Modal */
+.erp-user-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(5px);
+  animation: erpModalFadeIn 0.18s ease;
+}
+
+.erp-user-modal-card {
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.25);
+  animation: erpModalSlideUp 0.22s ease;
+}
+
+.erp-user-modal-card h2 {
+  margin: 0 0 24px;
+  font-size: 22px;
+  color: #0f172a;
+}
+
+.erp-user-modal-card label {
+  display: block;
+  margin: 0 0 7px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.erp-user-modal-card input:not([type="hidden"]) {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 18px;
+  padding: 13px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 15px;
+  outline: none;
+  transition: 0.18s ease;
+}
+
+.erp-user-modal-card input:not([type="hidden"]):focus {
+  border-color: #059669;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+}
+
+.erp-user-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.erp-user-cancel-btn,
+.erp-user-save-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.erp-user-cancel-btn {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.erp-user-cancel-btn:hover {
+  background: #cbd5e1;
+}
+
+.erp-user-save-btn {
+  background: #059669;
+  color: #ffffff;
+}
+
+.erp-user-save-btn:hover {
+  background: #047857;
+  transform: translateY(-1px);
+}
+
+.erp-user-modal .erp-admin-message {
+  min-height: 20px;
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@keyframes erpModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes erpModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .erp-user-modal {
+    padding: 14px;
+  }
+
+  .erp-user-modal-card {
+    padding: 22px 18px;
+    border-radius: 17px;
+  }
+
+  .erp-user-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .erp-user-cancel-btn,
+  .erp-user-save-btn {
+    width: 100%;
+  }
+}
+
+.session-spinner {
+  width:42px;
+  height:42px;
+  border:4px solid #dbe4f5;
+  border-top-color:#2563eb;
+  border-radius:50%;
+  animation: sessionSpin .8s linear infinite;
+  margin:auto;
+}
+
+@keyframes sessionSpin {
+  to {
+    transform:rotate(360deg);
+  }
+}
+
+
+/* ===== ERP WELCOME HEADER ===== */
+
+.erp-user-welcome {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 18px 0;
+  padding: 12px 16px;
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.erp-user-welcome-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.erp-user-welcome-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.35;
+}
+
+.erp-user-welcome-title span {
+  font-weight: 700;
+}
+
+.erp-user-welcome-sub {
+  margin-top: 3px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.erp-welcome-logout {
+  flex-shrink: 0;
+  border: 1px solid #e5bcbc;
+  border-radius: 8px;
+  background: #fff;
+  color: #dc2626;
+  padding: 7px 13px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.erp-welcome-logout:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+}
+
+@media (max-width: 600px) {
+  .erp-user-welcome {
+    padding: 10px 12px;
+  }
+
+  .erp-user-welcome-content {
+    gap: 10px;
+  }
+
+  .erp-user-welcome-title {
+    font-size: 15px;
+  }
+
+  .erp-user-welcome-sub {
+    font-size: 11px;
+  }
+
+  .erp-welcome-logout {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+
+/* Prevent accidental double-submit on Record Sale */
+.erp-primary-btn.sale-submit-loading,
+.erp-primary-btn.sale-submit-loading:disabled {
+  opacity: 0.72;
+  cursor: wait;
+  transform: scale(0.99);
+  pointer-events: none;
+  filter: saturate(0.7);
+}
+
+.erp-primary-btn.sale-submit-loading::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 7px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: saleSubmitSpin 0.7s linear infinite;
+  vertical-align: -1px;
+}
+
+@keyframes saleSubmitSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 </style>
 
 <style>
@@ -1062,6 +1624,26 @@ body {
 </head>
 <body>
 
+<!-- 🔄 Session Loading Screen -->
+<div id="sessionLoadingScreen" style="
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f4f7fe;
+">
+  <div style="text-align:center;">
+    <div class="session-spinner"></div>
+    <div style="
+      margin-top:16px;
+      font-size:15px;
+      color:#555;
+    ">Loading...</div>
+  </div>
+</div>
+
 <!-- 🔐 Login Screen -->
 <div id="loginScreen" style="max-width:420px;margin:60px auto;padding:30px;border-radius:16px;background:white;box-shadow:0 8px 30px rgba(0,0,0,.12);">
 
@@ -1217,6 +1799,31 @@ function hideCreateUserForm() {
 }
 
 
+function updateWelcomeUserName() {
+  const user = window.currentUser;
+
+  const name =
+    user?.name ||
+    user?.username ||
+    'User';
+
+  const welcome = document.getElementById('erpWelcomeUserName');
+  const online = document.getElementById('erpUserName');
+  const signout = document.getElementById('erpSignoutName');
+
+  if (welcome) {
+    welcome.textContent = name;
+  }
+
+  if (online) {
+    online.textContent = name;
+  }
+
+  if (signout) {
+    signout.textContent = name;
+  }
+}
+
 async function loginUser() {
   const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -1250,6 +1857,8 @@ async function loginUser() {
     }
 
     window.currentUser = data.user;
+    updateWelcomeUserName();
+
     message.textContent = '';
 
     document.getElementById('loginScreen').style.display = 'none';
@@ -1289,6 +1898,8 @@ function toggleLoginPassword() {
 
 
 function erpShowView(viewName) {
+  sessionStorage.setItem('erpCurrentView', viewName);
+
   const adminUserManagement = document.getElementById('adminUserManagement');
   if (adminUserManagement) {
     adminUserManagement.style.display = 'none';
@@ -1314,6 +1925,152 @@ function erpShowView(viewName) {
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openStockHistoryPage() {
+  erpShowView('erpStockHistoryView');
+
+  setTimeout(() => {
+    loadStockHistory();
+  }, 50);
+}
+
+async function openStockHistoryFromMenu() {
+  openStockHistoryPage();
+}
+
+function openPurchaseHistoryPage() {
+  erpShowView('erpPurchaseHistoryView');
+
+  setTimeout(() => {
+    loadPurchaseHistory();
+  }, 50);
+}
+
+async function loadPurchaseHistory() {
+  const table = document.getElementById('purchaseHistoryPageTable');
+
+  if (!table) return;
+
+  table.innerHTML = `
+    <tr>
+      <td colspan="8">Loading...</td>
+    </tr>
+  `;
+
+  try {
+    const response = await fetch('/api/purchases');
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to load purchase history');
+    }
+
+    const purchases = data.purchases || [];
+
+    if (!purchases.length) {
+      table.innerHTML = `
+        <tr>
+          <td colspan="9">No purchase history found.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    table.innerHTML = purchases.map(purchase => {
+      const paymentLabel =
+        purchase.payment_type === 'credit'
+          ? '📒 Credit'
+          : '💵 Cash';
+
+      const isCorrected = purchase.corrected === true;
+
+      const canDeletePurchase =
+        window.currentUser?.role === 'admin' ||
+        (window.currentUser?.permissions || []).includes('delete_stock');
+      return `
+        <tr style="${
+          isCorrected
+            ? 'background:#fff7ed;border-left:4px solid #f97316;'
+            : ''
+        }">
+          <td>${escapeHtml(purchase.created_at || '')}</td>
+          <td>${escapeHtml(purchase.product_name || '')}</td>
+          <td>${escapeHtml(purchase.supplier || '—')}</td>
+          <td>${purchase.quantity} ${escapeHtml(purchase.unit || '')}</td>
+          <td>${Number(purchase.unit_price || 0).toLocaleString()} ETB</td>
+          <td><strong>${Number(purchase.total || 0).toLocaleString()} ETB</strong></td>
+          <td>${paymentLabel}</td>
+
+<td>
+  ${
+    isCorrected
+      ? '<span style="display:inline-block;padding:5px 9px;border-radius:999px;background:#fed7aa;color:#9a3412;font-weight:700;">↶ Corrected</span>'
+      : '<span style="color:#64748b;">Normal</span>'
+  }
+</td>
+
+<td>
+
+<tr style="${
+  isCorrected
+    ? 'background:#fff7ed;border-left:4px solid #f97316;'
+    : ''
+}">
+  <td>${escapeHtml(purchase.created_at || '')}</td>
+        </tr>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error('Purchase history error:', error);
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="9">Failed to load purchase history.</td>
+      </tr>
+    `;
+  }
+}
+
+
+async function deletePurchase(purchaseId) {
+  if (!Number.isInteger(Number(purchaseId)) || Number(purchaseId) <= 0) {
+    alert('Invalid purchase ID.');
+    return;
+  }
+
+  const confirmed = confirm(
+    'Delete this purchase?\n\n' +
+    'This will reverse the stock and payment/accounting effect.'
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/purchases/${Number(purchaseId)}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.error || 'Failed to delete purchase'
+      );
+    }
+
+    alert('Purchase deleted and reversed successfully.');
+
+    await loadPurchaseHistory();
+
+  } catch (error) {
+    console.error('Delete purchase error:', error);
+    alert(error.message || 'Failed to delete purchase.');
+  }
 }
 
 async function loadAdminUsers() {
@@ -1342,7 +2099,7 @@ async function loadAdminUsers() {
     if (!rows.length) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align:center;">No users found</td>
+          <td colspan="8" style="text-align:center;">No users found</td>
         </tr>
       `;
       return;
@@ -1356,6 +2113,7 @@ async function loadAdminUsers() {
       const username = row[3]?.value ?? '';
       const role = row[4]?.value ?? '';
       const active = Number(row[5]?.value ?? 0);
+      const department = row[7]?.value ?? 'general';
 
       const isCurrentUser =
         window.currentUser &&
@@ -1366,6 +2124,7 @@ async function loadAdminUsers() {
       tr.innerHTML = `
         <td>#${displayId}</td>
         <td><b></b></td>
+        <td></td>
         <td></td>
         <td></td>
         <td></td>
@@ -1381,39 +2140,70 @@ async function loadAdminUsers() {
       tr.children[2].textContent = email;
       tr.children[3].textContent = username;
       tr.children[4].textContent = role;
+      tr.children[5].textContent = department;
 
-      const actions = tr.children[6];
+const actions = tr.children[7];
 
-      if (isCurrentUser) {
-        const current = document.createElement('span');
-        current.style.color = '#777';
-        current.textContent = 'Current Admin';
-        actions.appendChild(current);
-      } else {
-        const statusButton = document.createElement('button');
-        statusButton.type = 'button';
-        statusButton.textContent = active ? 'Disable' : 'Enable';
-        statusButton.style.cssText =
-          'padding:7px 10px;margin:2px;border:0;border-radius:6px;background:#2563eb;color:white;';
+const editButton = document.createElement('button');
+editButton.type = 'button';
+editButton.textContent = '✏️ Edit';
+editButton.style.cssText =
+  'padding:7px 10px;margin:2px;border:0;border-radius:6px;background:#059669;color:white;';
 
-        statusButton.addEventListener('click', () => {
-          toggleUserStatus(Number(id), active);
-        });
+editButton.addEventListener('click', () => {
+  editUserProfile(
+    Number(id),
+    name,
+    email,
+    username,
+    department
+  );
+});
 
-        const deleteButton = document.createElement('button');
-        deleteButton.type = 'button';
-        deleteButton.textContent = 'Delete';
-        deleteButton.style.cssText =
-          'padding:7px 10px;margin:2px;border:0;border-radius:6px;background:#dc2626;color:white;';
+const passwordButton = document.createElement('button');
+passwordButton.type = 'button';
+passwordButton.textContent = '🔑 Password';
+passwordButton.style.cssText =
+  'padding:7px 10px;margin:2px;border:0;border-radius:6px;background:#7c3aed;color:white;';
 
-        deleteButton.addEventListener('click', () => {
-          deleteUser(Number(id), name);
-        });
+passwordButton.addEventListener('click', () => {
+  changeUserPassword(Number(id), name);
+});
 
-        actions.appendChild(statusButton);
-        actions.appendChild(deleteButton);
-      }
+actions.appendChild(editButton);
+actions.appendChild(passwordButton);
 
+if (isCurrentUser) {
+  const current = document.createElement('span');
+  current.style.cssText =
+    'display:inline-block;color:#777;margin:5px;';
+  current.textContent = 'Current Admin';
+  actions.appendChild(current);
+
+} else {
+  const statusButton = document.createElement('button');
+  statusButton.type = 'button';
+  statusButton.textContent = active ? 'Disable' : 'Enable';
+  statusButton.style.cssText =
+    'padding:7px 10px;margin:2px;border:0;border-radius:6px;background:#2563eb;color:white;';
+
+  statusButton.addEventListener('click', () => {
+    toggleUserStatus(Number(id), active);
+  });
+
+  const deleteButton = document.createElement('button');
+  deleteButton.type = 'button';
+  deleteButton.textContent = 'Delete';
+  deleteButton.style.cssText =
+    'padding:7px 10px;margin:2px;border:0;border-radius:6px;background:#dc2626;color:white;';
+
+  deleteButton.addEventListener('click', () => {
+    deleteUser(Number(id), name);
+  });
+
+  actions.appendChild(statusButton);
+  actions.appendChild(deleteButton);
+}
       tbody.appendChild(tr);
     });
 
@@ -1482,6 +2272,382 @@ async function deleteUser(userId, userName) {
   }
 }
 
+async function editUserProfile(
+  userId,
+  currentName,
+  currentEmail,
+  currentUsername,
+  currentDepartment
+) {
+  const modal = document.getElementById('editUserModal');
+  const idInput = document.getElementById('editUserId');
+  const nameInput = document.getElementById('editUserName');
+  const usernameInput = document.getElementById('editUserUsername');
+  const emailInput = document.getElementById('editUserEmail');
+  const departmentInput = document.getElementById('editUserDepartment');
+  const message = document.getElementById('editUserMessage');
+
+  const permissionsBox =
+    document.getElementById('editUserPermissions');
+
+  const deleteStock =
+    document.getElementById('permissionDeleteStock');
+
+  const deleteSales =
+    document.getElementById('permissionDeleteSales');
+
+  const deleteRepairs =
+    document.getElementById('permissionDeleteRepairs');
+
+  if (
+    !modal ||
+    !idInput ||
+    !nameInput ||
+    !usernameInput ||
+    !emailInput ||
+    !departmentInput
+  ) {
+    console.error('Edit User Modal elements not found');
+    return;
+  }
+
+  idInput.value = userId;
+  nameInput.value = currentName || '';
+  usernameInput.value = currentUsername || '';
+  emailInput.value = currentEmail || '';
+  departmentInput.value = currentDepartment || 'general';
+
+  if (message) {
+    message.textContent = '';
+    message.style.color = '';
+  }
+
+  if (deleteStock) deleteStock.checked = false;
+  if (deleteSales) deleteSales.checked = false;
+  if (deleteRepairs) deleteRepairs.checked = false;
+
+  try {
+    const response = await fetch(
+      `/api/users/${userId}/permissions`,
+      {
+        method: 'GET',
+        credentials: 'include'
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Failed to load permissions'
+      );
+    }
+
+    const permissions = Array.isArray(data.permissions)
+      ? data.permissions
+      : [];
+
+    if (deleteStock) {
+      deleteStock.checked =
+        permissions.includes('delete_stock');
+    }
+
+    if (deleteSales) {
+      deleteSales.checked =
+        permissions.includes('delete_sales');
+    }
+
+    if (deleteRepairs) {
+      deleteRepairs.checked =
+        permissions.includes('delete_repairs');
+    }
+
+    if (permissionsBox) {
+      permissionsBox.style.display =
+        window.currentUser &&
+        window.currentUser.role === 'admin'
+          ? 'block'
+          : 'none';
+    }
+
+  } catch (error) {
+    console.error('Load permissions error:', error);
+
+    if (message) {
+      message.textContent =
+        'Failed to load user permissions';
+      message.style.color = '#dc2626';
+    }
+  }
+
+  modal.style.display = 'flex';
+}
+
+async function changeUserPassword(userId, userName) {
+  const modal = document.getElementById('changePasswordModal');
+  const idInput = document.getElementById('changePasswordUserId');
+  const userNameText = document.getElementById('changePasswordUserName');
+  const passwordInput = document.getElementById('newUserPassword');
+  const confirmInput = document.getElementById('confirmUserPassword');
+  const message = document.getElementById('changePasswordMessage');
+
+  if (
+    !modal ||
+    !idInput ||
+    !userNameText ||
+    !passwordInput ||
+    !confirmInput
+  ) {
+    console.error('Change Password Modal elements not found');
+    return;
+  }
+
+  idInput.value = userId;
+
+  userNameText.textContent =
+    `Change password for: ${userName || 'User'}`;
+
+  passwordInput.value = '';
+  confirmInput.value = '';
+
+  if (message) {
+    message.textContent = '';
+    message.style.color = '';
+  }
+
+  modal.style.display = 'flex';
+
+  setTimeout(() => {
+    passwordInput.focus();
+  }, 50);
+}
+
+
+function closeChangePasswordModal() {
+  const modal =
+    document.getElementById('changePasswordModal');
+
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+
+async function saveChangedUserPassword() {
+  const userId = Number(
+    document.getElementById('changePasswordUserId').value
+  );
+
+  const password =
+    document.getElementById('newUserPassword').value;
+
+  const confirmPassword =
+    document.getElementById('confirmUserPassword').value;
+
+  const message =
+    document.getElementById('changePasswordMessage');
+
+  if (!password) {
+    message.textContent =
+      'New password is required.';
+    message.style.color = '#dc2626';
+    return;
+  }
+
+  if (password.length < 8) {
+    message.textContent =
+      'Password must be at least 8 characters.';
+    message.style.color = '#dc2626';
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    message.textContent =
+      'Passwords do not match.';
+    message.style.color = '#dc2626';
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/users/${userId}/password`,
+      {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          password
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      message.textContent =
+        data.error || 'Failed to change password';
+
+      message.style.color = '#dc2626';
+      return;
+    }
+
+    message.textContent =
+      'Password changed successfully.';
+
+    message.style.color = '#059669';
+
+    setTimeout(() => {
+      closeChangePasswordModal();
+    }, 700);
+
+  } catch (error) {
+    console.error(
+      'Password change error:',
+      error
+    );
+
+    message.textContent =
+      'Server connection error';
+
+    message.style.color = '#dc2626';
+  }
+} 
+
+function closeEditUserModal() {
+  const modal = document.getElementById('editUserModal');
+
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+
+async function saveEditedUser() {
+  const userId = Number(
+    document.getElementById('editUserId').value
+  );
+
+  const name =
+    document.getElementById('editUserName').value.trim();
+
+  const username =
+    document.getElementById('editUserUsername').value.trim();
+
+  const email =
+    document.getElementById('editUserEmail').value.trim();
+
+  const department =
+    document.getElementById('editUserDepartment').value;
+
+  const permissions = [];
+
+  if (
+    document.getElementById('permissionDeleteStock')?.checked
+  ) {
+    permissions.push('delete_stock');
+  }
+
+  if (
+    document.getElementById('permissionDeleteSales')?.checked
+  ) {
+    permissions.push('delete_sales');
+  }
+
+  if (
+    document.getElementById('permissionDeleteRepairs')?.checked
+  ) {
+    permissions.push('delete_repairs');
+  }
+
+  const message =
+    document.getElementById('editUserMessage');
+
+  if (!name || !username) {
+    message.textContent =
+      'Name and username are required.';
+    message.style.color = '#dc2626';
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/users/${userId}/profile`,
+      {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          username,
+          email,
+          department
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      message.textContent =
+        data.error || 'Failed to update user profile';
+
+      message.style.color = '#dc2626';
+      return;
+    }
+
+    if (
+      window.currentUser &&
+      Number(window.currentUser.id) === userId
+    ) {
+      window.currentUser.name = name;
+      window.currentUser.username = username;
+      window.currentUser.email = email;
+      window.currentUser.department = department;
+    }
+
+    const permissionResponse = await fetch(
+      `/api/users/${userId}/permissions`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          permissions
+        })
+      }
+    );
+
+    const permissionData =
+      await permissionResponse.json();
+
+    if (!permissionResponse.ok) {
+      message.textContent =
+        permissionData.error ||
+        'Failed to update user permissions';
+
+      message.style.color = '#dc2626';
+      return;
+    }
+
+    closeEditUserModal();
+
+    await loadAdminUsers();
+
+  } catch (error) {
+    console.error('Profile update error:', error);
+
+    message.textContent =
+      'Server connection error';
+
+    message.style.color = '#dc2626';
+  }
+}
 
 function openNewUserView() {
   let view = document.getElementById('newUserView');
@@ -1634,6 +2800,31 @@ window.addEventListener('popstate', function () {
       <button class="erp-notification" type="button" onclick="alert('No new notifications')">♧</button>
     </header>
 
+<!-- WELCOME + LOGOUT -->
+<div class="erp-user-welcome">
+
+  <div class="erp-user-welcome-content">
+
+    <div>
+      <div class="erp-user-welcome-title">
+        Welcome, <span id="erpWelcomeUserName">User</span> 👋
+      </div>
+
+      <div class="erp-user-welcome-sub">
+        to Nuru &amp; ChatGPT's ERP
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="erp-welcome-logout"
+      onclick="logoutUser()">
+      Logout
+    </button>
+
+  </div>
+
+</div>
     <!-- HOME VIEW -->
     <section id="erpHomeView" class="erp-view active">
 
@@ -1666,7 +2857,7 @@ window.addEventListener('popstate', function () {
         <div class="erp-kpi">
           <span>NUMBER OF SALES</span>
           <strong id="salesCount">0</strong>
-          <small>Sales</small>
+          <small data-i18n="sales">Sales</small>
         </div>
         <div class="erp-kpi">
           <span>CREDIT</span>
@@ -1732,25 +2923,27 @@ window.addEventListener('popstate', function () {
         <button class="erp-primary-btn" type="button" onclick="document.getElementById('saleProduct').focus()">＋ New Sale</button>
       </div>
 
-      <div class="erp-tabs">
-        <button class="active" type="button">Today</button>
-        <button type="button">Yesterday</button>
-        <button type="button">This Week</button>
-        <button type="button">This Month</button>
-        <button type="button">All</button>
+      <div class="erp-tabs" id="salesPeriodTabs">
+        <button class="active" type="button" data-period="today">Today</button>
+        <button type="button" data-period="yesterday">Yesterday</button>
+        <button type="button" data-period="week">This Week</button>
+        <button type="button" data-period="month">This Month</button>
+        <button type="button" data-period="all">All</button>
       </div>
 
       <div class="erp-stat-row">
-        <div><span>REVENUE</span><b>0</b></div>
-        <div><span>SALES</span><b>0</b></div>
-        <div><span>CREDIT</span><b>0</b></div>
+        <div><span>REVENUE</span><b id="salesViewRevenue">0</b></div>
+        <div><span>SALES</span><b id="salesViewCount">0</b></div>
+        <div><span>CREDIT</span><b id="salesViewCredit">0 ETB</b></div>
       </div>
 
       <div class="erp-stat-row">
-        <div><span>SALES COLLECTED</span><b>0</b></div>
-        <div><span>CREDIT RETURN</span><b>0</b></div>
-        <div><span>EXPENSES</span><b>0</b></div>
+        <div><span>SALES COLLECTED</span><b id="salesViewCollected">0 ETB</b></div>
+        <div><span>CREDIT RETURN</span><b id="salesViewCreditReturn">0 ETB</b></div>
+        <div><span>EXPENSES</span><b id="salesViewExpenses">0 ETB</b></div>
       </div>
+
+      <div id="salesList"></div>
 
       <div class="erp-form-card">
         <h2>🛍️ New Sale</h2>
@@ -1786,70 +2979,111 @@ window.addEventListener('popstate', function () {
 
       <div class="erp-page-title">
         <h1>Stock</h1>
-        <button class="erp-primary-btn" type="button" onclick="document.getElementById('productName').focus()">＋ Add Stock</button>
       </div>
 
-      <div class="erp-tabs">
-        <button class="active" type="button">All Products</button>
-        <button type="button">Low Stock</button>
-        <button type="button">Out of stock</button>
+      <div class="stock-navigation-grid">
+        <button class="stock-nav-card" type="button" onclick="openAllProductsPage()">
+          <span class="stock-nav-icon">📦</span>
+          <span class="stock-nav-title">All Products</span>
+          <span class="stock-nav-subtitle">View all products</span>
+        </button>
+
+        <button class="stock-nav-card" type="button" onclick="openAddProductPage()">
+          <span class="stock-nav-icon">➕</span>
+          <span class="stock-nav-title">Add Product</span>
+          <span class="stock-nav-subtitle">Create new product</span>
+        </button>
+
+        <button class="stock-nav-card" type="button" onclick="openPurchasePage()">
+          <span class="stock-nav-icon">🛒</span>
+          <span class="stock-nav-title">Purchase / Add Stock</span>
+          <span class="stock-nav-subtitle">Record stock purchase</span>
+        </button>
+
+        <button class="stock-nav-card" type="button" onclick="openLowStockPage()">
+          <span class="stock-nav-icon">⚠️</span>
+          <span class="stock-nav-title">Low Stock</span>
+          <span class="stock-nav-subtitle">View low stock items</span>
+        </button>
+
+        <button class="stock-nav-card" type="button" onclick="openOutOfStockPage()">
+          <span class="stock-nav-icon">📦</span>
+          <span class="stock-nav-title">Out of Stock</span>
+          <span class="stock-nav-subtitle">View unavailable items</span>
+        </button>
+
+        <button class="stock-nav-card" type="button" onclick="openStockHistoryPage()">
+          <span class="stock-nav-icon">↶</span>
+          <span class="stock-nav-title">Stock History</span>
+          <span class="stock-nav-subtitle">View stock movements</span>
+        </button>
+
+        <button class="stock-nav-card" type="button" onclick="openPurchaseHistoryPage()">
+          <span class="stock-nav-icon">🧾</span>
+          <span class="stock-nav-title">Purchase History</span>
+          <span class="stock-nav-subtitle">View purchase records</span>
+        </button>
       </div>
 
-      <div class="erp-stock-stats">
-        <div><span>HEALTHY</span><b id="healthyStockCount">0</b></div>
-        <div><span>LOW STOCK</span><b id="lowStockCount" class="orange">0</b></div>
-        <div><span>PRODUCTS</span><b id="totalProductsCount">0</b></div>
+    </section>
+
+
+    <!-- STOCK HISTORY VIEW -->
+    <section id="erpStockHistoryView" class="erp-view">
+      <div class="stock-history-header">
+        <button
+          type="button"
+          class="stock-history-back-btn"
+          onclick="erpShowView('erpStockView')"
+        >
+          ← Back to Stock
+        </button>
+
+        <h1>↶ Stock History</h1>
       </div>
 
-      <div class="erp-search">⌕ <span>Filter products...</span></div>
+      <div class="erp-table-card stock-history-page-card">
+        <div class="stock-history-page-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Product</th>
+                <th>Type</th>
+                <th>Movement</th>
+                <th>Before</th>
+                <th>After</th>
+                <th>Note</th>
+              </tr>
+            </thead>
 
-      <div class="erp-empty">
-        <div class="erp-empty-icon">📦</div>
-        <h3>No products found.</h3>
-        <p>Add your first product to start managing stock.</p>
+            <tbody id="stockHistoryPageTable">
+              <tr>
+                <td colspan="9">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ALL PRODUCTS VIEW -->
+    <section id="erpAllProductsView" class="erp-view">
+      <div class="stock-history-header">
+        <button
+          type="button"
+          class="stock-history-back-btn"
+          onclick="erpShowView('erpStockView')"
+        >
+          ← Back to Stock
+        </button>
+
+        <h1>📦 All Products</h1>
       </div>
 
-      <div class="erp-two-buttons">
-        <button type="button" onclick="document.getElementById('productName').focus()">📦 Products</button>
-        <button type="button">↶ History</button>
-      </div>
-
-      <div class="erp-form-card">
-        <h2>📦 Add Product</h2>
-
-        <input id="productName" type="text" placeholder="Product name">
-        <input id="productUnit" type="text" placeholder="Unit (pcs, kg, box...)">
-        <input id="purchasePrice" type="number" placeholder="Purchase price">
-        <input id="sellingPrice" type="number" placeholder="Selling price">
-        <input id="openingStock" type="number" min="0" step="0.01" placeholder="Opening stock quantity">
-
-        <button class="erp-primary-btn full" type="button" onclick="addProduct()">💾 Save Product</button>
-      </div>
-
-      <div class="erp-form-card">
-        <h2>🛒 Purchase / Add Stock</h2>
-
-        <select id="purchaseProduct">
-          <option value="">Select Product</option>
-        </select>
-
-        <input id="purchaseQuantity" type="number" min="0.01" step="0.01" placeholder="Quantity">
-        <input id="purchaseUnitPrice" type="number" min="0" step="0.01" placeholder="Unit price">
-        <input id="purchaseSupplier" type="text" placeholder="Supplier name">
-
-        <select id="purchasePaymentType">
-          <option value="cash">💵 Cash Purchase</option>
-          <option value="credit">📒 Credit Purchase</option>
-        </select>
-
-        <p class="erp-total">Total: <strong id="purchaseTotal">0 ETB</strong></p>
-
-        <button class="erp-primary-btn full" type="button" onclick="registerPurchase()">💾 Record Purchase</button>
-      </div>
-
-      <div class="erp-table-card">
-        <h2>📋 Products</h2>
-        <div style="overflow-x:auto;">
+      <div class="erp-table-card stock-history-page-card">
+        <div class="stock-history-page-scroll">
           <table>
             <thead>
               <tr>
@@ -1861,8 +3095,253 @@ window.addEventListener('popstate', function () {
                 <th>Stock</th>
               </tr>
             </thead>
-            <tbody id="productsTable">
-              <tr><td colspan="6">Loading...</td></tr>
+
+            <tbody id="allProductsPageTable">
+              <tr>
+                <td colspan="6">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ADD PRODUCT VIEW -->
+    <section id="erpAddProductView" class="erp-view">
+      <div class="stock-history-header">
+        <button
+          type="button"
+          class="stock-history-back-btn"
+          onclick="erpShowView('erpStockView')"
+        >
+          ← Back to Stock
+        </button>
+
+        <h1>📦 Add Product</h1>
+      </div>
+
+      <div class="erp-form-card">
+        <h2>➕ New Product</h2>
+
+        <input
+          id="productName"
+          type="text"
+          placeholder="Product name"
+        >
+
+        <input
+          id="productUnit"
+          type="text"
+          placeholder="Unit (pcs, kg, box...)"
+        >
+
+        <input
+          id="purchasePrice"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="Purchase price"
+        >
+
+        <input
+          id="sellingPrice"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="Selling price"
+        >
+
+        <input
+          id="openingStock"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="Opening stock quantity"
+        >
+
+        <button
+          class="erp-primary-btn full"
+          type="button"
+          onclick="addProduct()"
+        >
+          💾 Save Product
+        </button>
+      </div>
+    </section>
+
+
+    <!-- PURCHASE / ADD STOCK VIEW -->
+    <section id="erpPurchaseView" class="erp-view">
+      <div class="stock-history-header">
+        <button
+          type="button"
+          class="stock-history-back-btn"
+          onclick="erpShowView('erpStockView')"
+        >
+          ← Back to Stock
+        </button>
+
+        <h1>🛒 Purchase / Add Stock</h1>
+      </div>
+
+      <div class="erp-form-card">
+        <h2>🛒 Record Purchase</h2>
+
+        <select id="purchaseProduct">
+          <option value="">Select Product</option>
+        </select>
+
+        <input
+          id="purchaseQuantity"
+          type="number"
+          min="0.01"
+          step="0.01"
+          placeholder="Quantity"
+        >
+
+        <input
+          id="purchaseUnitPrice"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="Unit price"
+        >
+
+        <select id="purchaseSupplier">
+          <option value="">Select Supplier</option>
+        </select>
+
+        <select id="purchasePaymentType">
+          <option value="cash">💵 Cash Purchase</option>
+          <option value="credit">📒 Credit Purchase</option>
+        </select>
+
+        <p class="erp-total">
+          Total: <strong id="purchaseTotal">0 ETB</strong>
+        </p>
+
+        <button
+          class="erp-primary-btn full"
+          type="button"
+          onclick="registerPurchase()"
+        >
+          💾 Record Purchase
+        </button>
+      </div>
+    </section>
+
+    <!-- LOW STOCK VIEW -->
+<section id="erpLowStockView" class="erp-view">
+  <div class="stock-history-header">
+    <button
+      type="button"
+      class="stock-history-back-btn"
+      onclick="erpShowView('erpStockView')"
+    >
+      ← Back to Stock
+    </button>
+
+    <h1>⚠️ Low Stock</h1>
+  </div>
+
+  <div class="erp-table-card stock-history-page-card">
+    <div class="stock-history-page-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Product</th>
+            <th>Unit</th>
+            <th>Purchase</th>
+            <th>Sale</th>
+            <th>Stock</th>
+          </tr>
+        </thead>
+
+        <tbody id="lowStockPageTable">
+          <tr>
+            <td colspan="6">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- OUT OF STOCK VIEW -->
+<section id="erpOutOfStockView" class="erp-view">
+  <div class="stock-history-header">
+    <button
+      type="button"
+      class="stock-history-back-btn"
+      onclick="erpShowView('erpStockView')"
+    >
+      ← Back to Stock
+    </button>
+
+    <h1>📦 Out of Stock</h1>
+  </div>
+
+  <div class="erp-table-card stock-history-page-card">
+    <div class="stock-history-page-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Product</th>
+            <th>Unit</th>
+            <th>Purchase</th>
+            <th>Sale</th>
+            <th>Stock</th>
+          </tr>
+        </thead>
+
+        <tbody id="outOfStockPageTable">
+          <tr>
+            <td colspan="6">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- PURCHASE HISTORY VIEW -->
+    <section id="erpPurchaseHistoryView" class="erp-view">
+      <div class="stock-history-header">
+        <button
+          type="button"
+          class="stock-history-back-btn"
+          onclick="erpShowView('erpStockView')"
+        >
+          ← Back to Stock
+        </button>
+
+        <h1>🛒 Purchase History</h1>
+      </div>
+
+      <div class="erp-table-card stock-history-page-card">
+        <div class="stock-history-page-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Product</th>
+                <th>Supplier</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody id="purchaseHistoryPageTable">
+              <tr>
+                <td colspan="7">Loading...</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -1894,7 +3373,7 @@ window.addEventListener('popstate', function () {
             <span><b>Products</b><small>Manage your products</small></span>
             <strong>›</strong>
           </button>
-          <button type="button">
+          <button type="button" onclick="openStockHistoryFromMenu()">
             <span class="erp-icon gray">↶</span>
             <span><b>History</b><small>View stock movements</small></span>
             <strong>›</strong>
@@ -1905,16 +3384,43 @@ window.addEventListener('popstate', function () {
       <div class="erp-menu-section">
         <label>CUSTOMERS</label>
         <div class="erp-menu-card">
-          <button type="button">
+          <button type="button" onclick="openCustomers()">
             <span class="erp-icon blue">👥</span>
             <span><b>Customers</b><small>Customer list and profiles</small></span>
             <strong>›</strong>
+          </button>
           <button type="button" onclick="openCustomerCredits()">
   <span class="erp-icon yellow">▤</span>
   <span><b>Credits</b><small>Collect outstanding credit</small></span>
   <strong>›</strong>
 </button>
      
+        </div>
+      </div>
+
+      <div class="erp-menu-section">
+        <label>REPAIRS</label>
+        <div class="erp-menu-card">
+          <button type="button" onclick="openNewRepair()">
+            <span class="erp-icon blue">＋</span>
+            <span><b>New Repair</b><small>Register a new repair</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button" onclick="openActiveRepairs()">
+            <span class="erp-icon yellow">🔧</span>
+            <span><b>Active Repairs</b><small>Repairs currently in progress</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button" onclick="openCompletedRepairs()">
+            <span class="erp-icon green">✓</span>
+            <span><b>Completed</b><small>Completed repair jobs</small></span>
+            <strong>›</strong>
+          </button>
+          <button type="button" onclick="openRepairHistory()">
+            <span class="erp-icon gray">▤</span>
+            <span><b>Repair History</b><small>View all repair records</small></span>
+            <strong>›</strong>
+          </button>
         </div>
       </div>
 
@@ -1937,17 +3443,17 @@ window.addEventListener('popstate', function () {
       <div class="erp-menu-section">
         <label>MONEY</label>
         <div class="erp-menu-card">
-          <button type="button">
+          <button type="button" onclick="openExpensesView()">
             <span class="erp-icon red">↘</span>
             <span><b>Expenses</b><small>Track business expenses</small></span>
             <strong>›</strong>
           </button>
-          <button type="button">
+          <button type="button" onclick="openCashInOutView()">
             <span class="erp-icon blue">↔</span>
             <span><b>Cash In / Out</b><small>Manage cash movement</small></span>
             <strong>›</strong>
           </button>
-          <button type="button">
+          <button type="button" onclick="openPaymentBalancesView()">
             <span class="erp-icon green">▣</span>
             <span><b>Payment Balances</b><small>Track payments and balances</small></span>
             <strong>›</strong>
@@ -1973,11 +3479,13 @@ window.addEventListener('popstate', function () {
             <span><b>Settings</b><small>Application settings</small></span>
             <strong>›</strong>
           </button>
-          <button type="button">
+          
+
+        <button type="button" onclick="openCorrectionsView()">
             <span class="erp-icon gray">↶</span>
             <span><b>Corrections</b><small>Correct recorded transactions</small></span>
-            <strong>›</strong>
-          </button>
+           <strong>›</strong>
+         </button>
           <button type="button">
             <span class="erp-icon gray">⇩</span>
             <span><b>Exports</b><small>Export business reports</small></span>
@@ -2083,7 +3591,7 @@ window.addEventListener('popstate', function () {
   <nav class="erp-bottom-nav">
     <button class="erp-nav-item active" type="button" data-view="erpHomeView" onclick="erpShowView('erpHomeView')">
       <span class="erp-nav-icon">⌂</span>
-      <small>Home</small>
+      <small data-i18n="home">Home</small>
     </button>
 
     <button class="erp-nav-item" type="button" data-view="erpSalesView" onclick="erpShowView('erpSalesView')">
@@ -2095,18 +3603,83 @@ window.addEventListener('popstate', function () {
 
     <button class="erp-nav-item" type="button" data-view="erpStockView" onclick="erpShowView('erpStockView')">
       <span class="erp-nav-icon">◇</span>
-      <small>Stock</small>
+      <small data-i18n="stock">Stock</small>
     </button>
 
     <button class="erp-nav-item" type="button" data-view="erpMoreView" onclick="erpShowView('erpMoreView')">
       <span class="erp-nav-icon">•••</span>
-      <small>More</small>
+      <small data-i18n="more">More</small>
     </button>
   </nav>
 
   </div>
 
-  <section id="settingsView" style="display:none;min-height:100vh;background:#f4f8f8;padding:0 14px 30px;box-sizing:border-box;">
+  
+<section id="correctionsView" style="display:none;min-height:100vh;background:#f4f8f8;padding:0 14px 30px;box-sizing:border-box;">
+  <div style="max-width:520px;margin:0 auto;">
+
+    <div style="display:flex;align-items:center;gap:12px;padding:16px 2px;position:sticky;top:0;z-index:2;background:#f4f8f8;">
+      <button type="button" onclick="closeCorrectionsView()" style="width:42px;height:42px;border:0;border-radius:12px;background:#fff;color:#294b4d;font-size:22px;">←</button>
+      <div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#71817f;">CORRECTIONS</div>
+        <h2 style="margin:2px 0 0;color:#294b4d;font-size:20px;">↶ Corrections</h2>
+      </div>
+    </div>
+
+    <div class="erp-menu-card" style="margin-top:8px;border-radius:16px;">
+
+      <button type="button" onclick="openCorrectionType('sale')">
+        <span class="erp-icon blue">🛒</span>
+        <span><b>Sales Correction</b><small>Correct a recorded sale</small></span>
+        <strong>›</strong>
+      </button>
+
+      <button type="button" onclick="openCorrectionType('purchase')">
+        <span class="erp-icon green">📦</span>
+        <span><b>Purchase Correction</b><small>Correct a recorded purchase</small></span>
+        <strong>›</strong>
+      </button>
+
+      <button type="button" onclick="openCorrectionType('expense')">
+        <span class="erp-icon red">↘</span>
+        <span><b>Expense Correction</b><small>Correct a recorded expense</small></span>
+        <strong>›</strong>
+      </button>
+
+      <button type="button" onclick="openCorrectionType('income')">
+        <span class="erp-icon teal">↗</span>
+        <span><b>Cash / Income Correction</b><small>Correct recorded cash income</small></span>
+        <strong>›</strong>
+      </button>
+
+      <button type="button" onclick="openCorrectionType('payment')">
+        <span class="erp-icon yellow">▣</span>
+        <span><b>Payment Correction</b><small>Correct a recorded payment</small></span>
+        <strong>›</strong>
+      </button>
+
+      <button type="button" onclick="openCorrectionType('stock')">
+        <span class="erp-icon purple">⚖</span>
+        <span><b>Stock Adjustment</b><small>Correct stock quantity</small></span>
+        <strong>›</strong>
+      </button>
+
+      <button type="button" onclick="openCorrectionType('status')">
+        <span class="erp-icon gray">📊</span>
+        <span><b>Correction Status</b><small>View correction history</small></span>
+        <strong>›</strong>
+      </button>
+
+    </div>
+
+    <div id="correctionTypeMessage" style="margin-top:14px;"></div>
+
+    <div id="correctionFormContainer" style="margin-top:14px;"></div>
+
+  </div>
+</section>
+
+<section id="settingsView" style="display:none;min-height:100vh;background:#f4f8f8;padding:0 14px 30px;box-sizing:border-box;">
   <div style="max-width:520px;margin:0 auto;">
     <div style="display:flex;align-items:center;gap:12px;padding:16px 2px;position:sticky;top:0;z-index:2;background:#f4f8f8;">
       <button type="button" onclick="closeSettingsView()" style="width:42px;height:42px;border:0;border-radius:12px;background:#fff;color:#294b4d;font-size:22px;">←</button>
@@ -2118,19 +3691,19 @@ window.addEventListener('popstate', function () {
 
     <div class="erp-menu-card" style="margin-top:8px;border-radius:16px;">
       <div style="padding:16px 12px;border-bottom:1px solid #eef3f3;">
-        <b style="color:#294b4d;">Language / ቋንቋ</b>
-        <small style="display:block;margin-top:4px;color:#71817f;">Choose application language</small>
+        <b style="color:#294b4d;" data-i18n="language">Language</b>
+        <small style="display:block;margin-top:4px;color:#71817f;" data-i18n="chooseLanguage">Choose application language</small>
       </div>
 
       <button type="button" onclick="setLanguage('am')">
         <span class="erp-icon teal">አማ</span>
-        <span><b>አማርኛ</b><small>Amharic</small></span>
+        <span><b data-i18n="amharic">Amharic</b><small data-i18n="amharic">Amharic</small></span>
         <strong>›</strong>
       </button>
 
       <button type="button" onclick="setLanguage('en')">
         <span class="erp-icon teal">EN</span>
-        <span><b>English</b><small>English</small></span>
+        <span><b data-i18n="english">English</b><small data-i18n="english">English</small></span>
         <strong>›</strong>
       </button>
     </div>
@@ -2156,6 +3729,7 @@ window.addEventListener('popstate', function () {
             <th>Email</th>
             <th>Username</th>
             <th>Role</th>
+            <th>Department</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -2171,6 +3745,137 @@ window.addEventListener('popstate', function () {
     <p id="adminUserMessage" class="erp-admin-message"></p>
   </section>
 
+</div>
+
+<!-- Edit User Modal -->
+
+<div id="editUserModal"
+     class="erp-user-modal"
+     style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.68);align-items:center;justify-content:center;padding:20px;box-sizing:border-box;"
+     onclick="if(event.target === this) closeEditUserModal()">
+  <div class="erp-user-modal-card">
+    <h2>✏️ Edit User</h2>
+<p style="margin:-16px 0 24px;color:#64748b;font-size:14px;">
+  Update the user's account information.
+</p>
+
+<input type="hidden" id="editUserId">
+
+    <label for="editUserName">Name</label>
+    <input id="editUserName" type="text" placeholder="Name">
+
+    <label for="editUserUsername">Username</label>
+    <input id="editUserUsername" type="text" placeholder="Username">
+
+    <label for="editUserEmail">Email</label>
+    <input id="editUserEmail" type="email" placeholder="Email">
+
+    <label for="editUserDepartment">Department</label>
+    <select id="editUserDepartment">
+      <option value="general">General</option>
+      <option value="stock">Stock</option>
+      <option value="sales">Sales</option>
+      <option value="repairs">Repairs</option>
+      <option value="finance">Finance</option>
+    </select>
+
+    
+    <div id="editUserPermissions" style="margin-top:18px;padding:14px;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;">
+      <div style="font-weight:700;color:#294b4d;margin-bottom:10px;">
+        🔐 Delete Permissions
+      </div>
+
+      <label style="display:flex;align-items:center;gap:10px;margin:9px 0;">
+        <input type="checkbox" id="permissionDeleteStock">
+        <span>🗑️ Delete Stock</span>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:10px;margin:9px 0;">
+        <input type="checkbox" id="permissionDeleteSales">
+        <span>🗑️ Delete Sales</span>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:10px;margin:9px 0;">
+        <input type="checkbox" id="permissionDeleteRepairs">
+        <span>🗑️ Delete Repairs</span>
+      </label>
+    </div>
+
+<p id="editUserMessage" class="erp-admin-message"></p>
+
+    <div class="erp-user-modal-actions">
+      <button type="button" class="erp-user-cancel-btn" onclick="closeEditUserModal()">
+        Cancel
+      </button>
+
+ <button type="button" class="erp-user-save-btn" onclick="saveEditedUser()">
+  💾 Save Changes
+</button>
+    </div>
+  </div>
+</div>
+
+<div id="changePasswordModal"
+     class="erp-user-modal"
+     style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.68);align-items:center;justify-content:center;padding:20px;box-sizing:border-box;"
+     onclick="if(event.target === this) closeChangePasswordModal()">
+
+  <div class="erp-user-modal-card">
+
+    <h2>🔑 Change Password</h2>
+
+    <p id="changePasswordUserName"
+       style="margin:-16px 0 24px;color:#64748b;font-size:14px;">
+      Change user password
+    </p>
+
+    <input type="hidden" id="changePasswordUserId">
+
+    <label for="newUserPassword">
+      New Password
+    </label>
+
+    <input
+      id="newUserPassword"
+      type="password"
+      placeholder="Enter new password"
+      autocomplete="new-password"
+    >
+
+    <label for="confirmUserPassword">
+      Confirm Password
+    </label>
+
+    <input
+      id="confirmUserPassword"
+      type="password"
+      placeholder="Confirm new password"
+      autocomplete="new-password"
+    >
+
+    <p id="changePasswordMessage"
+       class="erp-admin-message">
+    </p>
+
+    <div class="erp-user-modal-actions">
+
+      <button
+        type="button"
+        class="erp-user-cancel-btn"
+        onclick="closeChangePasswordModal()">
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="erp-user-save-btn"
+        onclick="saveChangedUserPassword()">
+        🔐 Change Password
+      </button>
+
+    </div>
+
+  </div>
 </div>
 
 <script>
@@ -2197,43 +3902,59 @@ loadSeason();
 
 
 async function restoreSession() {
+  const loadingScreen =
+    document.getElementById('sessionLoadingScreen');
+
   try {
     const response = await fetch('/api/me', {
       method: 'GET',
       credentials: 'include'
     });
 
-    if (!response.ok) {
-      return;
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data.user) {
+        window.currentUser = data.user;
+
+        updateWelcomeUserName();
+
+        const loginScreen =
+          document.getElementById('loginScreen');
+
+        const dashboard =
+          document.getElementById('dashboard');
+
+        if (loginScreen) {
+          loginScreen.style.display = 'none';
+        }
+
+        if (dashboard) {
+          dashboard.style.display = 'block';
+        }
+
+        const adminUserManagement =
+          document.getElementById('adminUserManagement');
+
+        if (adminUserManagement) {
+          adminUserManagement.style.display = 'none';
+        }
+
+        const savedView = sessionStorage.getItem('erpCurrentView');
+
+        if (savedView) {
+          erpShowView(savedView);
+        }
+      }
     }
 
-    const data = await response.json();
-
-    if (!data.user) {
-      return;
-    }
-
-    window.currentUser = data.user;
-
-    const loginScreen = document.getElementById('loginScreen');
-    const dashboard = document.getElementById('dashboard');
-
-    if (loginScreen) {
-      loginScreen.style.display = 'none';
-    }
-
-    if (dashboard) {
-      dashboard.style.display = 'block';
-    }
-
-    const adminUserManagement =
-      document.getElementById('adminUserManagement');
-
-    if (adminUserManagement) {
-      adminUserManagement.style.display = 'none';
-    }
   } catch (error) {
     console.error('Session restore error:', error);
+
+  } finally {
+    if (loadingScreen) {
+      loadingScreen.style.display = 'none';
+    }
   }
 }
 
@@ -2287,21 +4008,98 @@ restoreSession();
     loadUsers(); // ሰንጠረዡን ማደስ
   }
 
+// 🚚 Purchase Supplier መረጃ ማምጣት
+async function loadPurchaseSuppliers() {
+  const select = document.getElementById("purchaseSupplier");
+
+  if (!select) return;
+
+  try {
+    const res = await fetch("/api/suppliers");
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || "Failed to load suppliers");
+    }
+
+    const suppliers = data.suppliers || [];
+
+    select.innerHTML = `
+      <option value="">Select Supplier</option>
+      ${suppliers.map(supplier => `
+        <option value="${escapeHtml(supplier.name)}">
+          ${escapeHtml(supplier.name)}
+        </option>
+      `).join("")}
+    `;
+
+  } catch (err) {
+    console.error("Error loading suppliers:", err);
+
+    select.innerHTML = `
+      <option value="">Failed to load suppliers</option>
+    `;
+  }
+}
   // ገጹ ሲከፈት መረጃዎችን አምጣ
 
 // 📦 Products መረጃ ማምጣት
 async function loadProducts() {
   try {
     const res = await fetch("/api/products");
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data.results?.[0]?.response?.result?.rows || [];
+
+  } catch (err) {
+    console.error("Error loading products:", err);
+    return [];
+  }
+}
+
+
+
+
+
+// 🛒 Purchase / Add Stock Dedicated Page
+function openPurchasePage() {
+  erpShowView("erpPurchaseView");
+}
+
+// 📦 Add Product Dedicated Page
+function openAddProductPage() {
+  erpShowView("erpAddProductView");
+
+  setTimeout(() => {
+    const name = document.getElementById("productName");
+    if (name) name.focus();
+  }, 50);
+}
+
+// 📦 All Products Dedicated Page
+async function loadAllProductsPage() {
+  const table = document.getElementById("allProductsPageTable");
+  if (!table) return;
+
+  table.innerHTML = `
+    <tr>
+      <td colspan="6">Loading...</td>
+    </tr>
+  `;
+
+  try {
+    const res = await fetch("/api/products");
     const data = await res.json();
 
     const rows = data.results?.[0]?.response?.result?.rows || [];
-    const table = document.getElementById("productsTable");
 
     if (!rows.length) {
       table.innerHTML = `
         <tr>
-          <td colspan="6">ምንም Product አልተመዘገበም</td>
+          <td colspan="6">No products found.</td>
         </tr>
       `;
       return;
@@ -2309,34 +4107,184 @@ async function loadProducts() {
 
     table.innerHTML = rows.map(row => `
       <tr>
-        <td>${row[0].value}</td>
-        <td>${row[1].value}</td>
-        <td>${row[2].value}</td>
-        <td>${row[3].value}</td>
-        <td>${row[4].value}</td>
-        <td>${row[5].value}</td>
+        <td>${escapeHtml(String(row[0]?.value ?? ""))}</td>
+        <td>${escapeHtml(String(row[1]?.value ?? ""))}</td>
+        <td>${escapeHtml(String(row[2]?.value ?? ""))}</td>
+        <td>${escapeHtml(String(row[3]?.value ?? ""))}</td>
+        <td>${escapeHtml(String(row[4]?.value ?? ""))}</td>
+        <td><strong>${escapeHtml(String(row[5]?.value ?? ""))}</strong></td>
       </tr>
     `).join("");
 
-    const healthyCount = rows.filter(row => Number(row[5].value) > 0).length;
-    const lowStockCount = rows.filter(row => {
-      const stock = Number(row[5].value);
-      return stock > 0 && stock <= 5;
-    }).length;
+  } catch (error) {
+    console.error("All Products page error:", error);
 
-    const healthyEl = document.getElementById("healthyStockCount");
-    const lowEl = document.getElementById("lowStockCount");
-    const totalEl = document.getElementById("totalProductsCount");
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">Failed to load products.</td>
+      </tr>
+    `;
+  }
+}
 
-    if (healthyEl) healthyEl.textContent = healthyCount;
-    if (lowEl) lowEl.textContent = lowStockCount;
-    if (totalEl) totalEl.textContent = rows.length;
+function openAllProductsPage() {
+  erpShowView("erpAllProductsView");
 
-    const emptyBox = document.querySelector("#erpStockView .erp-empty");
-    if (emptyBox) emptyBox.style.display = "none";
+  setTimeout(() => {
+    loadAllProductsPage();
+  }, 50);
+}
+
+// 📦 Low Stock / Out of Stock Pages
+async function loadStockFilterPage(type) {
+  const tableId =
+    type === "low"
+      ? "lowStockPageTable"
+      : "outOfStockPageTable";
+
+  const table = document.getElementById(tableId);
+  if (!table) return;
+
+  table.innerHTML = `
+    <tr>
+      <td colspan="6">Loading...</td>
+    </tr>
+  `;
+
+  try {
+    const res = await fetch("/api/products");
+    const data = await res.json();
+
+    const rows = data.results?.[0]?.response?.result?.rows || [];
+
+    const filtered = rows.filter(row => {
+      const stock = Number(row[5]?.value) || 0;
+
+      if (type === "low") {
+        return stock > 0 && stock <= 5;
+      }
+
+      return stock <= 0;
+    });
+
+    if (!filtered.length) {
+      table.innerHTML = `
+        <tr>
+          <td colspan="6">
+            ${type === "low"
+              ? "No low stock products found."
+              : "No out of stock products found."}
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    table.innerHTML = filtered.map(row => `
+      <tr>
+        <td>${escapeHtml(String(row[0]?.value ?? ""))}</td>
+        <td>${escapeHtml(String(row[1]?.value ?? ""))}</td>
+        <td>${escapeHtml(String(row[2]?.value ?? ""))}</td>
+        <td>${escapeHtml(String(row[3]?.value ?? ""))}</td>
+        <td>${escapeHtml(String(row[4]?.value ?? ""))}</td>
+        <td><strong>${escapeHtml(String(row[5]?.value ?? ""))}</strong></td>
+      </tr>
+    `).join("");
+
+  } catch (error) {
+    console.error("Stock filter page error:", error);
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">Failed to load products.</td>
+      </tr>
+    `;
+  }
+}
+
+function openLowStockPage() {
+  erpShowView("erpLowStockView");
+
+  setTimeout(() => {
+    loadStockFilterPage("low");
+  }, 50);
+}
+
+function openOutOfStockPage() {
+  erpShowView("erpOutOfStockView");
+
+  setTimeout(() => {
+    loadStockFilterPage("out");
+  }, 50);
+}
+
+// 🔎 Stock Product Filters
+async function loadStockHistory() {
+  const table = document.getElementById("stockHistoryPageTable");
+
+  if (!table) return;
+
+  table.innerHTML = `
+    <tr>
+      <td colspan="7">Loading...</td>
+    </tr>
+  `;
+
+  try {
+    const res = await fetch("/api/stock-movements");
+    const data = await res.json();
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      table.innerHTML = `
+        <tr>
+          <td colspan="7">ምንም Stock History አልተመዘገበም</td>
+        </tr>
+      `;
+      return;
+    }
+
+    table.innerHTML = rows.map(row => {
+      const type = row[4].value;
+      const quantity = Number(row[5].value);
+      const isIn = quantity > 0;
+
+      const movement = `${isIn ? "+" : ""}${quantity} ${row[3].value}`;
+
+      const typeLabel =
+        type === "purchase" ? "Purchase" :
+        type === "sale" ? "Sale" :
+        type === "opening" ? "Opening" :
+        type === "production" ? "Production" :
+        type;
+
+      const movementStyle = isIn
+        ? "color:green;font-weight:700;"
+        : "color:red;font-weight:700;";
+
+      return `
+        <tr>
+          <td>${row[10].value}</td>
+          <td>${row[2].value}</td>
+          <td>${typeLabel}</td>
+          <td style="${movementStyle}">${movement}</td>
+          <td>${row[6].value}</td>
+          <td>${row[7].value}</td>
+          <td>${row[9].value || ""}</td>
+        </tr>
+      `;
+    }).join("");
 
   } catch (err) {
-    console.error("Error loading products:", err);
+    console.error("Error loading stock history:", err);
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="7">Stock History ማምጣት አልተቻለም</td>
+      </tr>
+    `;
   }
 }
 
@@ -2548,6 +4496,9 @@ async function registerPurchase() {
     return alert("እባክዎን ትክክለኛ የአንዱ ዋጋ ያስገቡ!");
   }
 
+if (payment_type === "credit" && !supplier) {
+  return alert("እባክዎን Supplier ይምረጡ!");
+}
   try {
     const res = await fetch("/api/purchases", {
       method: "POST",
@@ -2578,6 +4529,7 @@ async function registerPurchase() {
     document.getElementById("purchaseTotal").textContent = "0 ETB";
 
     await loadPurchaseProducts();
+    await loadPurchaseSuppliers();
     await loadProducts();
     await loadDashboard();
 
@@ -2588,6 +4540,7 @@ async function registerPurchase() {
 }
 
 loadPurchaseProducts();
+loadPurchaseSuppliers();
 
 
 async function loadSaleProducts() {
@@ -2646,6 +4599,14 @@ document.getElementById("saleUnitPrice").addEventListener(
 );
 
 async function registerSale() {
+  const recordSaleButton = document.querySelector(
+    'button[onclick="registerSale()"]'
+  );
+
+  if (recordSaleButton?.disabled) {
+    return;
+  }
+
   const product_id =
     document.getElementById("saleProduct").value;
 
@@ -2684,6 +4645,15 @@ async function registerSale() {
     return alert(
       `በቂ Stock የለም! ያለው Stock: ${stock}`
     );
+  }
+
+  // Prevent accidental double-click / duplicate sale submissions.
+  if (recordSaleButton) {
+    recordSaleButton.disabled = true;
+    recordSaleButton.dataset.originalText =
+      recordSaleButton.innerHTML;
+    recordSaleButton.innerHTML = "⏳ Recording Sale...";
+    recordSaleButton.classList.add("sale-submit-loading");
   }
 
   try {
@@ -2725,10 +4695,296 @@ async function registerSale() {
   } catch (err) {
     console.error("Sale error:", err);
     alert("ሽያጭ ማስገባት ላይ ስህተት ተፈጥሯል!");
+  } finally {
+    if (recordSaleButton) {
+      recordSaleButton.disabled = false;
+      recordSaleButton.innerHTML =
+        recordSaleButton.dataset.originalText || "💾 Record Sale";
+      recordSaleButton.classList.remove("sale-submit-loading");
+      delete recordSaleButton.dataset.originalText;
+    }
   }
 }
 
 loadSaleProducts();
+
+// 📊 Sales Page Summary
+let currentSalesPeriod = "today";
+
+function formatSalesAmount(value) {
+  return Number(value || 0).toLocaleString() + " ETB";
+}
+
+
+
+function renderSalesList(sales) {
+  const container = document.getElementById("salesList");
+
+  if (!container) return;
+
+  if (!sales || !sales.length) {
+    container.innerHTML = `
+      <div class="erp-empty">
+        <div class="erp-empty-icon">🛒</div>
+        <p>No sales found for the selected period.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const currentUser = window.currentUser;
+
+  const canDeleteSales =
+    currentUser?.role === "admin" ||
+    Array.isArray(currentUser?.permissions) &&
+    currentUser.permissions.includes("delete_sales");
+
+  container.innerHTML = `
+    <div class="erp-form-card">
+      <h2>📋 Sales Records</h2>
+
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:10px;">Product</th>
+              <th style="text-align:left; padding:10px;">Qty</th>
+              <th style="text-align:left; padding:10px;">Unit Price</th>
+              <th style="text-align:left; padding:10px;">Customer</th>
+              <th style="text-align:left; padding:10px;">Payment</th>
+              <th style="text-align:left; padding:10px;">Total</th>
+              <th style="text-align:left; padding:10px;">Date</th>
+              <th style="text-align:left; padding:10px;">Status</th>
+              ${
+                canDeleteSales
+                  ? `<th style="text-align:left; padding:10px;">Action</th>`
+                  : ""
+              }
+            </tr>
+          </thead>
+
+          <tbody>
+            ${sales.map(sale => {
+              const saleId = sale[0]?.value || "";
+              const isCorrected = Number(sale[10]?.value || 0) === 1;
+
+              return `
+                <tr style="${
+                  isCorrected
+                    ? "background:#fff7ed;border-left:4px solid #f97316;"
+                    : ""
+                }">
+
+                  <td style="padding:10px;">
+                    ${sale[2]?.value || ""}
+                  </td>
+
+                  <td style="padding:10px;">
+                    ${sale[3]?.value || 0}
+                  </td>
+
+                  <td style="padding:10px;">
+                    ${formatSalesAmount(sale[4]?.value)}
+                  </td>
+
+                  <td style="padding:10px;">
+                    ${sale[6]?.value || "-"}
+                  </td>
+
+                  <td style="padding:10px;">
+                    ${
+                      sale[8]?.value === "credit"
+                        ? "📒 Credit"
+                        : "💵 Cash"
+                    }
+                  </td>
+
+                  <td style="padding:10px;font-weight:600;">
+                    ${formatSalesAmount(sale[7]?.value)}
+                  </td>
+
+                  <td style="padding:10px;">
+                    ${sale[9]?.value || ""}
+                  </td>
+
+                  <td style="padding:10px;">
+                    ${
+                      isCorrected
+                        ? `<span style="
+                            display:inline-block;
+                            padding:5px 9px;
+                            border-radius:999px;
+                            background:#fed7aa;
+                            color:#9a3412;
+                            font-weight:700;
+                          ">↶ Corrected</span>`
+                        : `<span style="color:#64748b;">Normal</span>`
+                    }
+                  </td>
+
+                  ${
+                    canDeleteSales
+                      ? `
+                        <td style="padding:10px;">
+                          <button
+                            type="button"
+                            onclick="deleteSale(${saleId})"
+                            style="
+                              border:0;
+                              border-radius:8px;
+                              padding:7px 10px;
+                              background:#dc2626;
+                              color:#fff;
+                              cursor:pointer;
+                            "
+                          >
+                            🗑️ Delete
+                          </button>
+                        </td>
+                      `
+                      : ""
+                  }
+
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+async function deleteSale(saleId) {
+  if (!saleId) {
+    alert("Invalid sale ID");
+    return;
+  }
+
+  const confirmed = confirm(
+    "ይህን ሽያጭ መሰረዝ ይፈልጋሉ?\n\n" +
+    "Stock ይመለሳል፣ Cash/Receivable ይስተካከላል።"
+  );
+
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`/api/sales/${saleId}`, {
+      method: "DELETE",
+      credentials: "include"
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(
+        data.error ||
+        "ሽያጩን መሰረዝ አልተሳካም"
+      );
+      return;
+    }
+
+    alert("ሽያጩ በትክክል ተሰርዟል።");
+
+    await loadSalesSummary(currentSalesPeriod);
+    await loadProducts();
+    await loadSaleProducts();
+    await loadDashboard();
+
+  } catch (error) {
+    console.error("Delete sale error:", error);
+    alert("ሽያጩን ለመሰረዝ ላይ ስህተት ተፈጥሯል።");
+  }
+}
+
+async function loadSalesSummary(period = "today") {
+  try {
+    currentSalesPeriod = period;
+
+    const res = await fetch(
+      "/api/sales-summary?period=" + encodeURIComponent(period)
+    );
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || "Failed to load sales summary");
+    }
+
+    const summary = data.summary || {};
+
+    const revenue = document.getElementById("salesViewRevenue");
+    const count = document.getElementById("salesViewCount");
+    const credit = document.getElementById("salesViewCredit");
+    const collected = document.getElementById("salesViewCollected");
+    const creditReturn = document.getElementById("salesViewCreditReturn");
+    const expenses = document.getElementById("salesViewExpenses");
+
+    if (revenue) {
+      revenue.textContent = formatSalesAmount(summary.revenue);
+    }
+
+    if (count) {
+      count.textContent = Number(summary.sales_count || 0).toLocaleString();
+    }
+
+    if (credit) {
+      credit.textContent = formatSalesAmount(summary.credit);
+    }
+
+    if (collected) {
+      collected.textContent =
+        formatSalesAmount(summary.sales_collected);
+    }
+
+    if (creditReturn) {
+      creditReturn.textContent =
+        formatSalesAmount(summary.credit_return);
+    }
+
+    if (expenses) {
+      expenses.textContent = formatSalesAmount(summary.expenses);
+    }
+
+    renderSalesList(data.sales || []);
+
+  } catch (err) {
+    console.error("Sales summary error:", err);
+
+    const container = document.getElementById("salesList");
+
+    if (container) {
+      container.innerHTML = `
+        <div class="erp-empty">
+          <div class="erp-empty-icon">⚠️</div>
+          <p>Failed to load sales data.</p>
+        </div>
+      `;
+    }
+  }
+}
+
+
+// Sales period tabs
+document.querySelectorAll("#salesPeriodTabs button").forEach(button => {
+  button.addEventListener("click", function () {
+
+    document
+      .querySelectorAll("#salesPeriodTabs button")
+      .forEach(btn => btn.classList.remove("active"));
+
+    this.classList.add("active");
+
+    const period = this.dataset.period || "today";
+
+    loadSalesSummary(period);
+  });
+});
+
+
+// Initial Sales page load
+loadSalesSummary("today");
+
 
 
 async function registerIncome() {
@@ -2942,6 +5198,1528 @@ function closeUserManagement() {
 }
 
 
+async function submitPurchaseCorrection() {
+  const purchaseId =
+    document.getElementById('purchaseCorrectionPurchaseId')?.value;
+
+  const reason =
+    document.getElementById('purchaseCorrectionReason')?.value.trim();
+
+  const message =
+    document.getElementById('purchaseCorrectionMessage');
+
+  if (!purchaseId) {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#b91c1c;font-weight:700;">Please select a purchase.</div>';
+    }
+    return;
+  }
+
+  if (!reason) {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#b91c1c;font-weight:700;">Please enter a correction reason.</div>';
+    }
+    return;
+  }
+
+  const confirmed = confirm(
+    `Correct Purchase #${purchaseId}?\n\n` +
+    `The original purchase will remain in the records.\n` +
+    `Stock and related financial records will be reversed.\n\n` +
+    `Reason: ${reason}`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#64748b;font-weight:700;">Correcting purchase...</div>';
+    }
+
+    const res = await fetch(
+      `/api/purchases/${encodeURIComponent(purchaseId)}/correct`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(
+        data.error || 'Failed to correct purchase'
+      );
+    }
+
+    if (message) {
+      message.innerHTML = `
+        <div style="
+          padding:12px;
+          border-radius:10px;
+          background:#ecfdf5;
+          color:#047857;
+          font-weight:700;
+        ">
+          ✅ ${data.message || 'Purchase corrected successfully.'}
+        </div>
+      `;
+    }
+
+    await loadProducts();
+    await loadDashboard();
+
+    setTimeout(() => {
+      openCorrectionType('purchase');
+    }, 500);
+
+  } catch (error) {
+    console.error('Purchase correction error:', error);
+
+    if (message) {
+      message.innerHTML = `
+        <div style="
+          padding:12px;
+          border-radius:10px;
+          background:#fef2f2;
+          color:#b91c1c;
+          font-weight:700;
+        ">
+          ❌ ${error.message}
+        </div>
+      `;
+    }
+  }
+}
+
+function openCorrectionsView() {
+  const erpApp = document.querySelector('.erp-app');
+  const correctionsView = document.getElementById('correctionsView');
+
+  if (erpApp) erpApp.style.display = 'none';
+
+  if (correctionsView) {
+    correctionsView.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function closeCorrectionsView() {
+  const erpApp = document.querySelector('.erp-app');
+  const correctionsView = document.getElementById('correctionsView');
+
+  if (correctionsView) correctionsView.style.display = 'none';
+  if (erpApp) erpApp.style.display = '';
+
+  erpShowView('erpMoreView');
+}
+
+
+async function openCorrectionType(type) {
+  const container = document.getElementById('correctionFormContainer');
+  const message = document.getElementById('correctionTypeMessage');
+
+  if (!container) return;
+
+  if (message) message.innerHTML = '';
+
+  if (type === 'status') {
+    container.innerHTML = `
+      <div class="erp-form-card">
+        <h3 style="margin-top:0;">📊 Correction Status</h3>
+
+        <div id="correctionStatusLoading" style="padding:14px 0;color:#64748b;">
+          Loading correction history...
+        </div>
+
+        <div id="correctionStatusContent" style="display:none;">
+          <div id="correctionStatusSummary" style="margin-bottom:14px;"></div>
+
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;min-width:760px;">
+              <thead>
+                <tr style="background:#f1f5f9;">
+                  <th style="padding:10px;text-align:left;border-bottom:1px solid #cbd5e1;">Type</th>
+                  <th style="padding:10px;text-align:left;border-bottom:1px solid #cbd5e1;">Original ID</th>
+                  <th style="padding:10px;text-align:left;border-bottom:1px solid #cbd5e1;">Description / Reason</th>
+                  <th style="padding:10px;text-align:right;border-bottom:1px solid #cbd5e1;">Amount</th>
+                  <th style="padding:10px;text-align:right;border-bottom:1px solid #cbd5e1;">Qty</th>
+                  <th style="padding:10px;text-align:left;border-bottom:1px solid #cbd5e1;">Date</th>
+                  <th style="padding:10px;text-align:center;border-bottom:1px solid #cbd5e1;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="correctionStatusTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="correctionStatusMessage" style="margin-top:14px;"></div>
+      </div>
+    `;
+
+    try {
+      const res = await fetch('/api/correction-status', {
+        credentials: 'include'
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data?.success) {
+        throw new Error(
+          data?.error || 'Failed to load correction status'
+        );
+      }
+
+      const loading =
+        document.getElementById('correctionStatusLoading');
+
+      const content =
+        document.getElementById('correctionStatusContent');
+
+      const summary =
+        document.getElementById('correctionStatusSummary');
+
+      const tbody =
+        document.getElementById('correctionStatusTableBody');
+
+      if (!tbody) return;
+
+      if (loading) loading.style.display = 'none';
+      if (content) content.style.display = 'block';
+
+      const corrections = Array.isArray(data.corrections)
+        ? data.corrections
+        : [];
+
+      if (summary) {
+        summary.innerHTML = `
+          <div style="
+            padding:12px 14px;
+            border-radius:10px;
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+          ">
+            <strong>Total Corrections:</strong>
+            ${corrections.length}
+          </div>
+        `;
+      }
+
+      if (!corrections.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7"
+                style="padding:20px;text-align:center;color:#64748b;">
+              No correction records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = corrections.map(item => {
+        const type =
+          item.correction_type || 'Correction';
+
+        const originalId =
+          item.original_id == null
+            ? '-'
+            : `#${item.original_id}`;
+
+        const description =
+          item.description || '-';
+
+        const amount =
+          item.amount == null
+            ? '-'
+            : `${Number(item.amount).toLocaleString()} ETB`;
+
+        const quantity =
+          item.quantity == null
+            ? '-'
+            : `${Number(item.quantity).toLocaleString()}${item.unit ? ` ${item.unit}` : ''}`;
+
+        const date =
+          item.created_at || '-';
+
+        const status =
+          item.type === 'stock'
+            ? 'Adjusted'
+            : 'Corrected';
+
+        const statusColor =
+          item.type === 'stock'
+            ? '#0369a1'
+            : '#c2410c';
+
+        return `
+          <tr style="
+            background:${item.type === 'stock' ? '#f0f9ff' : '#fff7ed'};
+          ">
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:700;">
+              ${type}
+            </td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;">
+              ${originalId}
+            </td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;">
+              ${description}
+              ${item.party ? `<div style="font-size:12px;color:#64748b;margin-top:3px;">${item.party}</div>` : ''}
+            </td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;text-align:right;">
+              ${amount}
+            </td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;text-align:right;">
+              ${quantity}
+            </td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;white-space:nowrap;">
+              ${date}
+            </td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;text-align:center;">
+              <span style="
+                display:inline-block;
+                padding:5px 9px;
+                border-radius:999px;
+                background:${item.type === 'stock' ? '#e0f2fe' : '#ffedd5'};
+                color:${statusColor};
+                font-size:12px;
+                font-weight:800;
+              ">
+                ${status}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+    } catch (error) {
+      console.error('Correction status error:', error);
+
+      const loading =
+        document.getElementById('correctionStatusLoading');
+
+      if (loading) {
+        loading.innerHTML = `
+          <div style="
+            padding:12px;
+            border-radius:10px;
+            background:#fef2f2;
+            color:#b91c1c;
+          ">
+            ${error.message || 'Failed to load correction status.'}
+          </div>
+        `;
+      }
+    }
+
+    return;
+  }
+
+  if (type === 'sale') {
+    container.innerHTML = `
+      <div class="erp-form-card">
+        <h3 style="margin-top:0;">🛒 Sales Correction</h3>
+
+        <div id="salesCorrectionLoading" style="padding:14px 0;color:#64748b;">
+          Loading sales...
+        </div>
+
+        <div id="salesCorrectionForm" style="display:none;">
+
+          <label style="display:block;margin:12px 0 6px;font-weight:700;">
+            Select Sale
+          </label>
+
+          <select
+            id="salesCorrectionSaleId"
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;box-sizing:border-box;"
+          >
+            <option value="">Select a sale</option>
+          </select>
+
+          <label style="display:block;margin:14px 0 6px;font-weight:700;">
+            Correction Reason
+          </label>
+
+          <textarea
+            id="salesCorrectionReason"
+            rows="4"
+            placeholder="Enter the reason for correcting this sale..."
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;box-sizing:border-box;resize:vertical;"
+          ></textarea>
+
+          <button
+            type="button"
+            onclick="submitSalesCorrection()"
+            style="width:100%;margin-top:14px;padding:13px;border:0;border-radius:10px;background:#f97316;color:#fff;font-weight:800;cursor:pointer;"
+          >
+            ↶ Correct Sale
+          </button>
+
+          <div
+            id="salesCorrectionMessage"
+            style="margin-top:12px;"
+          ></div>
+
+        </div>
+      </div>
+    `;
+
+    try {
+      const res = await fetch('/api/sales-summary?period=all', {
+        credentials: 'include'
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to load sales');
+      }
+
+      const sales = Array.isArray(data.sales) ? data.sales : [];
+
+      const select = document.getElementById('salesCorrectionSaleId');
+      const loading = document.getElementById('salesCorrectionLoading');
+      const form = document.getElementById('salesCorrectionForm');
+
+      if (!select || !loading || !form) return;
+
+      const availableSales = sales.filter(sale => {
+        const corrected = Number(sale[10]?.value || 0) === 1;
+        return !corrected;
+      });
+
+      if (!availableSales.length) {
+        loading.innerHTML = `
+          <div style="padding:12px;border-radius:10px;background:#f8fafc;color:#64748b;">
+            No uncorrected sales found.
+          </div>
+        `;
+        return;
+      }
+
+      availableSales.forEach(sale => {
+        const id = sale[0]?.value || '';
+        const product = sale[2]?.value || '';
+        const quantity = sale[3]?.value || 0;
+        const total = formatSalesAmount(sale[7]?.value);
+        const payment = sale[8]?.value === 'credit'
+          ? '📒 Credit'
+          : '💵 Cash';
+        const date = sale[9]?.value || '';
+
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent =
+          `#${id} • ${product} • Qty ${quantity} • ${total} • ${payment} • ${date}`;
+
+        select.appendChild(option);
+      });
+
+      loading.style.display = 'none';
+      form.style.display = 'block';
+
+    } catch (error) {
+      console.error('Load sales correction error:', error);
+
+      const loading = document.getElementById('salesCorrectionLoading');
+
+      if (loading) {
+        loading.innerHTML = `
+          <div style="padding:12px;border-radius:10px;background:#fef2f2;color:#b91c1c;">
+            Failed to load sales.
+          </div>
+        `;
+      }
+    }
+
+    return;
+  }
+
+  if (type === 'purchase') {
+    container.innerHTML = `
+      <div class="erp-form-card">
+        <h3 style="margin-top:0;">📦 Purchase Correction</h3>
+
+        <div id="purchaseCorrectionLoading" style="padding:14px 0;color:#64748b;">
+          Loading purchases...
+        </div>
+
+        <div id="purchaseCorrectionForm" style="display:none;">
+
+          <label style="display:block;margin:12px 0 6px;font-weight:700;">
+            Select Purchase
+          </label>
+
+          <select
+            id="purchaseCorrectionPurchaseId"
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;box-sizing:border-box;"
+          >
+            <option value="">Select a purchase</option>
+          </select>
+
+          <label style="display:block;margin:14px 0 6px;font-weight:700;">
+            Correction Reason
+          </label>
+
+          <textarea
+            id="purchaseCorrectionReason"
+            rows="4"
+            placeholder="Enter the reason for correcting this purchase..."
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;box-sizing:border-box;resize:vertical;"
+          ></textarea>
+
+          <button
+            type="button"
+            onclick="submitPurchaseCorrection()"
+            style="width:100%;margin-top:14px;padding:13px;border:0;border-radius:10px;background:#f97316;color:#fff;font-weight:800;cursor:pointer;"
+          >
+            ↶ Correct Purchase
+          </button>
+
+          <div
+            id="purchaseCorrectionMessage"
+            style="margin-top:12px;"
+          ></div>
+
+        </div>
+      </div>
+    `;
+
+    try {
+      const res = await fetch('/api/purchases', {
+        credentials: 'include'
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to load purchases');
+      }
+
+      const purchases = Array.isArray(data.purchases)
+        ? data.purchases
+        : [];
+
+      const select = document.getElementById('purchaseCorrectionPurchaseId');
+      const loading = document.getElementById('purchaseCorrectionLoading');
+      const form = document.getElementById('purchaseCorrectionForm');
+
+      if (!select || !loading || !form) return;
+
+      const availablePurchases = purchases.filter(purchase => {
+        return purchase.corrected !== true;
+      });
+
+      if (!availablePurchases.length) {
+        loading.innerHTML = `
+          <div style="padding:12px;border-radius:10px;background:#f8fafc;color:#64748b;">
+            No uncorrected purchases found.
+          </div>
+        `;
+        return;
+      }
+
+      availablePurchases.forEach(purchase => {
+        const option = document.createElement('option');
+
+        option.value = purchase.id;
+
+        const payment = purchase.payment_type === 'credit'
+          ? '📒 Credit'
+          : '💵 Cash';
+
+        option.textContent =
+          `#${purchase.id} • ${purchase.product_name} • Qty ${purchase.quantity} • ${Number(purchase.total || 0).toLocaleString()} ETB • ${payment} • ${purchase.created_at || ''}`;
+
+        select.appendChild(option);
+      });
+
+      loading.style.display = 'none';
+      form.style.display = 'block';
+
+    } catch (error) {
+      console.error('Load purchase correction error:', error);
+
+      const loading = document.getElementById('purchaseCorrectionLoading');
+
+      if (loading) {
+        loading.innerHTML = `
+          <div style="padding:12px;border-radius:10px;background:#fef2f2;color:#b91c1c;">
+            Failed to load purchases.
+          </div>
+        `;
+      }
+    }
+
+    return;
+  }
+
+  if (type === 'income') {
+    container.innerHTML = `
+      <div class="erp-form-card">
+        <h3 style="margin-top:0;">💰 Cash / Income Correction</h3>
+
+        <div id="incomeCorrectionLoading" style="padding:14px 0;color:#64748b;">
+          Loading income records...
+        </div>
+
+        <div id="incomeCorrectionForm" style="display:none;">
+
+          <label style="display:block;margin:12px 0 6px;font-weight:700;">
+            Select Income
+          </label>
+
+          <select
+            id="incomeCorrectionIncomeId"
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;box-sizing:border-box;"
+          >
+            <option value="">Select an income</option>
+          </select>
+
+          <label style="display:block;margin:14px 0 6px;font-weight:700;">
+            Correction Reason
+          </label>
+
+          <textarea
+            id="incomeCorrectionReason"
+            rows="4"
+            placeholder="Enter the reason for correcting this income..."
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;box-sizing:border-box;resize:vertical;"
+          ></textarea>
+
+          <button
+            type="button"
+            onclick="submitIncomeCorrection()"
+            style="width:100%;margin-top:14px;padding:13px;border:0;border-radius:10px;background:#0f766e;color:#fff;font-weight:800;cursor:pointer;"
+          >
+            ↶ Correct Income
+          </button>
+
+          <div
+            id="incomeCorrectionMessage"
+            style="margin-top:12px;"
+          ></div>
+
+        </div>
+      </div>
+    `;
+
+    try {
+      const res = await fetch('/api/recent-cash-transactions', {
+        credentials: 'include'
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data?.results?.[0]?.response?.result) {
+        throw new Error('Failed to load income records');
+      }
+
+      const rows =
+        data?.results?.[0]?.response?.result?.rows || [];
+
+      const cols =
+        data?.results?.[0]?.response?.result?.cols || [];
+
+      const transactions = rows.map(row => {
+        const transaction = {};
+
+        cols.forEach((col, index) => {
+          const cell = row[index];
+
+          if (cell?.type === 'integer') {
+            transaction[col.name] = Number(cell.value);
+          } else if (cell?.type === 'float') {
+            transaction[col.name] = Number(cell.value);
+          } else if (cell?.type === 'null') {
+            transaction[col.name] = null;
+          } else {
+            transaction[col.name] = cell?.value ?? null;
+          }
+        });
+
+        return transaction;
+      });
+
+      const select =
+        document.getElementById('incomeCorrectionIncomeId');
+
+      const loading =
+        document.getElementById('incomeCorrectionLoading');
+
+      const form =
+        document.getElementById('incomeCorrectionForm');
+
+      if (!select || !loading || !form) return;
+
+      const availableIncome = transactions.filter(transaction => {
+        const type = transaction.type;
+        const amount = Number(transaction.amount || 0);
+
+        return type === 'income' && amount > 0;
+      });
+
+      if (!availableIncome.length) {
+        loading.innerHTML = `
+          <div style="padding:12px;border-radius:10px;background:#f8fafc;color:#64748b;">
+            No income records found.
+          </div>
+        `;
+        return;
+      }
+
+      availableIncome.forEach(income => {
+        const id = income.id || '';
+        const description = income.description || '';
+        const amount = Number(income.amount || 0);
+        const date = income.created_at || '';
+
+        const option = document.createElement('option');
+
+        option.value = id;
+
+        option.textContent =
+          `#${id} • ${description} • ${amount.toLocaleString()} ETB • ${date}`;
+
+        select.appendChild(option);
+      });
+
+      loading.style.display = 'none';
+      form.style.display = 'block';
+
+    } catch (error) {
+      console.error('Load income correction error:', error);
+
+      const loading =
+        document.getElementById('incomeCorrectionLoading');
+
+      if (loading) {
+        loading.innerHTML = `
+          <div style="padding:12px;border-radius:10px;background:#fef2f2;color:#b91c1c;">
+            Failed to load income records.
+          </div>
+        `;
+      }
+    }
+
+    return;
+  }
+
+  if (type === 'payment') {
+    container.innerHTML = `
+      <div class="erp-form-card">
+        <h3 style="margin-top:0;">▣ Payment Correction</h3>
+
+        <div id="paymentCorrectionLoading" style="padding:14px 0;color:#64748b;">
+          Loading payments...
+        </div>
+
+        <div id="paymentCorrectionForm" style="display:none;">
+
+          <label style="display:block;margin:12px 0 6px;font-weight:700;">
+            Payment Type
+          </label>
+
+          <select
+            id="paymentCorrectionType"
+            onchange="loadPaymentCorrectionRecords()"
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;box-sizing:border-box;"
+          >
+            <option value="customer">👤 Customer Payment</option>
+            <option value="supplier">🏢 Supplier Payment</option>
+          </select>
+
+          <label style="display:block;margin:14px 0 6px;font-weight:700;">
+            Select Payment
+          </label>
+
+          <select
+            id="paymentCorrectionPaymentId"
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;box-sizing:border-box;"
+          >
+            <option value="">Select a payment</option>
+          </select>
+
+          <label style="display:block;margin:14px 0 6px;font-weight:700;">
+            Correction Reason
+          </label>
+
+          <textarea
+            id="paymentCorrectionReason"
+            rows="4"
+            placeholder="Enter the reason for correcting this payment..."
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;box-sizing:border-box;resize:vertical;"
+          ></textarea>
+
+          <button
+            type="button"
+            onclick="submitPaymentCorrection()"
+            style="width:100%;margin-top:14px;padding:13px;border:0;border-radius:10px;background:#ca8a04;color:#fff;font-weight:800;cursor:pointer;"
+          >
+            ↶ Correct Payment
+          </button>
+
+          <div
+            id="paymentCorrectionMessage"
+            style="margin-top:12px;"
+          ></div>
+
+        </div>
+      </div>
+    `;
+
+    const loading =
+      document.getElementById('paymentCorrectionLoading');
+
+    const form =
+      document.getElementById('paymentCorrectionForm');
+
+    if (!loading || !form) return;
+
+    try {
+      await loadPaymentCorrectionRecords();
+
+      loading.style.display = 'none';
+      form.style.display = 'block';
+
+    } catch (error) {
+      console.error('Load payment correction error:', error);
+
+      loading.innerHTML = `
+        <div style="padding:12px;border-radius:10px;background:#fef2f2;color:#b91c1c;">
+          Failed to load payment records.
+        </div>
+      `;
+    }
+
+    return;
+  }
+
+  if (type === 'stock') {
+    container.innerHTML = `
+      <div class="erp-form-card">
+        <h3 style="margin-top:0;">⚖ Stock Adjustment</h3>
+
+        <div id="stockAdjustmentLoading" style="padding:14px 0;color:#64748b;">
+          Loading products...
+        </div>
+
+        <div id="stockAdjustmentForm" style="display:none;">
+
+          <label style="display:block;margin:12px 0 6px;font-weight:700;">
+            Select Product
+          </label>
+
+          <select
+            id="stockAdjustmentProductId"
+            onchange="updateStockAdjustmentPreview()"
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;box-sizing:border-box;"
+          >
+            <option value="">Select a product</option>
+          </select>
+
+          <div
+            id="stockAdjustmentCurrentStock"
+            style="margin-top:12px;padding:10px;border-radius:10px;background:#f1f5f9;color:#475569;font-weight:700;"
+          >
+            Current Stock: -
+          </div>
+
+          <label style="display:block;margin:14px 0 6px;font-weight:700;">
+            Adjustment Quantity
+          </label>
+
+          <input
+            id="stockAdjustmentAmount"
+            type="number"
+            step="any"
+            placeholder="Example: 5 or -2"
+            oninput="updateStockAdjustmentPreview()"
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;box-sizing:border-box;"
+          >
+
+          <div
+            id="stockAdjustmentNewStock"
+            style="margin-top:10px;padding:10px;border-radius:10px;background:#ecfdf5;color:#166534;font-weight:700;"
+          >
+            New Stock: -
+          </div>
+
+          <label style="display:block;margin:14px 0 6px;font-weight:700;">
+            Adjustment Reason
+          </label>
+
+          <textarea
+            id="stockAdjustmentReason"
+            rows="4"
+            placeholder="Enter the reason for this stock adjustment..."
+            style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;box-sizing:border-box;resize:vertical;"
+          ></textarea>
+
+          <button
+            type="button"
+            onclick="submitStockAdjustment()"
+            style="width:100%;margin-top:14px;padding:13px;border:0;border-radius:10px;background:#7c3aed;color:#fff;font-weight:800;cursor:pointer;"
+          >
+            ⚖ Adjust Stock
+          </button>
+
+          <div
+            id="stockAdjustmentMessage"
+            style="margin-top:12px;"
+          ></div>
+
+        </div>
+      </div>
+    `;
+
+    const loading =
+      document.getElementById('stockAdjustmentLoading');
+
+    const form =
+      document.getElementById('stockAdjustmentForm');
+
+    if (!loading || !form) return;
+
+    try {
+      const res = await fetch('/api/products', {
+        credentials: 'include'
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data?.results?.[0]?.response?.result) {
+        throw new Error(data?.error || 'Failed to load products');
+      }
+
+      const rows =
+        data.results[0].response.result.rows || [];
+
+      const select =
+        document.getElementById('stockAdjustmentProductId');
+
+      if (!select) return;
+
+      select.innerHTML =
+        '<option value="">Select a product</option>';
+
+      rows.forEach(row => {
+        const id = Number(row[0].value);
+        const name = row[1].value;
+        const stock = Number(row[5]?.value || 0);
+        const unit = row[2]?.value || '';
+
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent =
+          `${name} | Stock: ${stock} ${unit}`;
+
+        option.dataset.stock = stock;
+        option.dataset.unit = unit;
+
+        select.appendChild(option);
+      });
+
+      loading.style.display = 'none';
+      form.style.display = 'block';
+
+      updateStockAdjustmentPreview();
+
+    } catch (error) {
+      console.error('Load stock adjustment products error:', error);
+
+      loading.innerHTML = `
+        <div style="padding:12px;border-radius:10px;background:#fef2f2;color:#b91c1c;">
+          Failed to load products.
+        </div>
+      `;
+    }
+
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="erp-form-card">
+      <h3 style="margin-top:0;">Correction</h3>
+      <p style="color:#64748b;">
+        This correction type will be restored next.
+      </p>
+    </div>
+  `;
+}
+
+
+
+function updateStockAdjustmentPreview() {
+  const select = document.getElementById('stockAdjustmentProductId');
+  const amountInput = document.getElementById('stockAdjustmentAmount');
+  const currentBox = document.getElementById('stockAdjustmentCurrentStock');
+  const newStockBox = document.getElementById('stockAdjustmentNewStock');
+
+  if (!select || !amountInput || !currentBox || !newStockBox) return;
+
+  const option = select.options[select.selectedIndex];
+
+  if (!option || !option.value) {
+    currentBox.textContent = 'Current Stock: -';
+    newStockBox.textContent = 'New Stock: -';
+    return;
+  }
+
+  const currentStock = Number(option.dataset.stock || 0);
+  const unit = option.dataset.unit || '';
+  const adjustment = Number(amountInput.value || 0);
+  const newStock = currentStock + adjustment;
+
+  currentBox.textContent =
+    `Current Stock: ${currentStock} ${unit}`;
+
+  if (newStock < 0) {
+    newStockBox.textContent =
+      `New Stock: ${newStock} ${unit}  |  Invalid`;
+    newStockBox.style.background = '#fef2f2';
+    newStockBox.style.color = '#b91c1c';
+  } else {
+    newStockBox.textContent =
+      `New Stock: ${newStock} ${unit}`;
+    newStockBox.style.background = '#ecfdf5';
+    newStockBox.style.color = '#166534';
+  }
+}
+
+
+async function submitStockAdjustment() {
+  const productSelect =
+    document.getElementById('stockAdjustmentProductId');
+
+  const amountInput =
+    document.getElementById('stockAdjustmentAmount');
+
+  const reasonInput =
+    document.getElementById('stockAdjustmentReason');
+
+  const message =
+    document.getElementById('stockAdjustmentMessage');
+
+  if (!productSelect || !amountInput || !reasonInput || !message) {
+    return;
+  }
+
+  const productId = Number(productSelect.value);
+  const adjustment = Number(amountInput.value);
+  const reason = reasonInput.value.trim();
+
+  if (!productId) {
+    message.innerHTML = `
+      <div style="padding:12px;border-radius:10px;background:#fef2f2;color:#b91c1c;">
+        Please select a product.
+      </div>
+    `;
+    return;
+  }
+
+  if (!Number.isFinite(adjustment) || adjustment === 0) {
+    message.innerHTML = `
+      <div style="padding:12px;border-radius:10px;background:#fef2f2;color:#b91c1c;">
+        Adjustment quantity must be a non-zero number.
+      </div>
+    `;
+    return;
+  }
+
+  const option =
+    productSelect.options[productSelect.selectedIndex];
+
+  const currentStock =
+    Number(option?.dataset?.stock || 0);
+
+  const newStock =
+    currentStock + adjustment;
+
+  if (newStock < 0) {
+    message.innerHTML = `
+      <div style="padding:12px;border-radius:10px;background:#fef2f2;color:#b91c1c;">
+        Stock cannot become negative.
+      </div>
+    `;
+    return;
+  }
+
+  if (!reason) {
+    message.innerHTML = `
+      <div style="padding:12px;border-radius:10px;background:#fef2f2;color:#b91c1c;">
+        Please enter the adjustment reason.
+      </div>
+    `;
+    return;
+  }
+
+  const productName =
+    option?.textContent?.split(' | Stock:')[0] || 'this product';
+
+  const confirmed = confirm(
+    `Adjust stock for "${productName}"?\n\n` +
+    `Current stock: ${currentStock}\n` +
+    `Adjustment: ${adjustment > 0 ? '+' : ''}${adjustment}\n` +
+    `New stock: ${newStock}\n\n` +
+    `Reason: ${reason}`
+  );
+
+  if (!confirmed) return;
+
+  message.innerHTML = `
+    <div style="padding:12px;border-radius:10px;background:#f1f5f9;color:#475569;">
+      Saving stock adjustment...
+    </div>
+  `;
+
+  try {
+    const res = await fetch('/api/stock-adjustments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        product_id: productId,
+        adjustment,
+        reason
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data?.success) {
+      throw new Error(
+        data?.error || 'Failed to adjust stock'
+      );
+    }
+
+    message.innerHTML = `
+      <div style="padding:12px;border-radius:10px;background:#ecfdf5;color:#166534;">
+        <strong>✓ Stock adjusted successfully.</strong><br>
+        ${productName}: ${data.stock_before} → ${data.stock_after}
+      </div>
+    `;
+
+    if (typeof loadDashboard === 'function') {
+      try {
+        await loadDashboard();
+      } catch (error) {
+        console.warn('Dashboard refresh after stock adjustment failed:', error);
+      }
+    }
+
+    setTimeout(() => {
+      openCorrectionType('stock');
+    }, 600);
+
+  } catch (error) {
+    console.error('Stock adjustment error:', error);
+
+    message.innerHTML = `
+      <div style="padding:12px;border-radius:10px;background:#fef2f2;color:#b91c1c;">
+        ${error.message || 'Failed to adjust stock.'}
+      </div>
+    `;
+  }
+}
+
+
+async function loadPaymentCorrectionRecords() {
+  const type =
+    document.getElementById('paymentCorrectionType')?.value || 'customer';
+
+  const select =
+    document.getElementById('paymentCorrectionPaymentId');
+
+  const message =
+    document.getElementById('paymentCorrectionMessage');
+
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Loading payments...</option>';
+
+  try {
+    const endpoint =
+      type === 'supplier'
+        ? '/api/supplier-payments'
+        : '/api/customer-payments';
+
+    const res = await fetch(endpoint, {
+      credentials: 'include'
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        data.error || 'Failed to load payment records'
+      );
+    }
+
+    const payments =
+      type === 'supplier'
+        ? (Array.isArray(data.payments) ? data.payments : [])
+        : (Array.isArray(data) ? data : []);
+
+    const availablePayments = payments.filter(payment => {
+      return Number(payment.corrected || 0) !== 1;
+    });
+
+    select.innerHTML =
+      '<option value="">Select a payment</option>';
+
+    if (!availablePayments.length) {
+      select.innerHTML =
+        '<option value="">No uncorrected payments found</option>';
+      return;
+    }
+
+    availablePayments.forEach(payment => {
+      const option = document.createElement('option');
+
+      option.value = payment.id;
+
+      const party =
+        type === 'supplier'
+          ? (payment.supplier || 'Unknown Supplier')
+          : (payment.customer || 'Unknown Customer');
+
+      const amount =
+        Number(payment.amount || 0).toLocaleString();
+
+      const date =
+        payment.created_at || '';
+
+      option.textContent =
+        `#${payment.id} • ${party} • ${amount} ETB • ${date}`;
+
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error('Load payment correction records error:', error);
+
+    select.innerHTML =
+      '<option value="">Failed to load payments</option>';
+
+    if (message) {
+      message.innerHTML = `
+        <div style="
+          padding:12px;
+          border-radius:10px;
+          background:#fef2f2;
+          color:#b91c1c;
+          font-weight:700;
+        ">
+          ❌ ${error.message}
+        </div>
+      `;
+    }
+  }
+}
+
+async function submitIncomeCorrection() {
+  const incomeId =
+    document.getElementById('incomeCorrectionIncomeId')?.value;
+
+  const reason =
+    document.getElementById('incomeCorrectionReason')?.value.trim();
+
+  const message =
+    document.getElementById('incomeCorrectionMessage');
+
+  if (!incomeId) {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#b91c1c;font-weight:700;">Please select an income.</div>';
+    }
+    return;
+  }
+
+  if (!reason) {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#b91c1c;font-weight:700;">Please enter a correction reason.</div>';
+    }
+    return;
+  }
+
+  const confirmed = confirm(
+    `Correct Income #${incomeId}?\n\n` +
+    `The original income will remain in the records.\n` +
+    `The cash effect will be reversed.\n\n` +
+    `Reason: ${reason}`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#64748b;font-weight:700;">Correcting income...</div>';
+    }
+
+    const res = await fetch(
+      `/api/income/${encodeURIComponent(incomeId)}/correct`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(
+        data.error || 'Failed to correct income'
+      );
+    }
+
+    if (message) {
+      message.innerHTML = `
+        <div style="
+          padding:12px;
+          border-radius:10px;
+          background:#ecfdf5;
+          color:#047857;
+          font-weight:700;
+        ">
+          ✅ ${data.message || 'Income corrected successfully.'}
+        </div>
+      `;
+    }
+
+    await loadDashboard();
+
+    setTimeout(() => {
+      openCorrectionType('income');
+    }, 500);
+
+  } catch (error) {
+    console.error('Income correction error:', error);
+
+    if (message) {
+      message.innerHTML = `
+        <div style="
+          padding:12px;
+          border-radius:10px;
+          background:#fef2f2;
+          color:#b91c1c;
+          font-weight:700;
+        ">
+          ❌ ${error.message}
+        </div>
+      `;
+    }
+  }
+}
+
+
+async function submitPaymentCorrection() {
+  const type =
+    document.getElementById('paymentCorrectionType')?.value || 'customer';
+
+  const paymentId =
+    document.getElementById('paymentCorrectionPaymentId')?.value;
+
+  const reason =
+    document.getElementById('paymentCorrectionReason')?.value.trim();
+
+  const message =
+    document.getElementById('paymentCorrectionMessage');
+
+  if (!paymentId) {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#b91c1c;font-weight:700;">Please select a payment.</div>';
+    }
+    return;
+  }
+
+  if (!reason) {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#b91c1c;font-weight:700;">Please enter a correction reason.</div>';
+    }
+    return;
+  }
+
+  const paymentLabel =
+    type === 'supplier'
+      ? 'Supplier Payment'
+      : 'Customer Payment';
+
+  const confirmed = confirm(
+    `Correct ${paymentLabel} #${paymentId}?\n\n` +
+    `The original payment will remain in the records.\n` +
+    `The cash effect will be reversed.\n\n` +
+    `Reason: ${reason}`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#64748b;font-weight:700;">Correcting payment...</div>';
+    }
+
+    const endpoint =
+      type === 'supplier'
+        ? `/api/supplier-payments/${encodeURIComponent(paymentId)}/correct`
+        : `/api/customer-payments/${encodeURIComponent(paymentId)}/correct`;
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ reason })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(
+        data.error || 'Failed to correct payment'
+      );
+    }
+
+    if (message) {
+      message.innerHTML = `
+        <div style="
+          padding:12px;
+          border-radius:10px;
+          background:#ecfdf5;
+          color:#047857;
+          font-weight:700;
+        ">
+          ✅ ${data.message || 'Payment corrected successfully.'}
+        </div>
+      `;
+    }
+
+    await loadDashboard();
+
+    setTimeout(() => {
+      openCorrectionType('payment');
+    }, 500);
+
+  } catch (error) {
+    console.error('Payment correction error:', error);
+
+    if (message) {
+      message.innerHTML = `
+        <div style="
+          padding:12px;
+          border-radius:10px;
+          background:#fef2f2;
+          color:#b91c1c;
+          font-weight:700;
+        ">
+          ❌ ${error.message}
+        </div>
+      `;
+    }
+  }
+}
+
+async function submitSalesCorrection() {
+  const saleId = document.getElementById('salesCorrectionSaleId')?.value;
+  const reason = document.getElementById('salesCorrectionReason')?.value.trim();
+  const message = document.getElementById('salesCorrectionMessage');
+
+  if (!saleId) {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#b91c1c;font-weight:700;">Please select a sale.</div>';
+    }
+    return;
+  }
+
+  if (!reason) {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#b91c1c;font-weight:700;">Please enter a correction reason.</div>';
+    }
+    return;
+  }
+
+  const confirmed = confirm(
+    `Correct Sale #${saleId}?\n\n` +
+    `The original sale will remain in the records.\n` +
+    `Stock and related financial records will be reversed.\n\n` +
+    `Reason: ${reason}`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    if (message) {
+      message.innerHTML =
+        '<div style="color:#64748b;font-weight:700;">Correcting sale...</div>';
+    }
+
+    const res = await fetch(`/api/sales/${encodeURIComponent(saleId)}/correct`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ reason })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to correct sale');
+    }
+
+    if (message) {
+      message.innerHTML = `
+        <div style="padding:12px;border-radius:10px;background:#ecfdf5;color:#047857;font-weight:700;">
+          ✅ ${data.message || 'Sale corrected successfully.'}
+        </div>
+      `;
+    }
+
+    await loadSalesSummary(currentSalesPeriod || 'today');
+    await loadProducts();
+    await loadSaleProducts();
+    await loadDashboard();
+
+    setTimeout(() => {
+      openCorrectionType('sale');
+    }, 500);
+
+  } catch (error) {
+    console.error('Sales correction error:', error);
+
+    if (message) {
+      message.innerHTML = `
+        <div style="padding:12px;border-radius:10px;background:#fef2f2;color:#b91c1c;font-weight:700;">
+          ❌ ${error.message}
+        </div>
+      `;
+    }
+  }
+}
+
 function openSettingsView() {
   const erpApp = document.querySelector('.erp-app');
   const settingsView = document.getElementById('settingsView');
@@ -2964,15 +6742,63 @@ function closeSettingsView() {
   erpShowView('erpMoreView');
 }
 
+const erpTranslations = {
+  am: {
+    settings: 'ቅንብሮች',
+    language: 'ቋንቋ',
+    chooseLanguage: 'የመተግበሪያ ቋንቋ ይምረጡ',
+    amharic: 'አማርኛ',
+    english: 'እንግሊዝኛ',
+    home: 'መነሻ',
+    sales: 'ሽያጭ',
+    stock: 'እቃ ክምችት',
+    more: 'ተጨማሪ'
+  },
+  en: {
+    settings: 'Settings',
+    language: 'Language',
+    chooseLanguage: 'Choose application language',
+    amharic: 'Amharic',
+    english: 'English',
+    home: 'Home',
+    sales: 'Sales',
+    stock: 'Stock',
+    more: 'More'
+  }
+};
+
+window.erpTranslations = erpTranslations;
+
+function getCurrentLanguage() {
+  return localStorage.getItem('erpLanguage') || 'am';
+}
+
 function setLanguage(language) {
+  language = language === 'en' ? 'en' : 'am';
+
   localStorage.setItem('erpLanguage', language);
 
-  if (language === 'en') {
-    alert('English selected');
-  } else {
-    alert('አማርኛ ተመርጧል');
-  }
+  applyLanguage();
 }
+
+function applyLanguage() {
+  const language = getCurrentLanguage();
+  const translations = window.erpTranslations?.[language];
+
+  if (!translations) return;
+
+  document.documentElement.lang = language;
+
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const key = element.getAttribute('data-i18n');
+
+    if (Object.prototype.hasOwnProperty.call(translations, key)) {
+      element.textContent = translations[key];
+    }
+  });
+}
+
+applyLanguage();
 
 function openUserManagement() {
   const moreView = document.getElementById('erpMoreView');
@@ -2995,6 +6821,1245 @@ function openUserManagement() {
     adminUserManagement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
+function openCustomers() {
+  const existing = document.getElementById('customersView');
+
+  if (existing) {
+    existing.style.display = 'block';
+    loadCustomers();
+    return;
+  }
+
+  const view = document.createElement('section');
+  view.id = 'customersView';
+  view.className = 'customer-credits-view';
+
+  view.innerHTML = `
+    <div class="customer-credits-header">
+      <button type="button" onclick="closeCustomers()">← Back</button>
+      <div>
+        <span>CUSTOMERS</span>
+        <h2>Customers</h2>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+      <button
+        type="button"
+        class="erp-primary-btn"
+        onclick="openAddCustomer()"
+      >
+        + Add Customer
+      </button>
+    </div>
+
+    <div id="customersList" class="customer-credits-list">
+      <p>Loading...</p>
+    </div>
+  `;
+
+  document.body.appendChild(view);
+  loadCustomers();
+}
+
+async function loadCustomers() {
+  const list = document.getElementById('customersList');
+  if (!list) return;
+
+  list.innerHTML = '<p>Loading...</p>';
+
+  try {
+    const response = await fetch('/api/customers');
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to load customers');
+    }
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      list.innerHTML = `
+        <div class="erp-empty">
+          <div class="erp-empty-icon">👥</div>
+          <p>No customers registered yet.</p>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = rows.map(row => {
+      const id = row[0]?.value || '';
+      const name = row[1]?.value || '';
+      const phone = row[2]?.value || '';
+      const address = row[3]?.value || '';
+
+      return `
+        <div class="customer-credit-card">
+          <div class="customer-credit-top">
+            <div>
+              <span class="customer-credit-label">CUSTOMER</span>
+              <h3>${name}</h3>
+            </div>
+            <strong style="color:#29595b;">›</strong>
+          </div>
+
+          <div class="customer-credit-details">
+            <span>📞 ${phone || 'No phone'}</span>
+            <span>📍 ${address || 'No address'}</span>
+          </div>
+
+          <button
+            type="button"
+            class="erp-primary-btn full"
+            onclick="openCustomerProfile(${Number(id)})"
+          >
+            View Profile
+          </button>
+        </div>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error('Customers error:', error);
+
+    list.innerHTML = `
+      <div class="erp-empty">
+        <p>Failed to load customers.</p>
+      </div>
+    `;
+  }
+}
+
+function closeCustomers() {
+  const view = document.getElementById('customersView');
+
+  if (view) {
+    view.remove();
+  }
+}
+
+function openAddCustomer() {
+  const name = prompt('Customer name:');
+  if (name === null) return;
+
+  const customerName = name.trim();
+
+  if (!customerName) {
+    alert('Customer name is required.');
+    return;
+  }
+
+  const phone = prompt('Phone number:');
+  if (phone === null) return;
+
+  const address = prompt('Address:');
+  if (address === null) return;
+
+  const notes = prompt('Notes:');
+  if (notes === null) return;
+
+  createCustomer({
+    name: customerName,
+    phone: phone.trim(),
+    address: address.trim(),
+    notes: notes.trim()
+  });
+}
+
+async function createCustomer(customer) {
+  try {
+    const response = await fetch('/api/customers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(customer)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to create customer');
+    }
+
+    alert('Customer created successfully.');
+    loadCustomers();
+
+  } catch (error) {
+    console.error('Create customer error:', error);
+    alert(error.message || 'Failed to create customer.');
+  }
+}
+
+async function openCompletedRepairs() {
+  sessionStorage.setItem(
+    'erpDynamicView',
+    JSON.stringify({
+      name: 'openCompletedRepairs'
+    })
+  );
+
+  try {
+    const response = await fetch('/api/repairs');
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to load repairs');
+    }
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    const completedRows = rows.filter(
+      row => (row[6]?.value || '') === 'completed'
+    );
+
+    const existing = document.getElementById('completedRepairsView');
+
+    if (existing) {
+      existing.remove();
+    }
+
+    const view = document.createElement('section');
+
+    view.id = 'completedRepairsView';
+    view.className = 'customer-credits-view';
+
+    const repairsHtml = completedRows.length
+      ? completedRows.map(row => {
+          const repairId = Number(row[0]?.value || 0);
+          const customerName = row[2]?.value || 'Unknown Customer';
+          const device = row[3]?.value || 'Unknown Device';
+          const problem = row[4]?.value || '';
+          const description = row[5]?.value || '';
+          const estimated = Number(row[7]?.value || 0);
+          const paid = Number(row[8]?.value || 0);
+          const createdAt = row[9]?.value || '';
+          const completedAt = row[10]?.value || '';
+          const remaining = Math.max(estimated - paid, 0);
+
+          return `
+            <div class="customer-credit-card">
+              <div class="customer-credit-top">
+                <div>
+                  <span class="customer-credit-label">COMPLETED REPAIR</span>
+                  <h3>🛠️ ${device}</h3>
+                </div>
+                <strong style="color:#16803c;">Completed</strong>
+              </div>
+
+              <div style="margin:12px 0;color:#244b4d;font-size:13px;">
+                <div><b>Customer:</b> ${customerName}</div>
+                <div style="margin-top:6px;"><b>Problem:</b> ${problem}</div>
+                ${
+                  description
+                    ? `<div style="margin-top:6px;"><b>Note:</b> ${description}</div>`
+                    : ''
+                }
+              </div>
+
+              <div class="customer-credit-details">
+                <span>Estimated<br><b>${estimated.toLocaleString()} ETB</b></span>
+                <span>Paid<br><b>${paid.toLocaleString()} ETB</b></span>
+                <span>Remaining<br><b>${remaining.toLocaleString()} ETB</b></span>
+              </div>
+
+              <div style="font-size:11px;color:#8a9b9c;">
+                Received: ${createdAt}
+                ${
+                  completedAt
+                    ? `<br>Completed: ${completedAt}`
+                    : ''
+                }
+              </div>
+              
+              <div style="margin-top:12px;text-align:right;">
+  <button
+    type="button"
+    onclick="deleteRepair(${repairId})"
+    style="
+      background:#dc2626;
+      color:white;
+      border:none;
+      padding:9px 14px;
+      border-radius:8px;
+      font-weight:600;
+      cursor:pointer;
+    "
+  >
+    🗑 Delete Repair
+  </button>
+</div>
+
+            </div>
+          `;
+        }).join('')
+      : `
+        <div class="erp-empty">
+          <div class="erp-empty-icon">✓</div>
+          <p>No completed repairs.</p>
+        </div>
+      `;
+
+    view.innerHTML = `
+      <div class="customer-credits-header">
+        <button
+          type="button"
+          onclick="closeCompletedRepairs()"
+        >
+          ← Back
+        </button>
+
+        <div>
+          <span>REPAIRS</span>
+          <h2>Completed</h2>
+        </div>
+      </div>
+
+      <div class="customer-credits-list">
+        ${repairsHtml}
+      </div>
+    `;
+
+    document.body.appendChild(view);
+
+  } catch (error) {
+    console.error('Completed repairs error:', error);
+    alert(error.message || 'Failed to load completed repairs.');
+  }
+}
+
+function closeCompletedRepairs() {
+  const view = document.getElementById('completedRepairsView');
+
+  if (view) {
+    view.remove();
+  }
+}
+
+async function openRepairHistory() {
+  try {
+    const response = await fetch('/api/repairs');
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to load repair history');
+    }
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    const existing = document.getElementById('repairHistoryView');
+
+    if (existing) {
+      existing.remove();
+    }
+
+    const view = document.createElement('section');
+
+    view.id = 'repairHistoryView';
+    view.className = 'customer-credits-view';
+
+    const repairsHtml = rows.length
+      ? rows.map(row => {
+          const repairId = Number(row[0]?.value || 0);
+          const customerName = row[2]?.value || 'Unknown Customer';
+          const device = row[3]?.value || 'Unknown Device';
+          const problem = row[4]?.value || '';
+          const description = row[5]?.value || '';
+          const status = row[6]?.value || 'active';
+          const estimated = Number(row[7]?.value || 0);
+          const paid = Number(row[8]?.value || 0);
+          const createdAt = row[9]?.value || '';
+          const completedAt = row[10]?.value || '';
+          const remaining = Math.max(estimated - paid, 0);
+
+          const statusColor =
+            status === 'completed' ? '#16803c' : '#b77900';
+
+          const statusLabel =
+            status === 'completed' ? 'Completed' : 'Active';
+
+          return `
+            <div class="customer-credit-card">
+              <div class="customer-credit-top">
+                <div>
+                  <span class="customer-credit-label">REPAIR HISTORY</span>
+                  <h3>🛠️ ${device}</h3>
+                </div>
+
+                <strong style="color:${statusColor};">
+                  ${statusLabel}
+                </strong>
+              </div>
+
+              <div style="margin:12px 0;color:#244b4d;font-size:13px;">
+                <div><b>Customer:</b> ${customerName}</div>
+                <div style="margin-top:6px;"><b>Problem:</b> ${problem}</div>
+                ${
+                  description
+                    ? `<div style="margin-top:6px;"><b>Note:</b> ${description}</div>`
+                    : ''
+                }
+              </div>
+
+              <div class="customer-credit-details">
+                <span>Estimated<br><b>${estimated.toLocaleString()} ETB</b></span>
+                <span>Paid<br><b>${paid.toLocaleString()} ETB</b></span>
+                <span>Remaining<br><b>${remaining.toLocaleString()} ETB</b></span>
+              </div>
+
+              <div style="font-size:11px;color:#8a9b9c;">
+                Received: ${createdAt}
+                ${
+                  completedAt
+                    ? `<br>Completed: ${completedAt}`
+                    : ''
+                }
+              </div>
+
+              <div style="margin-top:12px;text-align:right;">
+                <button
+                  type="button"
+                  onclick="deleteRepair(${repairId})"
+                  style="
+                    background:#dc2626;
+                    color:white;
+                    border:none;
+                    padding:9px 14px;
+                    border-radius:8px;
+                    font-weight:600;
+                    cursor:pointer;
+                  "
+                >
+                  🗑 Delete Repair
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('')
+      : `
+        <div class="erp-empty">
+          <div class="erp-empty-icon">▤</div>
+          <p>No repair history.</p>
+        </div>
+      `;
+
+    view.innerHTML = `
+      <div class="customer-credits-header">
+        <button
+          type="button"
+          onclick="closeRepairHistory()"
+        >
+          ← Back
+        </button>
+
+        <div>
+          <span>REPAIRS</span>
+          <h2>Repair History</h2>
+        </div>
+      </div>
+
+      <div class="customer-credits-list">
+        ${repairsHtml}
+      </div>
+    `;
+
+    document.body.appendChild(view);
+
+  } catch (error) {
+    console.error('Repair history error:', error);
+    alert(error.message || 'Failed to load repair history.');
+  }
+}
+
+function closeRepairHistory() {
+  const view = document.getElementById('repairHistoryView');
+
+  if (view) {
+    view.remove();
+  }
+}
+
+async function openActiveRepairs() {
+  sessionStorage.setItem(
+    'erpDynamicView',
+    JSON.stringify({
+      name: 'openActiveRepairs'
+    })
+  );
+
+  try {
+    const response = await fetch('/api/repairs');
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to load repairs');
+    }
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    const activeRows = rows.filter(
+      row => (row[6]?.value || 'active') === 'active'
+    );
+
+    const existing = document.getElementById('activeRepairsView');
+
+    if (existing) {
+      existing.remove();
+    }
+
+    const view = document.createElement('section');
+
+    view.id = 'activeRepairsView';
+    view.className = 'customer-credits-view';
+
+    const repairsHtml = activeRows.length
+      ? activeRows.map(row => {
+          const id = row[0]?.value || '';
+          const customerName = row[2]?.value || 'Unknown Customer';
+          const device = row[3]?.value || 'Unknown Device';
+          const problem = row[4]?.value || '';
+          const description = row[5]?.value || '';
+          const estimated = Number(row[7]?.value || 0);
+          const paid = Number(row[8]?.value || 0);
+          const createdAt = row[9]?.value || '';
+          const remaining = Math.max(estimated - paid, 0);
+
+          return `
+            <div class="customer-credit-card">
+              <div class="customer-credit-top">
+                <div>
+                  <span class="customer-credit-label">ACTIVE REPAIR</span>
+                  <h3>🛠️ ${device}</h3>
+                </div>
+                <strong style="color:#d97706;">Active</strong>
+              </div>
+
+              <div style="margin:12px 0;color:#244b4d;font-size:13px;">
+                <div><b>Customer:</b> ${customerName}</div>
+                <div style="margin-top:6px;"><b>Problem:</b> ${problem}</div>
+                ${
+                  description
+                    ? `<div style="margin-top:6px;"><b>Note:</b> ${description}</div>`
+                    : ''
+                }
+              </div>
+
+              <div class="customer-credit-details">
+                <span>Estimated<br><b>${estimated.toLocaleString()} ETB</b></span>
+                <span>Paid<br><b>${paid.toLocaleString()} ETB</b></span>
+                <span>Remaining<br><b>${remaining.toLocaleString()} ETB</b></span>
+              </div>
+
+              <div style="font-size:11px;color:#8a9b9c;margin-bottom:12px;">
+                Received: ${createdAt}
+              </div>
+
+              <button
+                type="button"
+                class="erp-primary-btn full"
+                onclick="completeRepair(${Number(id)})"
+              >
+                ✓ Complete Repair
+              </button>
+
+              <button
+                type="button"
+                class="erp-primary-btn full"
+                style="margin-top:8px;background:#b42318;"
+                onclick="deleteRepair(${Number(id)})"
+              >
+                🗑 Delete Repair
+              </button>
+            </div>
+          `;
+        }).join('')
+      : `
+        <div class="erp-empty">
+          <div class="erp-empty-icon">🔧</div>
+          <p>No active repairs.</p>
+        </div>
+      `;
+
+    view.innerHTML = `
+      <div class="customer-credits-header">
+        <button
+          type="button"
+          onclick="closeActiveRepairs()"
+        >
+          ← Back
+        </button>
+
+        <div>
+          <span>REPAIRS</span>
+          <h2>Active Repairs</h2>
+        </div>
+      </div>
+
+      <div class="customer-credits-list">
+        ${repairsHtml}
+      </div>
+    `;
+
+    document.body.appendChild(view);
+
+  } catch (error) {
+    console.error('Active repairs error:', error);
+    alert(error.message || 'Failed to load active repairs.');
+  }
+}
+
+async function completeRepair(repairId) {
+  if (!Number.isInteger(Number(repairId)) || Number(repairId) <= 0) {
+    alert('Invalid repair id.');
+    return;
+  }
+
+  if (!confirm('Mark this repair as completed?')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/repairs/${Number(repairId)}/complete`,
+      {
+        method: 'PATCH'
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.error || 'Failed to complete repair'
+      );
+    }
+
+    alert('Repair completed successfully.');
+
+    const view = document.getElementById('activeRepairsView');
+
+    if (view) {
+      view.remove();
+    }
+
+    openActiveRepairs();
+
+  } catch (error) {
+    console.error('Complete repair error:', error);
+    alert(error.message || 'Failed to complete repair.');
+  }
+}
+
+async function deleteRepair(repairId) {
+  if (!Number.isInteger(Number(repairId)) || Number(repairId) <= 0) {
+    alert('Invalid repair id.');
+    return;
+  }
+
+  if (!confirm('Delete this repair permanently?')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/repairs/${Number(repairId)}`,
+      {
+        method: 'DELETE'
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.error || 'Failed to delete repair'
+      );
+    }
+
+    alert('Repair deleted successfully.');
+
+    const view = document.getElementById('activeRepairsView');
+
+    if (view) {
+      view.remove();
+    }
+
+    openActiveRepairs();
+
+  } catch (error) {
+    console.error('Delete repair error:', error);
+    alert(error.message || 'Failed to delete repair.');
+  }
+}
+
+function closeActiveRepairs() {
+  const view = document.getElementById('activeRepairsView');
+
+  if (view) {
+    view.remove();
+  }
+}
+
+async function openNewRepair() {
+  const existing = document.getElementById('newRepairView');
+
+  if (existing) {
+    existing.style.display = 'block';
+    loadRepairCustomers();
+    return;
+  }
+
+  const view = document.createElement('section');
+
+  view.id = 'newRepairView';
+  view.className = 'customer-credits-view';
+
+  view.innerHTML = `
+    <div class="customer-credits-header">
+      <button
+        type="button"
+        onclick="closeNewRepair()"
+      >
+        ← Back
+      </button>
+
+      <div>
+        <span>REPAIRS</span>
+        <h2>New Repair</h2>
+      </div>
+    </div>
+
+    <div class="customer-credit-card">
+      <div style="margin-bottom:14px;">
+        <span class="customer-credit-label">CUSTOMER</span>
+        <select
+          id="repairCustomerId"
+          style="width:100%;margin-top:7px;padding:12px;border:1px solid #d9e4e4;border-radius:10px;background:#fff;box-sizing:border-box;"
+        >
+          <option value="">Loading customers...</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <span class="customer-credit-label">DEVICE</span>
+        <input
+          id="repairDevice"
+          type="text"
+          placeholder="e.g. Laptop"
+          style="width:100%;margin-top:7px;padding:12px;border:1px solid #d9e4e4;border-radius:10px;box-sizing:border-box;"
+        >
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <span class="customer-credit-label">PROBLEM</span>
+        <textarea
+          id="repairProblem"
+          placeholder="Describe the problem"
+          rows="3"
+          style="width:100%;margin-top:7px;padding:12px;border:1px solid #d9e4e4;border-radius:10px;box-sizing:border-box;resize:vertical;"
+        ></textarea>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <span class="customer-credit-label">DESCRIPTION / NOTE</span>
+        <textarea
+          id="repairDescription"
+          placeholder="Additional notes"
+          rows="3"
+          style="width:100%;margin-top:7px;padding:12px;border:1px solid #d9e4e4;border-radius:10px;box-sizing:border-box;resize:vertical;"
+        ></textarea>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <span class="customer-credit-label">ESTIMATED COST</span>
+          <input
+            id="repairEstimatedCost"
+            type="number"
+            min="0"
+            step="0.01"
+            value="0"
+            style="width:100%;margin-top:7px;padding:12px;border:1px solid #d9e4e4;border-radius:10px;box-sizing:border-box;"
+          >
+        </div>
+
+        <div>
+          <span class="customer-credit-label">PAID AMOUNT</span>
+          <input
+            id="repairPaidAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            value="0"
+            style="width:100%;margin-top:7px;padding:12px;border:1px solid #d9e4e4;border-radius:10px;box-sizing:border-box;"
+          >
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="erp-primary-btn full"
+        onclick="createRepairFromForm()"
+      >
+        + Save Repair
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(view);
+  loadRepairCustomers();
+}
+
+async function loadRepairCustomers() {
+  const select = document.getElementById('repairCustomerId');
+
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Loading customers...</option>';
+
+  try {
+    const response = await fetch('/api/customers');
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to load customers');
+    }
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      select.innerHTML = '<option value="">No customers found</option>';
+      return;
+    }
+
+    select.innerHTML = `
+      <option value="">Select customer</option>
+      ${rows.map(row => {
+        const id = row[0]?.value || '';
+        const name = row[1]?.value || '';
+        const phone = row[2]?.value || '';
+
+        return `
+          <option value="${id}">
+            ${name}${phone ? ` - ${phone}` : ''}
+          </option>
+        `;
+      }).join('')}
+    `;
+
+  } catch (error) {
+    console.error('Repair customers error:', error);
+    select.innerHTML = '<option value="">Failed to load customers</option>';
+  }
+}
+
+let repairCreationInProgress = false;
+
+async function createRepairFromForm() {
+  const customerId =
+    Number(document.getElementById('repairCustomerId')?.value || 0);
+
+  const device =
+    document.getElementById('repairDevice')?.value.trim() || '';
+
+  const problem =
+    document.getElementById('repairProblem')?.value.trim() || '';
+
+  const description =
+    document.getElementById('repairDescription')?.value.trim() || '';
+
+  const estimatedCost =
+    Number(document.getElementById('repairEstimatedCost')?.value || 0);
+
+  const paidAmount =
+    Number(document.getElementById('repairPaidAmount')?.value || 0);
+
+  if (!Number.isInteger(customerId) || customerId <= 0) {
+    alert('Please select a customer.');
+    return;
+  }
+
+  if (!device) {
+    alert('Device is required.');
+    return;
+  }
+
+  if (!problem) {
+    alert('Problem is required.');
+    return;
+  }
+
+  if (!Number.isFinite(estimatedCost) || estimatedCost < 0) {
+    alert('Estimated cost is invalid.');
+    return;
+  }
+
+  if (!Number.isFinite(paidAmount) || paidAmount < 0) {
+    alert('Paid amount is invalid.');
+    return;
+  }
+
+  if (paidAmount > estimatedCost) {
+    alert('Paid amount cannot exceed estimated cost.');
+    return;
+  }
+
+  if (repairCreationInProgress) {
+    return;
+  }
+
+  repairCreationInProgress = true;
+
+  try {
+    const response = await fetch('/api/repairs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        customer_id: customerId,
+        device,
+        problem,
+        description,
+        status: 'active',
+        estimated_cost: estimatedCost,
+        paid_amount: paidAmount
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to create repair');
+    }
+
+    alert('Repair created successfully.');
+    closeNewRepair();
+
+  } catch (error) {
+    console.error('Create repair error:', error);
+    alert(error.message || 'Failed to create repair.');
+  } finally {
+    repairCreationInProgress = false;
+  }
+}
+
+function closeNewRepair() {
+  const view = document.getElementById('newRepairView');
+
+  if (view) {
+    view.remove();
+  }
+}
+
+async function openCustomerProfile(customerId) {
+  try {
+    const response = await fetch(`/api/customers/${customerId}`);
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to load customer');
+    }
+
+    const customer = data.customer;
+
+    const salesResponse = await fetch(
+      `/api/customer-sales/${encodeURIComponent(customer.name)}`
+    );
+
+    const salesData = await salesResponse.json();
+
+    if (!salesResponse.ok) {
+      throw new Error(
+        salesData.error || 'Failed to load customer sales'
+      );
+    }
+
+    const salesRows =
+      salesData.results?.[0]?.response?.result?.rows || [];
+
+    const existing = document.getElementById('customerProfileView');
+
+    if (existing) {
+      existing.remove();
+    }
+
+    const view = document.createElement('section');
+
+    view.id = 'customerProfileView';
+    view.className = 'customer-credits-view';
+
+    let totalSales = 0;
+
+    const salesHtml = salesRows.length
+      ? salesRows.map(row => {
+          const product = row[2]?.value || 'Unknown Product';
+          const quantity = Number(row[3]?.value || 0);
+          const unitPrice = Number(row[4]?.value || 0);
+          const total = Number(row[5]?.value || 0);
+          const paymentType = row[6]?.value || 'cash';
+          const createdAt = row[7]?.value || '';
+
+          totalSales += total;
+
+          return `
+            <div class="customer-credit-card">
+              <div class="customer-credit-top">
+                <div>
+                  <span class="customer-credit-label">SALE</span>
+                  <h3>${product}</h3>
+                </div>
+                <strong style="color:#29595b;">
+                  ${total.toLocaleString()} ETB
+                </strong>
+              </div>
+
+              <div class="customer-credit-details">
+                <span>
+                  ${quantity.toLocaleString()} ×
+                  ${unitPrice.toLocaleString()} ETB
+                </span>
+                <span>
+                  ${paymentType}
+                </span>
+              </div>
+
+              <div style="font-size:11px;color:#8a9b9c;">
+                ${createdAt}
+              </div>
+            </div>
+          `;
+        }).join('')
+      : `
+        <div class="erp-empty">
+          <div class="erp-empty-icon">🧾</div>
+          <p>No sales recorded for this customer.</p>
+        </div>
+      `;
+
+    view.innerHTML = `
+      <div class="customer-credits-header">
+        <button
+          type="button"
+          onclick="closeCustomerProfile()"
+        >
+          ← Back
+        </button>
+
+        <div>
+          <span>CUSTOMER</span>
+          <h2>${customer.name}</h2>
+        </div>
+      </div>
+
+      <div class="customer-credit-card">
+        <div class="customer-credit-label">
+          CUSTOMER INFORMATION
+        </div>
+
+        <div style="margin-top:10px;color:#244b4d;font-size:14px;line-height:1.8;">
+          <div>📞 ${customer.phone || 'No phone number'}</div>
+          <div>📍 ${customer.address || 'No address'}</div>
+          <div>📝 ${customer.notes || 'No notes'}</div>
+        </div>
+      </div>
+
+      <div style="margin:18px 0 10px;">
+        <span class="customer-credit-label">
+          SALES HISTORY
+        </span>
+
+        <div style="font-size:22px;font-weight:700;color:#244b4d;margin-top:4px;">
+          ${totalSales.toLocaleString()} ETB
+        </div>
+
+        <div style="font-size:12px;color:#789091;">
+          Total Sales
+        </div>
+      </div>
+
+      <div class="customer-credits-list">
+        ${salesHtml}
+      </div>
+
+      <div style="margin-top:18px;">
+        <button
+          type="button"
+          class="erp-primary-btn full"
+          onclick="openCustomerCredits()"
+        >
+          💰 Customer Credits
+        </button>
+      </div>
+
+      <div style="margin-top:10px;">
+        <button
+          type="button"
+          class="erp-primary-btn full"
+          id="customerRepairHistoryBtn"
+        >
+          🛠️ Repair History
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(view);
+
+    const repairHistoryBtn =
+      document.getElementById('customerRepairHistoryBtn');
+
+    if (repairHistoryBtn) {
+      repairHistoryBtn.addEventListener('click', () => {
+        openCustomerRepairHistory(
+          customer.id,
+          customer.name
+        );
+      });
+    }
+
+  } catch (error) {
+    console.error('Customer profile error:', error);
+    alert(error.message || 'Failed to load customer profile.');
+  }
+}
+
+async function openCustomerRepairHistory(customerId, customerName = '') {
+  try {
+    const response = await fetch(`/api/customer-repairs/${customerId}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to load repair history');
+    }
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    const existing = document.getElementById('customerRepairHistoryView');
+
+    if (existing) {
+      existing.remove();
+    }
+
+    const view = document.createElement('section');
+
+    view.id = 'customerRepairHistoryView';
+    view.className = 'customer-credits-view';
+
+    const repairsHtml = rows.length
+      ? rows.map(row => {
+          const device = row[2]?.value || 'Unknown Device';
+          const problem = row[3]?.value || '';
+          const description = row[4]?.value || '';
+          const status = row[5]?.value || 'active';
+          const estimated = Number(row[6]?.value || 0);
+          const paid = Number(row[7]?.value || 0);
+          const createdAt = row[8]?.value || '';
+          const completedAt = row[9]?.value || '';
+          const remaining = Math.max(estimated - paid, 0);
+
+          const statusLabel =
+            status === 'completed'
+              ? 'Completed'
+              : status === 'cancelled'
+                ? 'Cancelled'
+                : 'Active';
+
+          return `
+            <div class="customer-credit-card">
+              <div class="customer-credit-top">
+                <div>
+                  <span class="customer-credit-label">REPAIR</span>
+                  <h3>🛠️ ${device}</h3>
+                </div>
+                <strong style="color:#29595b;">
+                  ${statusLabel}
+                </strong>
+              </div>
+
+              <div style="margin:12px 0;color:#244b4d;font-size:13px;">
+                <div><b>Problem:</b> ${problem}</div>
+                ${
+                  description
+                    ? `<div style="margin-top:6px;"><b>Note:</b> ${description}</div>`
+                    : ''
+                }
+              </div>
+
+              <div class="customer-credit-details">
+                <span>Estimated<br><b>${estimated.toLocaleString()} ETB</b></span>
+                <span>Paid<br><b>${paid.toLocaleString()} ETB</b></span>
+                <span>Remaining<br><b>${remaining.toLocaleString()} ETB</b></span>
+              </div>
+
+              <div style="font-size:11px;color:#8a9b9c;">
+                Received: ${createdAt}
+                ${
+                  completedAt
+                    ? `<br>Completed: ${completedAt}`
+                    : ''
+                }
+              </div>
+            </div>
+          `;
+        }).join('')
+      : `
+        <div class="erp-empty">
+          <div class="erp-empty-icon">🛠️</div>
+          <p>No repair history for this customer.</p>
+        </div>
+      `;
+
+    view.innerHTML = `
+      <div class="customer-credits-header">
+        <button
+          type="button"
+          onclick="closeCustomerRepairHistory()"
+        >
+          ← Back
+        </button>
+
+        <div>
+          <span>REPAIRS</span>
+          <h2>${customerName || 'Repair History'}</h2>
+        </div>
+      </div>
+
+      <div class="customer-credits-list">
+        ${repairsHtml}
+      </div>
+    `;
+
+    document.body.appendChild(view);
+
+  } catch (error) {
+    console.error('Customer repair history error:', error);
+    alert(error.message || 'Failed to load repair history.');
+  }
+}
+
+function closeCustomerRepairHistory() {
+  const view = document.getElementById('customerRepairHistoryView');
+
+  if (view) {
+    view.remove();
+  }
+}
+
+function closeCustomerProfile() {
+  const view = document.getElementById('customerProfileView');
+
+  if (view) {
+    view.remove();
+  }
+}
+
 function openCustomerCredits() {
   const existing = document.getElementById('customerCreditsView');
 
@@ -3222,6 +8287,362 @@ function quickAction(action) {
 }
 
 
+
+function openExpensesView() {
+  erpShowView('erpMoreView');
+
+  const moreView = document.getElementById('erpMoreView');
+  if (!moreView) return;
+
+  const sections = moreView.querySelectorAll(':scope > .erp-menu-section');
+  const forms = moreView.querySelectorAll(':scope > .erp-form-card');
+  const signout = moreView.querySelector('.erp-signout-card');
+  const adminMount = document.getElementById('erpAdminMount');
+
+  sections.forEach(section => {
+    section.style.display = 'none';
+  });
+
+  forms.forEach(form => {
+    form.style.display = 'none';
+  });
+
+  if (signout) signout.style.display = 'none';
+  if (adminMount) adminMount.style.display = 'none';
+
+  let header = document.getElementById('moneyQuickHeader');
+
+  if (!header) {
+    header = document.createElement('div');
+    header.id = 'moneyQuickHeader';
+    header.style.cssText = `
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:16px;
+      padding:12px 0;
+    `;
+
+    header.innerHTML = `
+      <button
+        type="button"
+        onclick="closeMoneyQuickView()"
+        style="
+          border:none;
+          background:#f1f5f5;
+          border-radius:10px;
+          padding:10px 14px;
+          font-size:16px;
+          cursor:pointer;
+        "
+      >
+        ← Back
+      </button>
+
+      <div>
+        <div style="font-size:11px;color:#718080;font-weight:700;">
+          MONEY
+        </div>
+        <h2 style="margin:2px 0 0;">
+          Expenses
+        </h2>
+      </div>
+    `;
+
+    moreView.insertBefore(header, moreView.firstChild);
+  } else {
+    header.querySelector('h2').textContent = 'Expenses';
+    header.style.display = 'flex';
+  }
+
+  const expenseInput = document.getElementById('expenseDescription');
+
+  if (expenseInput) {
+    const form = expenseInput.closest('.erp-form-card');
+
+    if (form) {
+      form.style.display = 'block';
+      form.style.marginTop = '0';
+    }
+
+    setTimeout(() => expenseInput.focus(), 100);
+  }
+}
+
+
+function openCashInOutView() {
+  erpShowView('erpMoreView');
+
+  const moreView = document.getElementById('erpMoreView');
+  if (!moreView) return;
+
+  const sections = moreView.querySelectorAll(':scope > .erp-menu-section');
+  const forms = moreView.querySelectorAll(':scope > .erp-form-card');
+  const signout = moreView.querySelector('.erp-signout-card');
+  const adminMount = document.getElementById('erpAdminMount');
+
+  sections.forEach(section => {
+    section.style.display = 'none';
+  });
+
+  forms.forEach(form => {
+    form.style.display = 'none';
+  });
+
+  if (signout) signout.style.display = 'none';
+  if (adminMount) adminMount.style.display = 'none';
+
+  let header = document.getElementById('moneyQuickHeader');
+
+  if (!header) {
+    header = document.createElement('div');
+    header.id = 'moneyQuickHeader';
+    header.style.cssText = `
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:16px;
+      padding:12px 0;
+    `;
+
+    header.innerHTML = `
+      <button
+        type="button"
+        onclick="closeMoneyQuickView()"
+        style="
+          border:none;
+          background:#f1f5f5;
+          border-radius:10px;
+          padding:10px 14px;
+          font-size:16px;
+          cursor:pointer;
+        "
+      >
+        ← Back
+      </button>
+
+      <div>
+        <div style="font-size:11px;color:#718080;font-weight:700;">
+          MONEY
+        </div>
+        <h2 style="margin:2px 0 0;">
+          Cash In / Out
+        </h2>
+      </div>
+    `;
+
+    moreView.insertBefore(header, moreView.firstChild);
+  } else {
+    header.querySelector('h2').textContent = 'Cash In / Out';
+    header.style.display = 'flex';
+  }
+
+  const incomeInput = document.getElementById('incomeDescription');
+  const expenseInput = document.getElementById('expenseDescription');
+
+  if (incomeInput) {
+    const form = incomeInput.closest('.erp-form-card');
+
+    if (form) {
+      form.style.display = 'block';
+      form.style.marginTop = '0';
+    }
+  }
+
+  if (expenseInput) {
+    const form = expenseInput.closest('.erp-form-card');
+
+    if (form) {
+      form.style.display = 'block';
+      form.style.marginTop = '12px';
+    }
+  }
+
+  setTimeout(() => {
+    if (incomeInput) incomeInput.focus();
+  }, 100);
+}
+
+
+function closeMoneyQuickView() {
+  const moreView = document.getElementById('erpMoreView');
+
+  if (!moreView) return;
+
+  const header = document.getElementById('moneyQuickHeader');
+
+  if (header) {
+    header.remove();
+  }
+
+  const sections = moreView.querySelectorAll(':scope > .erp-menu-section');
+  const forms = moreView.querySelectorAll(':scope > .erp-form-card');
+  const signout = moreView.querySelector('.erp-signout-card');
+  const adminMount = document.getElementById('erpAdminMount');
+
+  sections.forEach(section => {
+    section.style.display = '';
+  });
+
+  forms.forEach(form => {
+    form.style.display = '';
+  });
+
+  if (signout) signout.style.display = '';
+  if (adminMount) adminMount.style.display = '';
+
+  erpShowView('erpMoreView');
+}
+
+
+function openPaymentBalancesView() {
+  let view = document.getElementById('paymentBalancesView');
+
+  if (view) {
+    view.style.display = 'block';
+    loadPaymentBalances();
+    return;
+  }
+
+  view = document.createElement('section');
+  view.id = 'paymentBalancesView';
+  view.className = 'customer-credits-view';
+
+  view.innerHTML = `
+    <div class="customer-credits-header">
+      <button type="button" onclick="closePaymentBalancesView()">← Back</button>
+      <div>
+        <span>PAYMENTS</span>
+        <h2>Payment Balances</h2>
+      </div>
+    </div>
+
+    <div id="paymentBalancesList" class="customer-credits-list">
+      <p>Loading...</p>
+    </div>
+  `;
+
+  document.body.appendChild(view);
+  loadPaymentBalances();
+}
+
+
+async function loadPaymentBalances() {
+  const list = document.getElementById('paymentBalancesList');
+
+  if (!list) return;
+
+  list.innerHTML = '<p>Loading...</p>';
+
+  try {
+    const [customerResponse, supplierResponse] = await Promise.all([
+      fetch('/api/customer-credits'),
+      fetch('/api/supplier-debts')
+    ]);
+
+    const customerData = await customerResponse.json();
+    const supplierData = await supplierResponse.json();
+
+    if (!customerResponse.ok || !customerData.success) {
+      throw new Error(
+        customerData.error || 'Failed to load customer balances'
+      );
+    }
+
+    if (!supplierResponse.ok || !supplierData.success) {
+      throw new Error(
+        supplierData.error || 'Failed to load supplier balances'
+      );
+    }
+
+    const customerCredits = customerData.credits || [];
+    const supplierDebts = supplierData.debts || [];
+
+    const customerTotal = customerCredits.reduce(
+      (sum, item) => sum + Number(item.outstanding || 0),
+      0
+    );
+
+    const supplierTotal = supplierDebts.reduce(
+      (sum, item) => sum + Number(item.amount || 0),
+      0
+    );
+
+    list.innerHTML = `
+      <div class="customer-credit-card">
+        <div class="customer-credit-top">
+          <div>
+            <span class="customer-credit-label">CUSTOMERS</span>
+            <h3>💰 Outstanding Credit</h3>
+          </div>
+          <strong>${customerTotal.toLocaleString()} ETB</strong>
+        </div>
+
+        <div class="customer-credit-details">
+          <span>${customerCredits.length} customer record(s)</span>
+        </div>
+
+        <button
+          type="button"
+          class="erp-primary-btn full"
+          onclick="closePaymentBalancesView(); openCustomerCredits();"
+        >
+          View Customer Credits
+        </button>
+      </div>
+
+      <div class="customer-credit-card">
+        <div class="customer-credit-top">
+          <div>
+            <span class="customer-credit-label">SUPPLIERS</span>
+            <h3>🚚 Outstanding Debt</h3>
+          </div>
+          <strong>${supplierTotal.toLocaleString()} ETB</strong>
+        </div>
+
+        <div class="customer-credit-details">
+          <span>${supplierDebts.length} supplier debt record(s)</span>
+        </div>
+
+        <button
+          type="button"
+          class="erp-primary-btn full"
+          onclick="closePaymentBalancesView(); openSupplierDebts();"
+        >
+          View Supplier Debts
+        </button>
+      </div>
+
+      <div class="customer-credit-card">
+        <div class="customer-credit-details">
+          <strong>Payment Balance Summary</strong>
+          <span>Customer Credit: ${customerTotal.toLocaleString()} ETB</span>
+          <span>Supplier Debt: ${supplierTotal.toLocaleString()} ETB</span>
+        </div>
+      </div>
+    `;
+
+  } catch (error) {
+    console.error('Payment balances error:', error);
+
+    list.innerHTML = `
+      <div class="erp-empty">
+        <p>Failed to load payment balances.</p>
+      </div>
+    `;
+  }
+}
+
+
+function closePaymentBalancesView() {
+  const view = document.getElementById('paymentBalancesView');
+
+  if (view) {
+    view.remove();
+  }
+}
+
+
 function openCapitalProfitView() {
   let view = document.getElementById('capitalProfitView');
 
@@ -3430,6 +8851,42 @@ function openSuppliers() {
       </div>
     </div>
 
+    <div class="erp-form-card">
+      <h2>🚚 Add Supplier</h2>
+
+      <input
+        id="supplierName"
+        type="text"
+        placeholder="Supplier name *"
+      >
+
+      <input
+        id="supplierPhone"
+        type="text"
+        placeholder="Phone"
+      >
+
+      <input
+        id="supplierAddress"
+        type="text"
+        placeholder="Address"
+      >
+
+      <input
+        id="supplierNote"
+        type="text"
+        placeholder="Note"
+      >
+
+      <button
+        class="erp-primary-btn full"
+        type="button"
+        onclick="addSupplier()"
+      >
+        💾 Save Supplier
+      </button>
+    </div>
+
     <div id="suppliersList" class="customer-credits-list">
       <p>Loading...</p>
     </div>
@@ -3437,6 +8894,51 @@ function openSuppliers() {
 
   document.body.appendChild(view);
   loadSuppliers();
+}
+
+async function addSupplier() {
+  const name = document.getElementById('supplierName')?.value.trim();
+  const phone = document.getElementById('supplierPhone')?.value.trim() || '';
+  const address = document.getElementById('supplierAddress')?.value.trim() || '';
+  const note = document.getElementById('supplierNote')?.value.trim() || '';
+
+  if (!name) {
+    alert('Supplier name is required.');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/suppliers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name,
+        phone,
+        address,
+        note
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to create supplier');
+    }
+
+    document.getElementById('supplierName').value = '';
+    document.getElementById('supplierPhone').value = '';
+    document.getElementById('supplierAddress').value = '';
+    document.getElementById('supplierNote').value = '';
+
+    alert('Supplier saved successfully.');
+
+    await loadSuppliers();
+  } catch (error) {
+    console.error('Add supplier error:', error);
+    alert(error.message || 'Failed to create supplier.');
+  }
 }
 
 async function loadSuppliers() {
@@ -3447,65 +8949,101 @@ async function loadSuppliers() {
   list.innerHTML = '<p>Loading...</p>';
 
   try {
-    const debtResponse = await fetch('/api/supplier-debts');
+    const [supplierResponse, debtResponse, paymentResponse] =
+      await Promise.all([
+        fetch('/api/suppliers'),
+        fetch('/api/supplier-debts'),
+        fetch('/api/supplier-payments')
+      ]);
+
+    const supplierData = await supplierResponse.json();
     const debtData = await debtResponse.json();
-
-    if (!debtResponse.ok || !debtData.success) {
-      throw new Error(debtData.error || 'Failed to load suppliers');
-    }
-
-    const paymentResponse = await fetch('/api/supplier-payments');
     const paymentData = await paymentResponse.json();
 
-    const debts = debtData.debts || [];
+    if (!supplierResponse.ok || !supplierData.success) {
+      throw new Error(
+        supplierData.error || 'Failed to load suppliers'
+      );
+    }
+
+    const masterSuppliers = supplierData.suppliers || [];
+    const debts = debtData.success
+      ? (debtData.debts || [])
+      : [];
     const payments = paymentData.success
       ? (paymentData.payments || [])
       : [];
 
-    if (debts.length === 0) {
-      list.innerHTML = `
-        <div class="erp-empty">
-          <div class="erp-empty-icon">🚚</div>
-          <p>No supplier credit records yet.</p>
-        </div>
-      `;
-      return;
-    }
+    const summary = {};
 
-    const suppliers = {};
+    masterSuppliers.forEach(item => {
+      summary[item.name] = {
+        id: item.id,
+        name: item.name,
+        phone: item.phone || '',
+        address: item.address || '',
+        note: item.note || '',
+        total: 0,
+        paid: 0,
+        count: 0
+      };
+    });
 
     debts.forEach(item => {
       const name = item.supplier || 'Unknown Supplier';
 
-      if (!suppliers[name]) {
-        suppliers[name] = {
-          supplier: name,
+      if (!summary[name]) {
+        summary[name] = {
+          id: null,
+          name,
+          phone: '',
+          address: '',
+          note: '',
           total: 0,
           paid: 0,
           count: 0
         };
       }
 
-      suppliers[name].total += Number(item.amount) || 0;
-      suppliers[name].count += 1;
+      summary[name].total += Number(item.amount) || 0;
+      summary[name].count += 1;
     });
 
     payments.forEach(payment => {
       const name = payment.supplier || 'Unknown Supplier';
 
-      if (!suppliers[name]) {
-        suppliers[name] = {
-          supplier: name,
+      if (!summary[name]) {
+        summary[name] = {
+          id: null,
+          name,
+          phone: '',
+          address: '',
+          note: '',
           total: 0,
           paid: 0,
           count: 0
         };
       }
 
-      suppliers[name].paid += Number(payment.amount) || 0;
+      summary[name].paid += Number(payment.amount) || 0;
     });
 
-    const supplierList = Object.values(suppliers);
+    const supplierList = Object.values(summary);
+
+    if (!supplierList.length) {
+      list.innerHTML = `
+        <div class="erp-empty">
+          <div class="erp-empty-icon">🚚</div>
+          <h3>No suppliers found.</h3>
+          <p>Add your first supplier above.</p>
+        </div>
+      `;
+      return;
+    }
+
+    supplierList.sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
 
     list.innerHTML = supplierList.map(item => {
       const outstanding = Math.max(
@@ -3513,28 +9051,71 @@ async function loadSuppliers() {
         0
       );
 
-      return `
-        <div class="customer-credit-card">
-          <div class="customer-credit-top">
-            <div>
-              <span class="customer-credit-label">SUPPLIER</span>
-              <h3>🚚 ${escapeHtml(item.supplier)}</h3>
-            </div>
-            <strong>${outstanding.toLocaleString()} ETB</strong>
-          </div>
+      const deleteButton = item.id
+        ? `
+          <button
+            type="button"
+            class="erp-secondary-btn full"
+            onclick="deleteSupplier(${item.id}, '${escapeJs(item.name)}')"
+          >
+            🗑 Delete Supplier
+          </button>
+        `
+        : '';
 
-          <div class="customer-credit-details">
-            <span>Credit Purchases: ${item.count}</span>
-            <span>Outstanding: ${outstanding.toLocaleString()} ETB</span>
-          </div>
-
+      const debtButton = item.count > 0
+        ? `
           <button
             type="button"
             class="erp-primary-btn full"
-            onclick="openSupplierDebts('${escapeJs(item.supplier)}')"
+            onclick="openSupplierDebts('${escapeJs(item.name)}')"
           >
             📒 View Debt
           </button>
+        `
+        : '';
+
+      return `
+        <div class="customer-credit-card">
+
+          <div class="customer-credit-top">
+            <div>
+              <span class="customer-credit-label">SUPPLIER</span>
+              <h3>🚚 ${escapeHtml(item.name)}</h3>
+            </div>
+
+            <strong>
+              ${outstanding.toLocaleString()} ETB
+            </strong>
+          </div>
+
+          <div class="customer-credit-details">
+            <span>
+              Phone: ${escapeHtml(item.phone || '-')}
+            </span>
+
+            <span>
+              Address: ${escapeHtml(item.address || '-')}
+            </span>
+
+            <span>
+              Credit Purchases: ${item.count}
+            </span>
+
+            <span>
+              Outstanding: ${outstanding.toLocaleString()} ETB
+            </span>
+          </div>
+
+          ${item.note ? `
+            <p style="margin:8px 0;color:#6e7d7f;font-size:12px;">
+              Note: ${escapeHtml(item.note)}
+            </p>
+          ` : ''}
+
+          ${debtButton}
+          ${deleteButton}
+
         </div>
       `;
     }).join('');
@@ -3547,6 +9128,35 @@ async function loadSuppliers() {
         <p>Failed to load suppliers.</p>
       </div>
     `;
+  }
+}
+
+async function deleteSupplier(id, name) {
+  if (!confirm(`Delete supplier "${name}"?`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/suppliers/${id}`,
+      {
+        method: 'DELETE'
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.error || 'Failed to delete supplier'
+      );
+    }
+
+    await loadSuppliers();
+
+  } catch (error) {
+    console.error('Delete supplier error:', error);
+    alert(error.message || 'Failed to delete supplier.');
   }
 }
 
@@ -3830,6 +9440,43 @@ function escapeJs(value) {
     .replace(/'/g, "\\'");
 }
 
+async function logoutUser() {
+  try {
+    const response = await fetch('/api/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      console.error('Logout failed');
+      return;
+    }
+
+    window.currentUser = null;
+
+    sessionStorage.removeItem('erpCurrentView');
+
+    const dashboard =
+      document.getElementById('dashboard');
+
+    const loginScreen =
+      document.getElementById('loginScreen');
+
+    if (dashboard) {
+      dashboard.style.display = 'none';
+    }
+
+    if (loginScreen) {
+      loginScreen.style.display = 'flex';
+    }
+
+    window.location.reload();
+
+  } catch (error) {
+    console.error('Logout error:', error);
+    window.location.reload();
+  }
+}
 </script>
 </body>
 </html>

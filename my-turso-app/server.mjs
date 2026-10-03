@@ -207,6 +207,12 @@ app.post('/api/register', async (req, res) => {
 // Website
 app.use(express.static(__dirname));
 app.use(api);
+
+// SPA fallback for ERP routes
+app.get('/erp/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

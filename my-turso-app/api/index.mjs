@@ -131,10 +131,22 @@ function verifyAuthToken(token) {
   }
 
 function requireAuth(req, res, next) {
+  console.log(
+    '[AUTH DEBUG] cookie header present:',
+    Boolean(req.headers.cookie)
+  );
+
   const cookies = parseCookies(req);
   const token = cookies.auth_token;
 
   const user = verifyAuthToken(token);
+
+  console.log(
+    '[AUTH DEBUG] token present:',
+    Boolean(token),
+    'verified:',
+    Boolean(user)
+  );
 
   if (!user) {
     return res.status(401).json({
@@ -144,6 +156,73 @@ function requireAuth(req, res, next) {
 
   req.user = user;
   next();
+}
+
+
+async function requirePermissionCheck(req, permission) {
+  if (req.user?.role === 'admin') {
+    return true;
+  }
+
+  const department = String(
+    req.user?.department || 'general'
+  ).trim().toLowerCase();
+
+  const departmentPermissions = {
+    stock: ['delete_stock'],
+    sales: ['delete_sales'],
+    repairs: ['delete_repairs'],
+    finance: [],
+    general: []
+  };
+
+  const allowedForDepartment =
+    departmentPermissions[department] || [];
+
+  if (!allowedForDepartment.includes(permission)) {
+    return false;
+  }
+
+  const data = await tursoQuery(
+    `SELECT id
+     FROM user_permissions
+     WHERE user_id = ? AND permission = ?
+     LIMIT 1`,
+    [req.user.id, permission]
+  );
+
+  const rows =
+    data.results?.[0]?.response?.result?.rows || [];
+
+  return rows.length > 0;
+}
+
+function requirePermission(permission) {
+  return async (req, res, next) => {
+    try {
+      if (req.user?.role === 'admin') {
+        return next();
+      }
+
+      const allowed = await requirePermissionCheck(req, permission);
+
+      if (!allowed) {
+        return res.status(403).json({
+          error: 'Permission denied',
+          permission
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error('Permission check error:', error);
+
+      res.status(500).json({
+        error: 'Failed to check permission',
+        details: error.message
+      });
+    }
+  };
 }
 
 function requireAdmin(req, res, next) {
@@ -173,6 +252,7 @@ app.post('/api/login', async (req, res) => {
        LIMIT 1`,
       [username.trim()]
     );
+
 
     const rows =
       data.results?.[0]?.response?.result?.rows || [];
@@ -223,7 +303,9 @@ app.post('/api/login', async (req, res) => {
         email: user.email,
         username: user.username,
         role: user.role,
-        language: user.language
+        language: user.language,
+        department: user.department || 'general',
+        permissions: []
       }
     });
 
@@ -280,9 +362,15 @@ app.get('/api/me', requireAuth, async (req, res) => {
   }
 });
 app.post('/api/logout', (req, res) => {
+  const secureCookie =
+    process.env.VERCEL === "1" ||
+    process.env.NODE_ENV === "production"
+      ? "Secure; "
+      : "";
+
   res.setHeader(
     'Set-Cookie',
-    'auth_token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0'
+    `auth_token=; HttpOnly; ${secureCookie}SameSite=Lax; Path=/; Max-Age=0`
   );
 
   res.json({
@@ -465,7 +553,8 @@ app.post('/api/users', requireAuth, requireAdmin, async (req, res) => {
       password,
       role = 'user',
       active = 1,
-      language = 'am'
+      language = 'am',
+      department = 'general'
     } = req.body;
 
     if (!name || !username || !password) {
@@ -483,6 +572,20 @@ app.post('/api/users', requireAuth, requireAdmin, async (req, res) => {
     if (!['admin', 'user'].includes(role)) {
       return res.status(400).json({
         error: 'Invalid role'
+      });
+    }
+
+    const allowedDepartments = [
+      'general',
+      'stock',
+      'sales',
+      'repairs',
+      'finance'
+    ];
+
+    if (!allowedDepartments.includes(department)) {
+      return res.status(400).json({
+        error: 'Invalid department'
       });
     }
 
@@ -504,8 +607,8 @@ app.post('/api/users', requireAuth, requireAdmin, async (req, res) => {
 
     const data = await tursoQuery(
       `INSERT INTO users
-       (name, email, username, password_hash, role, active, language)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       (name, email, username, password_hash, role, active, language, department)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         name.trim(),
         email?.trim() || '',
@@ -513,7 +616,8 @@ app.post('/api/users', requireAuth, requireAdmin, async (req, res) => {
         passwordHash,
         role,
         Number(active) ? 1 : 0,
-        language === 'en' ? 'en' : 'am'
+        language === 'en' ? 'en' : 'am',
+        department
       ]
     );
 
@@ -537,7 +641,7 @@ app.post('/api/users', requireAuth, requireAdmin, async (req, res) => {
 app.get('/api/users', requireAuth, requireAdmin, async (req, res) => {
   try {
     const data = await tursoQuery(
-      'SELECT id, name, email, username, role, active, language FROM users'
+      'SELECT id, name, email, username, role, active, language, department FROM users'
     );
 
     res.json(data);
@@ -661,6 +765,141 @@ app.delete('/api/users/:id', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
+
+
+// Admin: Update user profile
+app.patch('/api/users/:id/profile', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const { name, username, email } = req.body;
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        error: 'Invalid user ID'
+      });
+    }
+
+    if (!name || !username) {
+      return res.status(400).json({
+        error: 'Name and username are required'
+      });
+    }
+
+    const existing = await tursoQuery(
+      'SELECT id FROM users WHERE id = ? LIMIT 1',
+      [userId]
+    );
+
+    const rows =
+      existing.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+
+    const duplicate = await tursoQuery(
+      'SELECT id FROM users WHERE username = ? AND id != ? LIMIT 1',
+      [username.trim(), userId]
+    );
+
+    const duplicateRows =
+      duplicate.results?.[0]?.response?.result?.rows || [];
+
+    if (duplicateRows.length) {
+      return res.status(409).json({
+        error: 'Username already exists'
+      });
+    }
+
+    await tursoQuery(
+      `UPDATE users
+       SET name = ?, username = ?, email = ?
+       WHERE id = ?`,
+      [
+        name.trim(),
+        username.trim(),
+        email?.trim() || '',
+        userId
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'User profile updated successfully'
+    });
+
+  } catch (error) {
+    console.error('User profile update error:', error);
+
+    res.status(500).json({
+      error: 'Failed to update user profile',
+      details: error.message
+    });
+  }
+});
+
+
+// Admin: Change user password
+app.patch('/api/users/:id/password', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const { password } = req.body;
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        error: 'Invalid user ID'
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        error: 'Password is required'
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        error: 'Password must be at least 8 characters'
+      });
+    }
+
+    const existing = await tursoQuery(
+      'SELECT id FROM users WHERE id = ? LIMIT 1',
+      [userId]
+    );
+
+    const rows =
+      existing.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+
+    const passwordHash = hashPassword(password);
+
+    await tursoQuery(
+      'UPDATE users SET password_hash = ? WHERE id = ?',
+      [passwordHash, userId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+
+  } catch (error) {
+    console.error('User password update error:', error);
+
+    res.status(500).json({
+      error: 'Failed to change password',
+      details: error.message
+    });
+  }
+});
 
 // 🔧 Sales cost-price migration
 app.get('/api/upgrade-sales-table', async (req, res) => {
@@ -945,6 +1184,280 @@ app.get('/api/create-customer-payments-table', async (req, res) => {
   }
 });
 
+
+
+// 💳 Customer Payments List
+app.get('/api/customer-payments', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT
+        p.id,
+        p.customer,
+        p.sale_id,
+        p.description,
+        p.amount,
+        p.created_at,
+        CASE
+          WHEN EXISTS (
+            SELECT 1
+            FROM cash_transactions ct
+            WHERE ct.type = 'customer_payment_correction'
+              AND ct.description LIKE
+                  'Correction for Customer Payment #' || p.id || ' -%'
+          )
+          THEN 1
+          ELSE 0
+        END AS corrected
+      FROM customer_payments p
+      ORDER BY p.id DESC
+    `);
+
+    const rows =
+      data?.results?.[0]?.response?.result?.rows || [];
+
+    const cols =
+      data?.results?.[0]?.response?.result?.cols || [];
+
+    const payments = rows.map(row => {
+      const payment = {};
+
+      cols.forEach((col, index) => {
+        const cell = row[index];
+
+        if (cell?.type === 'integer' || cell?.type === 'float') {
+          payment[col.name] = Number(cell.value);
+        } else if (cell?.type === 'null') {
+          payment[col.name] = null;
+        } else {
+          payment[col.name] = cell?.value ?? null;
+        }
+      });
+
+      return payment;
+    });
+
+    res.json(payments);
+
+  } catch (error) {
+    console.error('Customer payments list error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load customer payments',
+      details: error.message
+    });
+  }
+});
+
+// 💳 Customer Payment Correction
+app.post('/api/customer-payments/:id/correct', async (req, res) => {
+  try {
+    const paymentId = Number(req.params.id);
+    const { reason } = req.body;
+
+    if (!Number.isInteger(paymentId) || paymentId <= 0) {
+      return res.status(400).json({
+        error: 'Valid customer payment ID is required'
+      });
+    }
+
+    if (!reason || !String(reason).trim()) {
+      return res.status(400).json({
+        error: 'Correction reason is required'
+      });
+    }
+
+    const paymentData = await tursoQuery(
+      `SELECT id, customer, sale_id, description, amount, created_at
+       FROM customer_payments
+       WHERE id = ?`,
+      [paymentId]
+    );
+
+    const rows =
+      paymentData?.results?.[0]?.response?.result?.rows || [];
+
+    const cols =
+      paymentData?.results?.[0]?.response?.result?.cols || [];
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: 'Customer payment not found'
+      });
+    }
+
+    const payment = {};
+
+    cols.forEach((col, index) => {
+      const cell = rows[0][index];
+
+      if (cell?.type === 'integer' || cell?.type === 'float') {
+        payment[col.name] = Number(cell.value);
+      } else if (cell?.type === 'null') {
+        payment[col.name] = null;
+      } else {
+        payment[col.name] = cell?.value ?? null;
+      }
+    });
+
+    const amount = Number(payment.amount);
+
+    if (!(amount > 0)) {
+      return res.status(400).json({
+        error: 'Selected customer payment is invalid'
+      });
+    }
+
+    const duplicateData = await tursoQuery(
+      `SELECT id
+       FROM cash_transactions
+       WHERE type = 'customer_payment_correction'
+         AND description LIKE ?
+       LIMIT 1`,
+      [`Correction for Customer Payment #${paymentId} -%`]
+    );
+
+    const duplicateRows =
+      duplicateData?.results?.[0]?.response?.result?.rows || [];
+
+    if (duplicateRows.length > 0) {
+      return res.status(400).json({
+        error: 'This customer payment has already been corrected'
+      });
+    }
+
+    await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      [
+        'customer_payment_correction',
+        `Correction for Customer Payment #${paymentId} - ${String(reason).trim()}`,
+        -Math.abs(amount)
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Customer payment corrected successfully',
+      original_payment_id: paymentId,
+      correction_amount: amount
+    });
+
+  } catch (error) {
+    console.error('Customer payment correction error:', error);
+
+    res.status(500).json({
+      error: 'Failed to correct customer payment',
+      details: error.message
+    });
+  }
+});
+
+// 💵 Supplier Payment Correction
+app.post('/api/supplier-payments/:id/correct', async (req, res) => {
+  try {
+    const paymentId = Number(req.params.id);
+    const { reason } = req.body;
+
+    if (!Number.isInteger(paymentId) || paymentId <= 0) {
+      return res.status(400).json({
+        error: 'Valid supplier payment ID is required'
+      });
+    }
+
+    if (!reason || !String(reason).trim()) {
+      return res.status(400).json({
+        error: 'Correction reason is required'
+      });
+    }
+
+    const paymentData = await tursoQuery(
+      `SELECT id, supplier, purchase_id, description, amount, created_at
+       FROM supplier_payments
+       WHERE id = ?`,
+      [paymentId]
+    );
+
+    const rows =
+      paymentData?.results?.[0]?.response?.result?.rows || [];
+
+    const cols =
+      paymentData?.results?.[0]?.response?.result?.cols || [];
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: 'Supplier payment not found'
+      });
+    }
+
+    const payment = {};
+
+    cols.forEach((col, index) => {
+      const cell = rows[0][index];
+
+      if (cell?.type === 'integer' || cell?.type === 'float') {
+        payment[col.name] = Number(cell.value);
+      } else if (cell?.type === 'null') {
+        payment[col.name] = null;
+      } else {
+        payment[col.name] = cell?.value ?? null;
+      }
+    });
+
+    const amount = Number(payment.amount);
+
+    if (!(amount > 0)) {
+      return res.status(400).json({
+        error: 'Selected supplier payment is invalid'
+      });
+    }
+
+    const duplicateData = await tursoQuery(
+      `SELECT id
+       FROM cash_transactions
+       WHERE type = 'supplier_payment_correction'
+         AND description LIKE ?
+       LIMIT 1`,
+      [`Correction for Supplier Payment #${paymentId} -%`]
+    );
+
+    const duplicateRows =
+      duplicateData?.results?.[0]?.response?.result?.rows || [];
+
+    if (duplicateRows.length > 0) {
+      return res.status(400).json({
+        error: 'This supplier payment has already been corrected'
+      });
+    }
+
+    await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      [
+        'supplier_payment_correction',
+        `Correction for Supplier Payment #${paymentId} - ${String(reason).trim()}`,
+        Math.abs(amount)
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Supplier payment corrected successfully',
+      original_payment_id: paymentId,
+      correction_amount: amount
+    });
+
+  } catch (error) {
+    console.error('Supplier payment correction error:', error);
+
+    res.status(500).json({
+      error: 'Failed to correct supplier payment',
+      details: error.message
+    });
+  }
+});
+
 // 💳 Register Customer Credit Payment
 app.post('/api/customer-payments', async (req, res) => {
   try {
@@ -1055,6 +1568,507 @@ app.get('/api/customer-credits', async (req, res) => {
   }
 });
 
+
+// 👥 Customers
+app.get('/api/create-repairs-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS repairs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        customer_id INTEGER,
+        device TEXT NOT NULL,
+        problem TEXT NOT NULL,
+        description TEXT,
+        status TEXT NOT NULL DEFAULT 'active',
+        estimated_cost REAL NOT NULL DEFAULT 0,
+        paid_amount REAL NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        completed_at TEXT
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Repairs table created successfully'
+    });
+  } catch (error) {
+    console.error('Repairs table error:', error);
+
+    res.status(500).json({
+      error: 'Failed to create repairs table',
+      details: error.message
+    });
+  }
+});
+
+app.patch('/api/repairs/:id/complete', async (req, res) => {
+  try {
+    const repairId = Number(req.params.id);
+
+    if (!Number.isInteger(repairId) || repairId <= 0) {
+      return res.status(400).json({
+        error: 'Valid repair id is required'
+      });
+    }
+
+    const existingData = await tursoQuery(
+      `SELECT id, status
+       FROM repairs
+       WHERE id = ?`,
+      [repairId]
+    );
+
+    const rows =
+      existingData.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      return res.status(404).json({
+        error: 'Repair not found'
+      });
+    }
+
+    const currentStatus = rows[0]?.[1]?.value || '';
+
+    if (currentStatus === 'completed') {
+      return res.json({
+        success: true,
+        message: 'Repair is already completed'
+      });
+    }
+
+    await tursoQuery(
+      `UPDATE repairs
+       SET status = 'completed',
+           completed_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [repairId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Repair completed successfully',
+      repair_id: repairId
+    });
+
+  } catch (error) {
+    console.error('Complete repair error:', error);
+
+    res.status(500).json({
+      error: 'Failed to complete repair',
+      details: error.message
+    });
+  }
+});
+
+
+app.delete('/api/repairs/:id', requireAuth, requirePermission('delete_repairs'), async (req, res) => {
+  try {
+    const repairId = Number(req.params.id);
+
+    if (!Number.isInteger(repairId) || repairId <= 0) {
+      return res.status(400).json({
+        error: 'Valid repair id is required'
+      });
+    }
+
+    const existingData = await tursoQuery(
+      `SELECT id
+       FROM repairs
+       WHERE id = ?`,
+      [repairId]
+    );
+
+    const rows =
+      existingData.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      return res.status(404).json({
+        error: 'Repair not found'
+      });
+    }
+
+    await tursoQuery(
+      `DELETE FROM repairs
+       WHERE id = ?`,
+      [repairId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Repair deleted successfully',
+      repair_id: repairId
+    });
+
+  } catch (error) {
+    console.error('Delete repair error:', error);
+
+    res.status(500).json({
+      error: 'Failed to delete repair',
+      details: error.message
+    });
+  }
+});
+
+app.get('/api/customer-repairs/:customerId', async (req, res) => {
+  try {
+    const customerId = Number(req.params.customerId);
+
+    if (!Number.isInteger(customerId) || customerId <= 0) {
+      return res.status(400).json({
+        error: 'Valid customer id is required'
+      });
+    }
+
+    const data = await tursoQuery(
+      `SELECT
+         id,
+         customer_id,
+         device,
+         problem,
+         description,
+         status,
+         estimated_cost,
+         paid_amount,
+         created_at,
+         completed_at
+       FROM repairs
+       WHERE customer_id = ?
+       ORDER BY id DESC`,
+      [customerId]
+    );
+
+    res.json(data);
+  } catch (error) {
+    console.error('Customer repairs error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load customer repairs',
+      details: error.message
+    });
+  }
+});
+
+app.get('/api/repairs', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT
+        repairs.id,
+        repairs.customer_id,
+        customers.name AS customer_name,
+        repairs.device,
+        repairs.problem,
+        repairs.description,
+        repairs.status,
+        repairs.estimated_cost,
+        repairs.paid_amount,
+        repairs.created_at,
+        repairs.completed_at
+      FROM repairs
+      LEFT JOIN customers
+        ON customers.id = repairs.customer_id
+      ORDER BY repairs.id DESC
+    `);
+
+    res.json(data);
+  } catch (error) {
+    console.error('Repairs error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load repairs',
+      details: error.message
+    });
+  }
+});
+
+app.post('/api/repairs', async (req, res) => {
+  try {
+    const {
+      customer_id,
+      device,
+      problem,
+      description = '',
+      status = 'active',
+      estimated_cost = 0,
+      paid_amount = 0
+    } = req.body;
+
+    const customerId = Number(customer_id);
+    const deviceName = String(device || '').trim();
+    const problemText = String(problem || '').trim();
+    const repairStatus = String(status || 'active').trim();
+
+    if (!Number.isInteger(customerId) || customerId <= 0) {
+      return res.status(400).json({
+        error: 'Valid customer_id is required'
+      });
+    }
+
+    if (!deviceName) {
+      return res.status(400).json({
+        error: 'Device is required'
+      });
+    }
+
+    if (!problemText) {
+      return res.status(400).json({
+        error: 'Problem is required'
+      });
+    }
+
+    const customerData = await tursoQuery(
+      `SELECT id, name
+       FROM customers
+       WHERE id = ?`,
+      [customerId]
+    );
+
+    const customerRows =
+      customerData.results?.[0]?.response?.result?.rows || [];
+
+    if (!customerRows.length) {
+      return res.status(404).json({
+        error: 'Customer not found'
+      });
+    }
+
+    const estimatedCost = Number(estimated_cost) || 0;
+    const paidAmount = Number(paid_amount) || 0;
+
+    if (estimatedCost < 0 || paidAmount < 0) {
+      return res.status(400).json({
+        error: 'Amounts cannot be negative'
+      });
+    }
+
+    if (paidAmount > estimatedCost) {
+      return res.status(400).json({
+        error: 'Paid amount cannot exceed estimated cost'
+      });
+    }
+
+    const data = await tursoQuery(
+      `INSERT INTO repairs
+       (
+         customer_id,
+         device,
+         problem,
+         description,
+         status,
+         estimated_cost,
+         paid_amount
+       )
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        customerId,
+        deviceName,
+        problemText,
+        String(description || '').trim(),
+        repairStatus,
+        estimatedCost,
+        paidAmount
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Repair created successfully',
+      repair_id:
+        data.results?.[0]?.response?.result?.last_insert_rowid || null
+    });
+  } catch (error) {
+    console.error('Create repair error:', error);
+
+    res.status(500).json({
+      error: 'Failed to create repair',
+      details: error.message
+    });
+  }
+});
+
+app.get('/api/create-customers-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS customers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        phone TEXT,
+        address TEXT,
+        notes TEXT,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Customers table created successfully'
+    });
+  } catch (error) {
+    console.error('Customers table error:', error);
+
+    res.status(500).json({
+      error: 'Failed to create customers table',
+      details: error.message
+    });
+  }
+});
+
+app.get('/api/customers', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT id, name, phone, address, notes, created_at
+      FROM customers
+      ORDER BY id DESC
+    `);
+
+    res.json(data);
+  } catch (error) {
+    console.error('Customers error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load customers',
+      details: error.message
+    });
+  }
+});
+
+app.post('/api/customers', async (req, res) => {
+  try {
+    const {
+      name,
+      phone = '',
+      address = '',
+      notes = ''
+    } = req.body;
+
+    const customerName = String(name || '').trim();
+
+    if (!customerName) {
+      return res.status(400).json({
+        error: 'Customer name is required'
+      });
+    }
+
+    const data = await tursoQuery(
+      `INSERT INTO customers
+       (name, phone, address, notes)
+       VALUES (?, ?, ?, ?)`,
+      [
+        customerName,
+        String(phone || '').trim(),
+        String(address || '').trim(),
+        String(notes || '').trim()
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Customer created successfully',
+      customer: {
+        id: data.results?.[0]?.response?.result?.last_insert_rowid || null,
+        name: customerName,
+        phone: String(phone || '').trim(),
+        address: String(address || '').trim(),
+        notes: String(notes || '').trim()
+      }
+    });
+  } catch (error) {
+    console.error('Create customer error:', error);
+
+    res.status(500).json({
+      error: 'Failed to create customer',
+      details: error.message
+    });
+  }
+});
+
+app.get('/api/customer-sales/:customer', async (req, res) => {
+  try {
+    const customerName = decodeURIComponent(req.params.customer || '').trim();
+
+    if (!customerName) {
+      return res.status(400).json({
+        error: 'Customer name is required'
+      });
+    }
+
+    const data = await tursoQuery(
+      `SELECT
+         sales.id,
+         sales.product_id,
+         products.name AS product_name,
+         sales.quantity,
+         sales.unit_price,
+         sales.total,
+         sales.payment_type,
+         sales.created_at
+       FROM sales
+       LEFT JOIN products ON products.id = sales.product_id
+       WHERE sales.customer = ?
+       ORDER BY sales.id DESC`,
+      [customerName]
+    );
+
+    res.json(data);
+
+  } catch (error) {
+    console.error('Customer sales error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load customer sales',
+      details: error.message
+    });
+  }
+});
+
+app.get('/api/customers/:id', async (req, res) => {
+  try {
+    const customerId = Number(req.params.id);
+
+    if (!Number.isInteger(customerId) || customerId <= 0) {
+      return res.status(400).json({
+        error: 'Valid customer id is required'
+      });
+    }
+
+    const data = await tursoQuery(
+      `SELECT id, name, phone, address, notes, created_at
+       FROM customers
+       WHERE id = ?`,
+      [customerId]
+    );
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      return res.status(404).json({
+        error: 'Customer not found'
+      });
+    }
+
+    const row = rows[0];
+
+    res.json({
+      success: true,
+      customer: {
+        id: row[0]?.value,
+        name: row[1]?.value || '',
+        phone: row[2]?.value || '',
+        address: row[3]?.value || '',
+        notes: row[4]?.value || '',
+        created_at: row[5]?.value || ''
+      }
+    });
+  } catch (error) {
+    console.error('Customer details error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load customer',
+      details: error.message
+    });
+  }
+});
+
 export default app;
 
 app.get('/api/seasons', async (req, res) => {
@@ -1132,6 +2146,169 @@ app.get('/api/migrate-users-auth', async (req, res) => {
     });
   }
 });
+app.get('/api/migrate-users-department', async (req, res) => {
+  try {
+    await tursoQuery(`
+      ALTER TABLE users
+      ADD COLUMN department TEXT NOT NULL DEFAULT 'general'
+    `);
+
+    res.json({
+      success: true,
+      message: 'User department field added successfully'
+    });
+  } catch (error) {
+    console.error('Department migration error:', error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
+
+app.get('/api/create-user-permissions-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS user_permissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        permission TEXT NOT NULL,
+        UNIQUE(user_id, permission)
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'User permissions table created successfully'
+    });
+  } catch (error) {
+    console.error('User permissions table error:', error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
+
+
+app.get('/api/users/:id/permissions', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        error: 'Invalid user ID'
+      });
+    }
+
+    const data = await tursoQuery(
+      `SELECT permission
+       FROM user_permissions
+       WHERE user_id = ?
+       ORDER BY permission`,
+      [userId]
+    );
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    const permissions = rows
+      .map(row => row[0]?.value)
+      .filter(Boolean);
+
+    res.json({
+      success: true,
+      user_id: userId,
+      permissions
+    });
+
+  } catch (error) {
+    console.error('Get user permissions error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load user permissions',
+      details: error.message
+    });
+  }
+});
+
+app.put('/api/users/:id/permissions', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const permissions = Array.isArray(req.body.permissions)
+      ? req.body.permissions
+      : [];
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        error: 'Invalid user ID'
+      });
+    }
+
+    const allowedPermissions = [
+      'delete_stock',
+      'delete_sales',
+      'delete_repairs'
+    ];
+
+    const invalidPermissions = permissions.filter(
+      permission => !allowedPermissions.includes(permission)
+    );
+
+    if (invalidPermissions.length) {
+      return res.status(400).json({
+        error: 'Invalid permission',
+        permissions: invalidPermissions
+      });
+    }
+
+    const uniquePermissions = [...new Set(permissions)];
+
+    const userData = await tursoQuery(
+      'SELECT id, role FROM users WHERE id = ? LIMIT 1',
+      [userId]
+    );
+
+    const userRows =
+      userData.results?.[0]?.response?.result?.rows || [];
+
+    if (!userRows.length) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+
+    await tursoQuery(
+      'DELETE FROM user_permissions WHERE user_id = ?',
+      [userId]
+    );
+
+    for (const permission of uniquePermissions) {
+      await tursoQuery(
+        `INSERT INTO user_permissions
+         (user_id, permission)
+         VALUES (?, ?)`,
+        [userId, permission]
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'User permissions updated successfully',
+      user_id: userId,
+      permissions: uniquePermissions
+    });
+
+  } catch (error) {
+    console.error('Update user permissions error:', error);
+
+    res.status(500).json({
+      error: 'Failed to update user permissions',
+      details: error.message
+    });
+  }
+});
+
 app.get('/api/create-products-table', async (req, res) => {
   try {
     await tursoQuery(`
@@ -1175,6 +2352,96 @@ app.get('/api/products', async (req, res) => {
     });
   }
 });
+
+app.delete('/api/products/:id', requireAuth, requirePermission('delete_stock'), async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.status(400).json({
+        error: 'Valid product id is required'
+      });
+    }
+
+    const productData = await tursoQuery(
+      'SELECT id, name FROM products WHERE id = ? LIMIT 1',
+      [productId]
+    );
+
+    const productRows =
+      productData.results?.[0]?.response?.result?.rows || [];
+
+    if (!productRows.length) {
+      return res.status(404).json({
+        error: 'Product not found'
+      });
+    }
+
+    const productName = productRows[0][1].value;
+
+    const salesData = await tursoQuery(
+      'SELECT id FROM sales WHERE product_id = ? LIMIT 1',
+      [productId]
+    );
+
+    const salesRows =
+      salesData.results?.[0]?.response?.result?.rows || [];
+
+    if (salesRows.length) {
+      return res.status(409).json({
+        error: 'Cannot delete product because sales history exists'
+      });
+    }
+
+    const purchasesData = await tursoQuery(
+      'SELECT id FROM purchases WHERE product_id = ? LIMIT 1',
+      [productId]
+    );
+
+    const purchaseRows =
+      purchasesData.results?.[0]?.response?.result?.rows || [];
+
+    if (purchaseRows.length) {
+      return res.status(409).json({
+        error: 'Cannot delete product because purchase history exists'
+      });
+    }
+
+    const movementsData = await tursoQuery(
+      'SELECT id FROM stock_movements WHERE product_id = ? LIMIT 1',
+      [productId]
+    );
+
+    const movementRows =
+      movementsData.results?.[0]?.response?.result?.rows || [];
+
+    if (movementRows.length) {
+      return res.status(409).json({
+        error: 'Cannot delete product because stock movement history exists'
+      });
+    }
+
+    await tursoQuery(
+      'DELETE FROM products WHERE id = ?',
+      [productId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Product deleted successfully',
+      product: productName
+    });
+
+  } catch (error) {
+    console.error('Delete product error:', error);
+
+    res.status(500).json({
+      error: 'Failed to delete product',
+      details: error.message
+    });
+  }
+});
+
 app.post('/api/products', async (req, res) => {
   try {
     const {
@@ -1204,6 +2471,27 @@ app.post('/api/products', async (req, res) => {
       ]
     );
 
+    const newProductId =
+      data.results?.[0]?.response?.result?.last_insert_rowid || null;
+
+    const openingQty = Number(stock) || 0;
+
+    if (newProductId && openingQty > 0) {
+      await tursoQuery(
+        `INSERT INTO stock_movements
+         (product_id, type, quantity, stock_before, stock_after, reference_id, note)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          newProductId,
+          'opening',
+          openingQty,
+          0,
+          openingQty,
+          null,
+          'Opening Stock'
+        ]
+      );
+    }
     res.json({
       success: true,
       message: 'Product created successfully',
@@ -1346,6 +2634,190 @@ app.post('/api/income', async (req, res) => {
   }
 });
 
+
+// 🔧 Expense Correction
+app.post('/api/expenses/:id/correct', async (req, res) => {
+  try {
+    const expenseId = Number(req.params.id);
+    const { reason } = req.body;
+
+    if (!Number.isInteger(expenseId) || expenseId <= 0) {
+      return res.status(400).json({
+        error: 'Valid expense ID is required'
+      });
+    }
+
+    if (!reason || !String(reason).trim()) {
+      return res.status(400).json({
+        error: 'Correction reason is required'
+      });
+    }
+
+    const result = await tursoQuery(
+      `SELECT id, type, description, amount, created_at
+       FROM cash_transactions
+       WHERE id = ? AND type = 'expense'`,
+      [expenseId]
+    );
+
+    const rows =
+      result?.results?.[0]?.response?.result?.rows || [];
+
+    const cols =
+      result?.results?.[0]?.response?.result?.cols || [];
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: 'Expense not found'
+      });
+    }
+
+    const expense = {};
+
+    cols.forEach((col, index) => {
+      const cell = rows[0][index];
+
+      if (cell?.type === 'integer') {
+        expense[col.name] = Number(cell.value);
+      } else if (cell?.type === 'float') {
+        expense[col.name] = Number(cell.value);
+      } else if (cell?.type === 'null') {
+        expense[col.name] = null;
+      } else {
+        expense[col.name] = cell?.value ?? null;
+      }
+    });
+    const amount = Number(expense.amount);
+
+    if (!(amount < 0)) {
+      return res.status(400).json({
+        error: 'Selected transaction is not a valid expense'
+      });
+    }
+
+    const correctionAmount = Math.abs(amount);
+
+    const data = await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      [
+        'expense_correction',
+        `Correction for Expense #${expenseId} - ${String(reason).trim()}`,
+        correctionAmount
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Expense corrected successfully',
+      original_expense_id: expenseId,
+      correction_amount: correctionAmount,
+      data
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to correct expense',
+      details: error.message
+    });
+  }
+});
+
+// 💰 Income Correction
+app.post('/api/income/:id/correct', async (req, res) => {
+  try {
+    const incomeId = Number(req.params.id);
+    const { reason } = req.body;
+
+    if (!Number.isInteger(incomeId) || incomeId <= 0) {
+      return res.status(400).json({
+        error: 'Valid income ID is required'
+      });
+    }
+
+    if (!reason || !String(reason).trim()) {
+      return res.status(400).json({
+        error: 'Correction reason is required'
+      });
+    }
+
+    const result = await tursoQuery(
+      `SELECT id, type, description, amount, created_at
+       FROM cash_transactions
+       WHERE id = ? AND type = 'income'`,
+      [incomeId]
+    );
+
+    const rows =
+      result?.results?.[0]?.response?.result?.rows || [];
+
+    const cols =
+      result?.results?.[0]?.response?.result?.cols || [];
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: 'Income not found'
+      });
+    }
+
+    const income = {};
+
+    cols.forEach((col, index) => {
+      const cell = rows[0][index];
+
+      if (cell?.type === 'integer') {
+        income[col.name] = Number(cell.value);
+      } else if (cell?.type === 'float') {
+        income[col.name] = Number(cell.value);
+      } else if (cell?.type === 'null') {
+        income[col.name] = null;
+      } else {
+        income[col.name] = cell?.value ?? null;
+      }
+    });
+
+    const amount = Number(income.amount);
+
+    if (!(amount > 0)) {
+      return res.status(400).json({
+        error: 'Selected transaction is not a valid income'
+      });
+    }
+
+    const correctionAmount = -Math.abs(amount);
+
+    const data = await tursoQuery(
+      `INSERT INTO cash_transactions
+       (type, description, amount)
+       VALUES (?, ?, ?)`,
+      [
+        'income_correction',
+        `Correction for Income #${incomeId} - ${String(reason).trim()}`,
+        correctionAmount
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Income corrected successfully',
+      original_income_id: incomeId,
+      correction_amount: Math.abs(amount),
+      data
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to correct income',
+      details: error.message
+    });
+  }
+});
+
 // 💸 Expense
 app.post('/api/expenses', async (req, res) => {
   try {
@@ -1437,6 +2909,102 @@ app.get('/api/upgrade-purchases-payment-type', async (req, res) => {
   }
 });
 
+
+// 📋 Purchase History
+app.get('/api/purchases', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT
+        purchases.id,
+        purchases.product_id,
+        products.name AS product_name,
+        products.unit,
+        purchases.quantity,
+        purchases.unit_price,
+        purchases.supplier,
+        purchases.total,
+        purchases.payment_type,
+        purchases.created_at,
+CASE
+  WHEN EXISTS (
+    SELECT 1
+    FROM stock_movements sm
+    WHERE sm.type = 'purchase_correction'
+      AND sm.reference_id = purchases.id
+  )
+  THEN 1
+  ELSE 0
+END AS corrected
+      FROM purchases
+      JOIN products
+        ON purchases.product_id = products.id
+      ORDER BY purchases.id DESC
+    `);
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    const purchases = rows.map(row => ({
+      id: Number(row[0].value),
+      product_id: Number(row[1].value),
+      product_name: row[2].value,
+      unit: row[3].value,
+      quantity: Number(row[4].value),
+      unit_price: Number(row[5].value),
+      supplier: row[6].value || '',
+      total: Number(row[7].value),
+      payment_type: row[8].value,
+      
+     created_at: row[9].value,
+     corrected: Number(row[10]?.value || 0) === 1
+    }));
+
+    res.json({
+      success: true,
+      count: purchases.length,
+      purchases
+    });
+
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load purchase history',
+      details: error.message
+    });
+  }
+});
+
+
+// 📦 Purchase Batch Tracking
+app.get('/api/create-purchase-batches-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS purchase_batches (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        purchase_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        quantity REAL NOT NULL,
+        remaining_quantity REAL NOT NULL,
+        unit_cost REAL NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Purchase batches table created successfully'
+    });
+
+  } catch (error) {
+    console.error('Purchase batches table error:', error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
+
 // 🛒 Register Purchase
 app.post('/api/purchases', async (req, res) => {
   try {
@@ -1483,7 +3051,7 @@ app.post('/api/purchases', async (req, res) => {
     }
 
     const productData = await tursoQuery(
-      'SELECT id, name FROM products WHERE id = ?',
+      'SELECT id, name, stock FROM products WHERE id = ?',
       [productId]
     );
 
@@ -1517,11 +3085,50 @@ app.post('/api/purchases', async (req, res) => {
     const purchaseId =
       purchase.results?.[0]?.response?.result?.last_insert_rowid || null;
 
+    if (purchaseId) {
+      await tursoQuery(
+        `INSERT INTO purchase_batches
+         (purchase_id, product_id, quantity, remaining_quantity, unit_cost)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+          purchaseId,
+          productId,
+          qty,
+          qty,
+          price
+        ]
+      );
+    }
+
+const stockData = await tursoQuery(
+  'SELECT stock FROM products WHERE id = ?',
+  [productId]
+);
+
+const stockBefore =
+  Number(stockData.results?.[0]?.response?.result?.rows?.[0]?.[0]?.value) || 0;
+
+const stockAfter = stockBefore + qty;
     await tursoQuery(
       'UPDATE products SET stock = stock + ? WHERE id = ?',
       [qty, productId]
     );
 
+
+await tursoQuery(
+  `INSERT INTO stock_movements
+   (product_id, type, quantity, stock_before, stock_after, reference_id, note)
+   VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  [
+    productId,
+    'purchase',
+    qty,
+    stockBefore,
+    stockAfter,
+    purchaseId,
+    `Purchase - ${productName}`
+  ]
+);
     if (payment_type === 'cash') {
       await tursoQuery(
         `INSERT INTO cash_transactions
@@ -1698,7 +3305,8 @@ app.get('/api/supplier-debts', async (req, res) => {
       supplier: row[2].value,
       description: row[3].value,
       amount: Number(row[4].value),
-      created_at: row[5].value
+      created_at: row[5].value,
+      corrected: Number(row[6]?.value || 0) === 1
     }));
 
     const total = debts.reduce((sum, debt) => sum + debt.amount, 0);
@@ -1721,6 +3329,507 @@ app.get('/api/supplier-debts', async (req, res) => {
 });
 
 // 💳 Create Supplier Debts Table
+
+// 🗑️ Delete Purchase
+app.delete(
+  '/api/purchases/:id',
+  requireAuth,
+  requirePermission('delete_stock'),
+  async (req, res) => {
+    try {
+      const purchaseId = Number(req.params.id);
+
+      if (!Number.isInteger(purchaseId) || purchaseId <= 0) {
+        return res.status(400).json({
+          error: 'Invalid purchase ID'
+        });
+      }
+
+      // 1. Find the purchase.
+      const purchaseData = await tursoQuery(
+        `SELECT
+          id,
+          product_id,
+          quantity,
+          unit_price,
+          supplier,
+          total,
+          payment_type
+         FROM purchases
+         WHERE id = ?
+         LIMIT 1`,
+        [purchaseId]
+      );
+
+      const purchaseRows =
+        purchaseData.results?.[0]?.response?.result?.rows || [];
+
+      if (!purchaseRows.length) {
+        return res.status(404).json({
+          error: 'Purchase not found'
+        });
+      }
+
+      const purchase = purchaseRows[0];
+
+      const productId = Number(purchase[1]?.value);
+      const quantity = Number(purchase[2]?.value || 0);
+      const total = Number(purchase[5]?.value || 0);
+      const supplier = purchase[4]?.value || '';
+      const paymentType = purchase[6]?.value || 'cash';
+
+      if (
+        !Number.isInteger(productId) ||
+        productId <= 0 ||
+        !Number.isFinite(quantity) ||
+        quantity <= 0
+      ) {
+        return res.status(400).json({
+          error: 'Invalid purchase data'
+        });
+      }
+
+      // 2. Check FIFO allocation usage.
+      const allocationData = await tursoQuery(
+        `SELECT
+          COALESCE(SUM(quantity), 0)
+         FROM sale_purchase_allocations
+         WHERE purchase_id = ?`,
+        [purchaseId]
+      );
+
+      const allocationRows =
+        allocationData.results?.[0]?.response?.result?.rows || [];
+
+      const allocatedQuantity =
+        Number(allocationRows[0]?.[0]?.value || 0);
+
+      if (allocatedQuantity > 0) {
+        return res.status(409).json({
+          error: 'Cannot delete purchase because some of this purchase has already been sold',
+          purchase_id: purchaseId,
+          purchased_quantity: quantity,
+          sold_quantity: allocatedQuantity,
+          remaining_quantity: Math.max(quantity - allocatedQuantity, 0)
+        });
+      }
+
+      // 3. Find the purchase batch.
+      const batchData = await tursoQuery(
+        `SELECT
+          id,
+          quantity,
+          remaining_quantity,
+          unit_cost
+         FROM purchase_batches
+         WHERE purchase_id = ?
+           AND product_id = ?
+         ORDER BY id ASC`,
+        [purchaseId, productId]
+      );
+
+      const batchRows =
+        batchData.results?.[0]?.response?.result?.rows || [];
+
+      let batchQuantity = 0;
+      let batchRemaining = 0;
+
+      if (batchRows.length) {
+        batchQuantity = Number(batchRows[0][1]?.value || 0);
+        batchRemaining = Number(batchRows[0][2]?.value || 0);
+
+        // If there is no sale allocation, the full batch should remain.
+        if (Math.abs(batchRemaining - batchQuantity) > 0.000001) {
+          return res.status(409).json({
+            error: 'Cannot delete purchase because its batch has already been partially consumed',
+            purchase_id: purchaseId,
+            batch_quantity: batchQuantity,
+            batch_remaining: batchRemaining
+          });
+        }
+      }
+
+      // 4. Check current product stock.
+      const productData = await tursoQuery(
+        `SELECT
+          id,
+          name,
+          stock
+         FROM products
+         WHERE id = ?
+         LIMIT 1`,
+        [productId]
+      );
+
+      const productRows =
+        productData.results?.[0]?.response?.result?.rows || [];
+
+      if (!productRows.length) {
+        return res.status(404).json({
+          error: 'Product for this purchase was not found'
+        });
+      }
+
+      const productName = productRows[0][1]?.value || '';
+      const currentStock = Number(productRows[0][2]?.value || 0);
+
+      if (quantity > currentStock) {
+        return res.status(409).json({
+          error: 'Cannot delete purchase because current stock is lower than the purchased quantity',
+          purchase_id: purchaseId,
+          purchased_quantity: quantity,
+          current_stock: currentStock
+        });
+      }
+
+      // 5. Reduce product stock.
+      const newStock = currentStock - quantity;
+
+      await tursoQuery(
+        `UPDATE products
+         SET stock = ?
+         WHERE id = ?`,
+        [newStock, productId]
+      );
+
+      // 6. Record stock reversal.
+      await tursoQuery(
+        `INSERT INTO stock_movements
+         (product_id, type, quantity, stock_before, stock_after, reference_id, note)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          productId,
+          'purchase_reversal',
+          -quantity,
+          currentStock,
+          newStock,
+          purchaseId,
+          `Purchase #${purchaseId} deleted - ${productName}`
+        ]
+      );
+
+      // 7. Reverse cash purchase.
+      if (paymentType === 'cash') {
+        await tursoQuery(
+          `INSERT INTO cash_transactions
+           (type, description, amount)
+           VALUES (?, ?, ?)`,
+          [
+            'purchase_reversal',
+            `Deleted Purchase #${purchaseId} - ${productName}${supplier ? ` - ${supplier}` : ''}`,
+            total
+          ]
+        );
+      }
+
+      // 8. Reverse credit supplier debt.
+      if (paymentType === 'credit') {
+        await tursoQuery(
+          `DELETE FROM supplier_debts
+           WHERE purchase_id = ?`,
+          [purchaseId]
+        );
+      }
+
+      // 9. Delete purchase batch.
+      await tursoQuery(
+        `DELETE FROM purchase_batches
+         WHERE purchase_id = ?`,
+        [purchaseId]
+      );
+
+      // 10. Delete purchase.
+      await tursoQuery(
+        `DELETE FROM purchases
+         WHERE id = ?`,
+        [purchaseId]
+      );
+
+      res.json({
+        success: true,
+        message: 'Purchase deleted and reversed successfully',
+        purchase_id: purchaseId,
+        restored_cash: paymentType === 'cash' ? total : 0,
+        reversed_supplier_debt: paymentType === 'credit',
+        restored_stock: -quantity,
+        new_stock: newStock
+      });
+
+    } catch (error) {
+      console.error('Delete purchase error:', error);
+
+      res.status(500).json({
+        error: 'Failed to delete purchase',
+        details: error.message
+      });
+    }
+  }
+);
+
+// ✏️ Purchase Correction
+app.post('/api/purchases/:id/correct', requireAuth, async (req, res) => {
+  try {
+    const purchaseId = Number(req.params.id);
+    const { reason } = req.body;
+
+    if (!Number.isInteger(purchaseId) || purchaseId <= 0) {
+      return res.status(400).json({
+        error: 'Invalid purchase ID'
+      });
+    }
+
+    if (!reason || !String(reason).trim()) {
+      return res.status(400).json({
+        error: 'Correction reason is required'
+      });
+    }
+
+    // 1. Find original purchase
+    const purchaseData = await tursoQuery(
+      `SELECT
+        id,
+        product_id,
+        quantity,
+        unit_price,
+        supplier,
+        total,
+        payment_type
+       FROM purchases
+       WHERE id = ?
+       LIMIT 1`,
+      [purchaseId]
+    );
+
+    const purchaseRows =
+      purchaseData.results?.[0]?.response?.result?.rows || [];
+
+    if (!purchaseRows.length) {
+      return res.status(404).json({
+        error: 'Purchase not found'
+      });
+    }
+
+    const purchase = purchaseRows[0];
+
+    const productId = Number(purchase[1]?.value);
+    const quantity = Number(purchase[2]?.value || 0);
+    const supplier = purchase[4]?.value || '';
+    const total = Number(purchase[5]?.value || 0);
+    const paymentType = purchase[6]?.value || 'cash';
+
+    if (
+      !Number.isInteger(productId) ||
+      productId <= 0 ||
+      !Number.isFinite(quantity) ||
+      quantity <= 0 ||
+      !Number.isFinite(total) ||
+      total < 0
+    ) {
+      return res.status(400).json({
+        error: 'Invalid purchase data'
+      });
+    }
+
+    // 2. Prevent duplicate correction
+    const existingCorrection = await tursoQuery(
+      `SELECT id
+       FROM stock_movements
+       WHERE type = 'purchase_correction'
+         AND reference_id = ?
+       LIMIT 1`,
+      [purchaseId]
+    );
+
+    const correctionRows =
+      existingCorrection.results?.[0]?.response?.result?.rows || [];
+
+    if (correctionRows.length) {
+      return res.status(409).json({
+        error: 'This purchase has already been corrected'
+      });
+    }
+
+    // 3. Check whether this purchase was already used in a sale
+    const allocationData = await tursoQuery(
+      `SELECT
+        COALESCE(SUM(quantity), 0)
+       FROM sale_purchase_allocations
+       WHERE purchase_id = ?`,
+      [purchaseId]
+    );
+
+    const allocationRows =
+      allocationData.results?.[0]?.response?.result?.rows || [];
+
+    const allocatedQuantity =
+      Number(allocationRows[0]?.[0]?.value || 0);
+
+    if (allocatedQuantity > 0) {
+      return res.status(409).json({
+        error: 'Cannot correct purchase because some of it has already been sold',
+        purchase_id: purchaseId,
+        purchased_quantity: quantity,
+        sold_quantity: allocatedQuantity,
+        remaining_quantity: Math.max(
+          quantity - allocatedQuantity,
+          0
+        )
+      });
+    }
+
+    // 4. Check purchase batch
+    const batchData = await tursoQuery(
+      `SELECT
+        id,
+        quantity,
+        remaining_quantity
+       FROM purchase_batches
+       WHERE purchase_id = ?
+         AND product_id = ?
+       ORDER BY id ASC`,
+      [purchaseId, productId]
+    );
+
+    const batchRows =
+      batchData.results?.[0]?.response?.result?.rows || [];
+
+    if (batchRows.length) {
+      const batchQuantity =
+        Number(batchRows[0][1]?.value || 0);
+
+      const batchRemaining =
+        Number(batchRows[0][2]?.value || 0);
+
+      if (
+        Math.abs(batchRemaining - batchQuantity) >
+        0.000001
+      ) {
+        return res.status(409).json({
+          error: 'Cannot correct purchase because its FIFO batch has already been partially consumed',
+          purchase_id: purchaseId,
+          batch_quantity: batchQuantity,
+          batch_remaining: batchRemaining
+        });
+      }
+    }
+
+    // 5. Check current product stock
+    const productData = await tursoQuery(
+      `SELECT
+        id,
+        name,
+        stock
+       FROM products
+       WHERE id = ?
+       LIMIT 1`,
+      [productId]
+    );
+
+    const productRows =
+      productData.results?.[0]?.response?.result?.rows || [];
+
+    if (!productRows.length) {
+      return res.status(404).json({
+        error: 'Product for this purchase was not found'
+      });
+    }
+
+    const productName =
+      productRows[0][1]?.value || '';
+
+    const currentStock =
+      Number(productRows[0][2]?.value || 0);
+
+    if (quantity > currentStock) {
+      return res.status(409).json({
+        error: 'Cannot correct purchase because current stock is lower than the purchased quantity',
+        purchase_id: purchaseId,
+        purchased_quantity: quantity,
+        current_stock: currentStock
+      });
+    }
+
+    // 6. Reduce stock
+    const newStock = currentStock - quantity;
+
+    await tursoQuery(
+      `UPDATE products
+       SET stock = ?
+       WHERE id = ?`,
+      [newStock, productId]
+    );
+
+    // 7. Mark FIFO batch as fully reversed
+    await tursoQuery(
+      `UPDATE purchase_batches
+       SET remaining_quantity = 0
+       WHERE purchase_id = ?
+         AND product_id = ?`,
+      [purchaseId, productId]
+    );
+
+    // 8. Record stock correction
+    await tursoQuery(
+      `INSERT INTO stock_movements
+       (product_id, type, quantity, stock_before, stock_after, reference_id, note)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        productId,
+        'purchase_correction',
+        -quantity,
+        currentStock,
+        newStock,
+        purchaseId,
+        `Purchase #${purchaseId} corrected - ${String(reason).trim()}`
+      ]
+    );
+
+    // 9. Reverse cash or supplier debt
+    if (paymentType === 'cash') {
+      await tursoQuery(
+        `INSERT INTO cash_transactions
+         (type, description, amount)
+         VALUES (?, ?, ?)`,
+        [
+          'purchase_correction',
+          `Correction for Purchase #${purchaseId} - ${productName}${supplier ? ` - ${supplier}` : ''}`,
+          total
+        ]
+      );
+    }
+
+    if (paymentType === 'credit') {
+      await tursoQuery(
+        `INSERT INTO supplier_debts
+         (purchase_id, supplier, description, amount)
+         VALUES (?, ?, ?, ?)`,
+        [
+          purchaseId,
+          supplier || 'Unknown Supplier',
+          `Purchase Correction #${purchaseId} - ${String(reason).trim()}`,
+          -total
+        ]
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'Purchase corrected successfully',
+      purchase_id: purchaseId,
+      restored_stock: quantity,
+      correction_amount: total,
+      payment_type: paymentType
+    });
+
+  } catch (error) {
+    console.error('Purchase correction error:', error);
+
+    res.status(500).json({
+      error: 'Failed to correct purchase',
+      details: error.message
+    });
+  }
+});
 app.get('/api/create-supplier-debts-table', async (req, res) => {
   try {
     await tursoQuery(`
@@ -1752,10 +3861,27 @@ app.get('/api/supplier-payments', async (req, res) => {
     const supplier = String(req.query.supplier || '').trim();
 
     const data = await tursoQuery(`
-      SELECT id, supplier, purchase_id, description, amount, created_at
-      FROM supplier_payments
-      ${supplier ? 'WHERE supplier = ?' : ''}
-      ORDER BY id DESC
+      SELECT
+        p.id,
+        p.supplier,
+        p.purchase_id,
+        p.description,
+        p.amount,
+        p.created_at,
+        CASE
+          WHEN EXISTS (
+            SELECT 1
+            FROM cash_transactions ct
+            WHERE ct.type = 'supplier_payment_correction'
+              AND ct.description LIKE
+                  'Correction for Supplier Payment #' || p.id || ' -%'
+          )
+          THEN 1
+          ELSE 0
+        END AS corrected
+      FROM supplier_payments p
+      ${supplier ? 'WHERE p.supplier = ?' : ''}
+      ORDER BY p.id DESC
     `, supplier ? [supplier] : []);
 
     const rows = data.results?.[0]?.response?.result?.rows || [];
@@ -1766,7 +3892,8 @@ app.get('/api/supplier-payments', async (req, res) => {
       purchase_id: row[2].value === null ? null : Number(row[2].value),
       description: row[3].value,
       amount: Number(row[4].value),
-      created_at: row[5].value
+      created_at: row[5].value,
+      corrected: Number(row[6]?.value || 0) === 1
     }));
 
     const total = payments.reduce((sum, payment) => sum + payment.amount, 0);
@@ -1882,6 +4009,82 @@ app.post('/api/supplier-payments', async (req, res) => {
   }
 });
 
+
+// 🧾 Create Sale-Purchase Allocation Table
+app.get('/api/create-sale-purchase-allocations-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS sale_purchase_allocations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sale_id INTEGER NOT NULL,
+        purchase_id INTEGER NOT NULL,
+        quantity REAL NOT NULL,
+        unit_cost REAL NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Sale purchase allocations table created successfully'
+    });
+
+  } catch (error) {
+    console.error('Sale purchase allocations table error:', error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
+
+// 🔎 Debug Product Stock & Purchase Batches
+app.get('/api/debug-product-batches/:id', async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+
+    const productData = await tursoQuery(
+      `SELECT id, name, stock, purchase_price, selling_price
+       FROM products
+       WHERE id = ?
+       LIMIT 1`,
+      [productId]
+    );
+
+    const productRows =
+      productData.results?.[0]?.response?.result?.rows || [];
+
+    const batchData = await tursoQuery(
+      `SELECT
+         id,
+         purchase_id,
+         product_id,
+         quantity,
+         remaining_quantity,
+         unit_cost
+       FROM purchase_batches
+       WHERE product_id = ?
+       ORDER BY purchase_id ASC, id ASC`,
+      [productId]
+    );
+
+    const batchRows =
+      batchData.results?.[0]?.response?.result?.rows || [];
+
+    res.json({
+      product: productRows,
+      purchase_batches: batchRows
+    });
+
+  } catch (error) {
+    console.error('Debug product batches error:', error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
+
 // 🛍️ Register Sale
 app.post('/api/sales', async (req, res) => {
   try {
@@ -1915,8 +4118,23 @@ app.post('/api/sales', async (req, res) => {
       });
     }
 
+    if (!['cash', 'credit'].includes(payment_type)) {
+      return res.status(400).json({
+        error: 'Invalid payment_type'
+      });
+    }
+
+    if (payment_type === 'credit' && (!customer || !customer.trim())) {
+      return res.status(400).json({
+        error: 'Customer name is required for credit sale'
+      });
+    }
+
     const productData = await tursoQuery(
-      'SELECT id, name, stock, purchase_price FROM products WHERE id = ?',
+      `SELECT id, name, stock, purchase_price
+       FROM products
+       WHERE id = ?
+       LIMIT 1`,
       [productId]
     );
 
@@ -1929,9 +4147,9 @@ app.post('/api/sales', async (req, res) => {
       });
     }
 
-    const productName = productRows[0][1].value;
-    const currentStock = Number(productRows[0][2].value);
-    const costPrice = Number(productRows[0][3].value) || 0;
+    const productName = productRows[0][1]?.value || '';
+    const currentStock = Number(productRows[0][2]?.value || 0);
+    const openingCost = Number(productRows[0][3]?.value || 0);
 
     if (qty > currentStock) {
       return res.status(400).json({
@@ -1939,8 +4157,80 @@ app.post('/api/sales', async (req, res) => {
       });
     }
 
+    // 1. Find purchase batches using FIFO.
+    const batchData = await tursoQuery(
+      `SELECT
+         id,
+         purchase_id,
+         remaining_quantity,
+         unit_cost
+       FROM purchase_batches
+       WHERE product_id = ?
+         AND remaining_quantity > 0
+       ORDER BY purchase_id ASC, id ASC`,
+      [productId]
+    );
+
+    const batchRows =
+      batchData.results?.[0]?.response?.result?.rows || [];
+
+    let remainingToAllocate = qty;
+    let totalCost = 0;
+    const allocations = [];
+
+    for (const row of batchRows) {
+      if (remainingToAllocate <= 0) {
+        break;
+      }
+
+      const batchId = Number(row[0]?.value);
+      const purchaseId = Number(row[1]?.value);
+      const batchRemaining = Number(row[2]?.value || 0);
+      const unitCost = Number(row[3]?.value || 0);
+
+      if (
+        !Number.isFinite(batchRemaining) ||
+        batchRemaining <= 0 ||
+        !Number.isFinite(unitCost)
+      ) {
+        continue;
+      }
+
+      const allocatedQty = Math.min(
+        remainingToAllocate,
+        batchRemaining
+      );
+
+      allocations.push({
+        batchId,
+        purchaseId,
+        quantity: allocatedQty,
+        unitCost
+      });
+
+      totalCost += allocatedQty * unitCost;
+      remainingToAllocate -= allocatedQty;
+    }
+
+    // 2. If FIFO batches do not cover the full sale,
+    // use Opening Stock at products.purchase_price as fallback cost.
+    let openingStockQuantity = 0;
+
+    if (remainingToAllocate > 0) {
+      openingStockQuantity = remainingToAllocate;
+      totalCost += openingStockQuantity * openingCost;
+      remainingToAllocate = 0;
+    }
+
     const total = qty * price;
 
+    // Actual average cost of this sale.
+    const actualCostPrice = totalCost / qty;
+
+    // Turso decimal parameters must be sent as strings.
+    const actualCostPriceValue = String(actualCostPrice);
+
+    // 3. Create the sale using the actual calculated cost.
     const sale = await tursoQuery(
       `INSERT INTO sales
        (product_id, quantity, unit_price, cost_price, customer, total, payment_type)
@@ -1949,18 +4239,72 @@ app.post('/api/sales', async (req, res) => {
         productId,
         qty,
         price,
-        costPrice,
-        customer || '',
+        actualCostPriceValue,
+        customer?.trim() || '',
         total,
         payment_type
       ]
     );
 
+    const saleId =
+      sale.results?.[0]?.response?.result?.last_insert_rowid || null;
+
+    if (!saleId) {
+      throw new Error('Failed to create sale ID');
+    }
+
+    // 4. Save FIFO allocations and reduce batch balances.
+    for (const allocation of allocations) {
+      await tursoQuery(
+        `INSERT INTO sale_purchase_allocations
+         (sale_id, purchase_id, quantity, unit_cost)
+         VALUES (?, ?, ?, ?)`,
+        [
+          saleId,
+          allocation.purchaseId,
+          allocation.quantity,
+          allocation.unitCost
+        ]
+      );
+
+      await tursoQuery(
+        `UPDATE purchase_batches
+         SET remaining_quantity = remaining_quantity - ?
+         WHERE id = ?`,
+        [
+          allocation.quantity,
+          allocation.batchId
+        ]
+      );
+    }
+
+    // 5. Reduce product stock.
+    const newStock = currentStock - qty;
+
     await tursoQuery(
-      'UPDATE products SET stock = stock - ? WHERE id = ?',
-      [qty, productId]
+      `UPDATE products
+       SET stock = ?
+       WHERE id = ?`,
+      [newStock, productId]
     );
 
+    // 6. Record stock movement.
+    await tursoQuery(
+      `INSERT INTO stock_movements
+       (product_id, type, quantity, stock_before, stock_after, reference_id, note)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        productId,
+        'sale',
+        -qty,
+        currentStock,
+        newStock,
+        saleId,
+        `Sale - ${productName}${customer ? ` - ${customer}` : ''}`
+      ]
+    );
+
+    // 7. Record payment/accounting entry.
     if (payment_type === 'cash') {
       await tursoQuery(
         `INSERT INTO cash_transactions
@@ -1978,8 +4322,8 @@ app.post('/api/sales', async (req, res) => {
          (sale_id, customer, description, amount)
          VALUES (?, ?, ?, ?)`,
         [
-          sale.results?.[0]?.response?.result?.last_insert_rowid || null,
-          customer,
+          saleId,
+          customer.trim(),
           `Credit Sale - ${productName}`,
           total
         ]
@@ -1989,21 +4333,431 @@ app.post('/api/sales', async (req, res) => {
     res.json({
       success: true,
       message: 'Sale registered successfully',
+      sale_id: saleId,
       total,
+      cost_of_goods_sold: totalCost,
+      actual_cost_per_unit: actualCostPrice,
       payment_type,
+      fifo_allocations: allocations,
+      opening_stock_quantity: openingStockQuantity,
       sale
     });
 
   } catch (error) {
-    console.error('Turso error:', error);
+    console.error('FIFO sale error:', error);
 
     res.status(500).json({
       error: 'Failed to register sale',
       details: error.message
     });
   }
-})
+});
+
 // 📋 Recent Purchases
+
+// 🗑️ Delete Sale
+app.delete(
+  '/api/sales/:id',
+  requireAuth,
+  requirePermission('delete_sales'),
+  async (req, res) => {
+    try {
+      const saleId = Number(req.params.id);
+
+      if (!Number.isInteger(saleId) || saleId <= 0) {
+        return res.status(400).json({
+          error: 'Invalid sale ID'
+        });
+      }
+
+      const saleData = await tursoQuery(
+        `SELECT
+          id,
+          product_id,
+          quantity,
+          total,
+          customer,
+          payment_type
+         FROM sales
+         WHERE id = ?
+         LIMIT 1`,
+        [saleId]
+      );
+
+      const saleRows =
+        saleData.results?.[0]?.response?.result?.rows || [];
+
+      if (!saleRows.length) {
+        return res.status(404).json({
+          error: 'Sale not found'
+        });
+      }
+
+      const sale = saleRows[0];
+
+      const productId = Number(sale[1]?.value);
+      const quantity = Number(sale[2]?.value || 0);
+      const total = Number(sale[3]?.value || 0);
+      const customer = sale[4]?.value || '';
+      const paymentType = sale[5]?.value || 'cash';
+
+      // 1. Find FIFO allocations for this sale.
+      const allocationData = await tursoQuery(
+        `SELECT
+          purchase_id,
+          quantity
+         FROM sale_purchase_allocations
+         WHERE sale_id = ?
+         ORDER BY id ASC`,
+        [saleId]
+      );
+
+      const allocationRows =
+        allocationData.results?.[0]?.response?.result?.rows || [];
+
+      // 2. Restore each purchase batch quantity.
+      for (const row of allocationRows) {
+        const purchaseId = Number(row[0]?.value);
+        const allocatedQuantity = Number(row[1]?.value || 0);
+
+        if (
+          !Number.isFinite(purchaseId) ||
+          purchaseId <= 0 ||
+          !Number.isFinite(allocatedQuantity) ||
+          allocatedQuantity <= 0
+        ) {
+          continue;
+        }
+
+        await tursoQuery(
+          `UPDATE purchase_batches
+           SET remaining_quantity = remaining_quantity + ?
+           WHERE purchase_id = ?
+             AND product_id = ?`,
+          [
+            allocatedQuantity,
+            purchaseId,
+            productId
+          ]
+        );
+      }
+
+      // 3. Return product stock.
+      const productData = await tursoQuery(
+        `SELECT stock
+         FROM products
+         WHERE id = ?
+         LIMIT 1`,
+        [productId]
+      );
+
+      const productRows =
+        productData.results?.[0]?.response?.result?.rows || [];
+
+      if (!productRows.length) {
+        return res.status(404).json({
+          error: 'Product for this sale was not found'
+        });
+      }
+
+      const currentStock = Number(productRows[0][0]?.value || 0);
+      const newStock = currentStock + quantity;
+
+      await tursoQuery(
+        `UPDATE products
+         SET stock = ?
+         WHERE id = ?`,
+        [newStock, productId]
+      );
+
+      // 4. Record stock reversal.
+      await tursoQuery(
+        `INSERT INTO stock_movements
+         (product_id, type, quantity, stock_before, stock_after, reference_id, note)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          productId,
+          'sale_reversal',
+          quantity,
+          currentStock,
+          newStock,
+          saleId,
+          `Sale #${saleId} deleted`
+        ]
+      );
+
+      // 5. Reverse cash sale.
+      if (paymentType === 'cash') {
+        await tursoQuery(
+          `INSERT INTO cash_transactions
+           (type, description, amount)
+           VALUES (?, ?, ?)`,
+          [
+            'sale_reversal',
+            `Deleted Sale #${saleId}`,
+            -total
+          ]
+        );
+      }
+
+      // 6. Remove credit receivable.
+      if (paymentType === 'credit') {
+        await tursoQuery(
+          `DELETE FROM customer_receivables
+           WHERE sale_id = ?`,
+          [saleId]
+        );
+      }
+
+      // 7. Delete FIFO allocation records.
+      await tursoQuery(
+        `DELETE FROM sale_purchase_allocations
+         WHERE sale_id = ?`,
+        [saleId]
+      );
+
+      // 8. Delete sale.
+      await tursoQuery(
+        `DELETE FROM sales
+         WHERE id = ?`,
+        [saleId]
+      );
+
+      res.json({
+        success: true,
+        message: 'Sale deleted and FIFO allocation reversed successfully',
+        sale_id: saleId,
+        restored_stock: quantity,
+        restored_allocations: allocationRows.length
+      });
+
+    } catch (error) {
+      console.error('Delete sale error:', error);
+
+      res.status(500).json({
+        error: 'Failed to delete sale',
+        details: error.message
+      });
+    }
+  }
+);
+
+// 🔄 Sales Correction
+app.post(
+  '/api/sales/:id/correct',
+  requireAuth,
+  async (req, res) => {
+    try {
+      const saleId = Number(req.params.id);
+      const { reason } = req.body;
+
+      if (!Number.isInteger(saleId) || saleId <= 0) {
+        return res.status(400).json({
+          error: 'Valid sale ID is required'
+        });
+      }
+
+      if (!reason || !String(reason).trim()) {
+        return res.status(400).json({
+          error: 'Correction reason is required'
+        });
+      }
+
+      // 1. Find the original sale.
+      const saleData = await tursoQuery(
+        `SELECT
+          id,
+          product_id,
+          quantity,
+          total,
+          customer,
+          payment_type
+         FROM sales
+         WHERE id = ?
+         LIMIT 1`,
+        [saleId]
+      );
+
+      const saleRows =
+        saleData.results?.[0]?.response?.result?.rows || [];
+
+      if (!saleRows.length) {
+        return res.status(404).json({
+          error: 'Sale not found'
+        });
+      }
+
+      const sale = saleRows[0];
+
+      const productId = Number(sale[1]?.value);
+      const quantity = Number(sale[2]?.value || 0);
+      const total = Number(sale[3]?.value || 0);
+      const customer = sale[4]?.value || '';
+      const paymentType = sale[5]?.value || 'cash';
+
+      if (
+        !Number.isFinite(productId) ||
+        productId <= 0 ||
+        !Number.isFinite(quantity) ||
+        quantity <= 0 ||
+        !Number.isFinite(total) ||
+        total < 0
+      ) {
+        return res.status(400).json({
+          error: 'Invalid sale data'
+        });
+      }
+
+      // 2. Prevent duplicate correction.
+      const existingCorrection = await tursoQuery(
+        `SELECT id
+         FROM stock_movements
+         WHERE type = 'sale_correction'
+           AND reference_id = ?
+         LIMIT 1`,
+        [saleId]
+      );
+
+      const correctionRows =
+        existingCorrection.results?.[0]?.response?.result?.rows || [];
+
+      if (correctionRows.length) {
+        return res.status(409).json({
+          error: 'This sale has already been corrected'
+        });
+      }
+
+      // 3. Find FIFO allocations.
+      const allocationData = await tursoQuery(
+        `SELECT
+          purchase_id,
+          quantity
+         FROM sale_purchase_allocations
+         WHERE sale_id = ?
+         ORDER BY id ASC`,
+        [saleId]
+      );
+
+      const allocationRows =
+        allocationData.results?.[0]?.response?.result?.rows || [];
+
+      // 4. Restore purchase batch quantities.
+      for (const row of allocationRows) {
+        const purchaseId = Number(row[0]?.value);
+        const allocatedQuantity = Number(row[1]?.value || 0);
+
+        if (
+          !Number.isFinite(purchaseId) ||
+          purchaseId <= 0 ||
+          !Number.isFinite(allocatedQuantity) ||
+          allocatedQuantity <= 0
+        ) {
+          continue;
+        }
+
+        await tursoQuery(
+          `UPDATE purchase_batches
+           SET remaining_quantity = remaining_quantity + ?
+           WHERE purchase_id = ?
+             AND product_id = ?`,
+          [
+            allocatedQuantity,
+            purchaseId,
+            productId
+          ]
+        );
+      }
+
+      // 5. Restore product stock.
+      const productData = await tursoQuery(
+        `SELECT stock
+         FROM products
+         WHERE id = ?
+         LIMIT 1`,
+        [productId]
+      );
+
+      const productRows =
+        productData.results?.[0]?.response?.result?.rows || [];
+
+      if (!productRows.length) {
+        return res.status(404).json({
+          error: 'Product for this sale was not found'
+        });
+      }
+
+      const currentStock = Number(productRows[0][0]?.value || 0);
+      const newStock = currentStock + quantity;
+
+      await tursoQuery(
+        `UPDATE products
+         SET stock = ?
+         WHERE id = ?`,
+        [newStock, productId]
+      );
+
+      // 6. Record stock correction.
+      await tursoQuery(
+        `INSERT INTO stock_movements
+         (product_id, type, quantity, stock_before, stock_after, reference_id, note)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          productId,
+          'sale_correction',
+          quantity,
+          currentStock,
+          newStock,
+          saleId,
+          `Sale #${saleId} corrected - ${String(reason).trim()}`
+        ]
+      );
+
+      // 7. Reverse cash or credit effect.
+      if (paymentType === 'cash') {
+        await tursoQuery(
+          `INSERT INTO cash_transactions
+           (type, description, amount)
+           VALUES (?, ?, ?)`,
+          [
+            'sale_correction',
+            `Correction for Sale #${saleId} - ${String(reason).trim()}`,
+            -total
+          ]
+        );
+      } else {
+        await tursoQuery(
+          `INSERT INTO customer_receivables
+           (sale_id, customer, description, amount)
+           VALUES (?, ?, ?, ?)`,
+          [
+            saleId,
+            customer || 'Unknown Customer',
+            `Sale Correction #${saleId} - ${String(reason).trim()}`,
+            -total
+          ]
+        );
+      }
+
+      res.json({
+        success: true,
+        message: 'Sale corrected successfully',
+        sale_id: saleId,
+        restored_stock: quantity,
+        correction_amount: total,
+        restored_allocations: allocationRows.length
+      });
+
+    } catch (error) {
+      console.error('Sales correction error:', error);
+
+      res.status(500).json({
+        error: 'Failed to correct sale',
+        details: error.message
+      });
+    }
+  }
+);
+
 app.get('/api/recent-purchases', async (req, res) => {
   try {
     const data = await tursoQuery(`
@@ -2165,6 +4919,192 @@ app.get('/api/recent-sales', async (req, res) => {
   }
 });
 // 🏭 Production Table
+
+// 📊 Sales Summary
+app.get('/api/sales-summary', async (req, res) => {
+  try {
+    const period = String(req.query.period || 'today').toLowerCase();
+
+    const allowedPeriods = ['today', 'yesterday', 'week', 'month', 'all'];
+
+    if (!allowedPeriods.includes(period)) {
+      return res.status(400).json({
+        error: 'Invalid period. Use today, yesterday, week, month, or all'
+      });
+    }
+
+    let dateCondition = '';
+
+    if (period === 'today') {
+      dateCondition = `
+        date(s.created_at, '+3 hours') = date('now', '+3 hours')
+      `;
+    } else if (period === 'yesterday') {
+      dateCondition = `
+        date(s.created_at, '+3 hours') =
+        date('now', '+3 hours', '-1 day')
+      `;
+    } else if (period === 'week') {
+      dateCondition = `
+        date(s.created_at, '+3 hours') >=
+        date('now', '+3 hours', 'weekday 1', '-7 days')
+        AND
+        date(s.created_at, '+3 hours') <
+        date('now', '+3 hours', 'weekday 1')
+      `;
+    } else if (period === 'month') {
+      dateCondition = `
+        strftime('%Y-%m', s.created_at, '+3 hours') =
+        strftime('%Y-%m', 'now', '+3 hours')
+      `;
+    } else {
+      dateCondition = '1 = 1';
+    }
+
+    const summaryData = await tursoQuery(`
+      SELECT
+        COALESCE(SUM(s.total), 0) AS revenue,
+        COUNT(s.id) AS sales_count,
+
+        COALESCE(SUM(
+          CASE
+            WHEN s.payment_type = 'credit'
+            THEN s.total
+            ELSE 0
+          END
+        ), 0) AS credit,
+
+        COALESCE(SUM(
+          CASE
+            WHEN s.payment_type = 'cash'
+            THEN s.total
+            ELSE 0
+          END
+        ), 0) AS sales_collected
+
+      FROM sales s
+      WHERE ${dateCondition}
+    `);
+
+    const paymentData = await tursoQuery(`
+      SELECT COALESCE(SUM(amount), 0) AS customer_payments
+      FROM customer_payments
+      WHERE ${
+        period === 'all'
+          ? '1 = 1'
+          : period === 'today'
+            ? `date(created_at, '+3 hours') = date('now', '+3 hours')`
+            : period === 'yesterday'
+              ? `date(created_at, '+3 hours') = date('now', '+3 hours', '-1 day')`
+              : period === 'month'
+                ? `strftime('%Y-%m', created_at, '+3 hours') =
+                   strftime('%Y-%m', 'now', '+3 hours')`
+                : `date(created_at, '+3 hours') >=
+                   date('now', '+3 hours', 'weekday 1', '-7 days')
+                   AND
+                   date(created_at, '+3 hours') <
+                   date('now', '+3 hours', 'weekday 1')`
+      }
+    `);
+
+    const expenseData = await tursoQuery(`
+      SELECT COALESCE(SUM(ABS(amount)), 0) AS expenses
+      FROM cash_transactions
+      WHERE type = 'expense'
+        AND ${
+          period === 'all'
+            ? '1 = 1'
+            : period === 'today'
+              ? `date(created_at, '+3 hours') = date('now', '+3 hours')`
+              : period === 'yesterday'
+                ? `date(created_at, '+3 hours') = date('now', '+3 hours', '-1 day')`
+                : period === 'month'
+                  ? `strftime('%Y-%m', created_at, '+3 hours') =
+                     strftime('%Y-%m', 'now', '+3 hours')`
+                  : `date(created_at, '+3 hours') >=
+                     date('now', '+3 hours', 'weekday 1', '-7 days')
+                     AND
+                     date(created_at, '+3 hours') <
+                     date('now', '+3 hours', 'weekday 1')`
+        }
+    `);
+
+    const salesListData = await tursoQuery(`
+      SELECT
+        s.id,
+        s.product_id,
+        p.name AS product_name,
+        s.quantity,
+        s.unit_price,
+        s.cost_price,
+        s.customer,
+        s.total,
+        s.payment_type,
+        s.created_at,
+        CASE
+          WHEN EXISTS (
+            SELECT 1
+            FROM stock_movements sm
+            WHERE sm.type = 'sale_correction'
+              AND sm.reference_id = s.id
+          )
+          THEN 1
+          ELSE 0
+        END AS corrected
+      FROM sales s
+      JOIN products p
+        ON s.product_id = p.id
+      WHERE ${dateCondition}
+      ORDER BY s.id DESC
+    `);
+
+    const summaryRows =
+      summaryData.results?.[0]?.response?.result?.rows || [];
+
+    const paymentRows =
+      paymentData.results?.[0]?.response?.result?.rows || [];
+
+    const expenseRows =
+      expenseData.results?.[0]?.response?.result?.rows || [];
+
+    const salesRows =
+      salesListData.results?.[0]?.response?.result?.rows || [];
+
+    const summaryRow = summaryRows[0] || [];
+    const paymentRow = paymentRows[0] || [];
+    const expenseRow = expenseRows[0] || [];
+
+    const revenue = Number(summaryRow[0]?.value || 0);
+    const salesCount = Number(summaryRow[1]?.value || 0);
+    const credit = Number(summaryRow[2]?.value || 0);
+    const salesCollected = Number(summaryRow[3]?.value || 0);
+    const customerPayments = Number(paymentRow[0]?.value || 0);
+    const expenses = Number(expenseRow[0]?.value || 0);
+
+    res.json({
+      success: true,
+      period,
+      summary: {
+        revenue,
+        sales_count: salesCount,
+        credit,
+        sales_collected: salesCollected + customerPayments,
+        credit_return: 0,
+        expenses
+      },
+      sales: salesRows
+    });
+
+  } catch (error) {
+    console.error('Sales summary error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load sales summary',
+      details: error.message
+    });
+  }
+});
+
 app.get('/api/create-production-table', async (req, res) => {
   try {
     await tursoQuery(`
@@ -2215,7 +5155,7 @@ app.post('/api/production', async (req, res) => {
     }
 
     const productData = await tursoQuery(
-      'SELECT id, name FROM products WHERE id = ?',
+      'SELECT id, name, stock FROM products WHERE id = ?',
       [productId]
     );
 
@@ -2229,6 +5169,8 @@ app.post('/api/production', async (req, res) => {
     }
 
     const productName = productRows[0][1].value;
+    const stockBefore = Number(productRows[0][2].value) || 0;
+    const stockAfter = stockBefore + qty;
 
     const production = await tursoQuery(
       `INSERT INTO production
@@ -2244,6 +5186,24 @@ app.post('/api/production', async (req, res) => {
     await tursoQuery(
       'UPDATE products SET stock = stock + ? WHERE id = ?',
       [qty, productId]
+    );
+
+    const productionId =
+      production.results?.[0]?.response?.result?.last_insert_rowid || null;
+
+    await tursoQuery(
+      `INSERT INTO stock_movements
+       (product_id, type, quantity, stock_before, stock_after, reference_id, note)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        productId,
+        'production',
+        qty,
+        stockBefore,
+        stockAfter,
+        productionId,
+        `Production - ${productName}`
+      ]
     );
 
     res.json({
@@ -2290,3 +5250,612 @@ app.get('/api/recent-production', async (req, res) => {
     });
   }
 });
+
+app.get('/api/create-stock-movements-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS stock_movements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        quantity REAL NOT NULL,
+        stock_before REAL NOT NULL DEFAULT 0,
+        stock_after REAL NOT NULL DEFAULT 0,
+        reference_id INTEGER,
+        note TEXT,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Stock movements table created successfully'
+    });
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
+app.get('/api/stock-movements', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT
+        stock_movements.id,
+        stock_movements.product_id,
+        products.name AS product_name,
+        products.unit,
+        stock_movements.type,
+        stock_movements.quantity,
+        stock_movements.stock_before,
+        stock_movements.stock_after,
+        stock_movements.reference_id,
+        stock_movements.note,
+        stock_movements.created_at
+      FROM stock_movements
+      JOIN products
+        ON stock_movements.product_id = products.id
+      ORDER BY stock_movements.id DESC
+    `);
+
+    res.json(data);
+  } catch (error) {
+    console.error('Turso error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load stock movements',
+      details: error.message
+    });
+  }
+});
+
+
+/* =========================================================
+   STOCK ADJUSTMENT
+   ========================================================= */
+
+app.post('/api/stock-adjustments', requireAuth, async (req, res) => {
+  try {
+    const productId = Number(req.body.product_id);
+    const adjustment = Number(req.body.adjustment);
+    const reason = String(req.body.reason || '').trim();
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.status(400).json({
+        error: 'Valid product_id is required'
+      });
+    }
+
+    if (!Number.isFinite(adjustment) || adjustment === 0) {
+      return res.status(400).json({
+        error: 'Adjustment must be a non-zero number'
+      });
+    }
+
+    if (!reason) {
+      return res.status(400).json({
+        error: 'Adjustment reason is required'
+      });
+    }
+
+    const productData = await tursoQuery(
+      `SELECT id, name, stock
+       FROM products
+       WHERE id = ?`,
+      [productId]
+    );
+
+    const productRows =
+      productData.results?.[0]?.response?.result?.rows || [];
+
+    if (!productRows.length) {
+      return res.status(404).json({
+        error: 'Product not found'
+      });
+    }
+
+    const productName = productRows[0][1].value;
+    const stockBefore =
+      Number(productRows[0][2].value) || 0;
+
+    const stockAfter = stockBefore + adjustment;
+
+    if (stockAfter < 0) {
+      return res.status(400).json({
+        error: `Adjustment would make stock negative. Current stock: ${stockBefore}`
+      });
+    }
+
+    await tursoQuery(
+      `UPDATE products
+       SET stock = ?
+       WHERE id = ?`,
+      [stockAfter, productId]
+    );
+
+    const movement = await tursoQuery(
+      `INSERT INTO stock_movements
+       (product_id, type, quantity, stock_before, stock_after, reference_id, note)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        productId,
+        'stock_adjustment',
+        adjustment,
+        stockBefore,
+        stockAfter,
+        null,
+        reason
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Stock adjusted successfully',
+      product_id: productId,
+      product_name: productName,
+      adjustment,
+      stock_before: stockBefore,
+      stock_after: stockAfter,
+      movement_id:
+        movement.results?.[0]?.response?.result?.last_insert_rowid || null
+    });
+
+  } catch (error) {
+    console.error('Stock adjustment error:', error);
+
+    res.status(500).json({
+      error: 'Failed to adjust stock',
+      details: error.message
+    });
+  }
+});
+
+/* =========================================================
+   CORRECTION STATUS
+   ========================================================= */
+
+app.get('/api/correction-status', requireAuth, async (req, res) => {
+  try {
+    const corrections = [];
+
+    // 1. Sales corrections
+    const salesData = await tursoQuery(`
+      SELECT
+        sm.id,
+        sm.reference_id,
+        sm.quantity,
+        sm.note,
+        sm.created_at,
+        s.customer,
+        s.total
+      FROM stock_movements sm
+      LEFT JOIN sales s
+        ON s.id = sm.reference_id
+      WHERE sm.type = 'sale_correction'
+      ORDER BY sm.id DESC
+    `);
+
+    const salesRows =
+      salesData.results?.[0]?.response?.result?.rows || [];
+
+    for (const row of salesRows) {
+      corrections.push({
+        id: Number(row[0]?.value),
+        type: 'sale',
+        correction_type: 'Sales Correction',
+        original_id:
+          row[1]?.value == null ? null : Number(row[1].value),
+        quantity: Number(row[2]?.value || 0),
+        amount: Number(row[6]?.value || 0),
+        description: row[3]?.value || '',
+        created_at: row[4]?.value || null,
+        party: row[5]?.value || ''
+      });
+    }
+
+    // 2. Purchase corrections
+    const purchaseData = await tursoQuery(`
+      SELECT
+        sm.id,
+        sm.reference_id,
+        sm.quantity,
+        sm.note,
+        sm.created_at,
+        p.supplier,
+        p.total
+      FROM stock_movements sm
+      LEFT JOIN purchases p
+        ON p.id = sm.reference_id
+      WHERE sm.type = 'purchase_correction'
+      ORDER BY sm.id DESC
+    `);
+
+    const purchaseRows =
+      purchaseData.results?.[0]?.response?.result?.rows || [];
+
+    for (const row of purchaseRows) {
+      corrections.push({
+        id: Number(row[0]?.value),
+        type: 'purchase',
+        correction_type: 'Purchase Correction',
+        original_id:
+          row[1]?.value == null ? null : Number(row[1].value),
+        quantity: Math.abs(Number(row[2]?.value || 0)),
+        amount: Number(row[6]?.value || 0),
+        description: row[3]?.value || '',
+        created_at: row[4]?.value || null,
+        party: row[5]?.value || ''
+      });
+    }
+
+    // 3. Expense corrections
+    const expenseData = await tursoQuery(`
+      SELECT
+        id,
+        description,
+        amount,
+        created_at
+      FROM cash_transactions
+      WHERE type = 'expense_correction'
+      ORDER BY id DESC
+    `);
+
+    const expenseRows =
+      expenseData.results?.[0]?.response?.result?.rows || [];
+
+    for (const row of expenseRows) {
+      const description = row[1]?.value || '';
+      const match =
+        description.match(/Correction for Expense #(\d+)\s*-\s*(.*)$/);
+
+      corrections.push({
+        id: Number(row[0]?.value),
+        type: 'expense',
+        correction_type: 'Expense Correction',
+        original_id: match ? Number(match[1]) : null,
+        quantity: null,
+        amount: Math.abs(Number(row[2]?.value || 0)),
+        description: match ? match[2] : description,
+        created_at: row[3]?.value || null,
+        party: ''
+      });
+    }
+
+    // 4. Income corrections
+    const incomeData = await tursoQuery(`
+      SELECT
+        id,
+        description,
+        amount,
+        created_at
+      FROM cash_transactions
+      WHERE type = 'income_correction'
+      ORDER BY id DESC
+    `);
+
+    const incomeRows =
+      incomeData.results?.[0]?.response?.result?.rows || [];
+
+    for (const row of incomeRows) {
+      const description = row[1]?.value || '';
+      const match =
+        description.match(/Correction for Income #(\d+)\s*-\s*(.*)$/);
+
+      corrections.push({
+        id: Number(row[0]?.value),
+        type: 'income',
+        correction_type: 'Cash / Income Correction',
+        original_id: match ? Number(match[1]) : null,
+        quantity: null,
+        amount: Math.abs(Number(row[2]?.value || 0)),
+        description: match ? match[2] : description,
+        created_at: row[3]?.value || null,
+        party: ''
+      });
+    }
+
+    // 5. Customer payment corrections
+    const customerPaymentData = await tursoQuery(`
+      SELECT
+        id,
+        description,
+        amount,
+        created_at
+      FROM cash_transactions
+      WHERE type = 'customer_payment_correction'
+      ORDER BY id DESC
+    `);
+
+    const customerPaymentRows =
+      customerPaymentData.results?.[0]?.response?.result?.rows || [];
+
+    for (const row of customerPaymentRows) {
+      const description = row[1]?.value || '';
+      const match =
+        description.match(
+          /Correction for Customer Payment #(\d+)\s*-\s*(.*)$/
+        );
+
+      corrections.push({
+        id: Number(row[0]?.value),
+        type: 'customer_payment',
+        correction_type: 'Customer Payment Correction',
+        original_id: match ? Number(match[1]) : null,
+        quantity: null,
+        amount: Math.abs(Number(row[2]?.value || 0)),
+        description: match ? match[2] : description,
+        created_at: row[3]?.value || null,
+        party: ''
+      });
+    }
+
+    // 6. Supplier payment corrections
+    const supplierPaymentData = await tursoQuery(`
+      SELECT
+        id,
+        description,
+        amount,
+        created_at
+      FROM cash_transactions
+      WHERE type = 'supplier_payment_correction'
+      ORDER BY id DESC
+    `);
+
+    const supplierPaymentRows =
+      supplierPaymentData.results?.[0]?.response?.result?.rows || [];
+
+    for (const row of supplierPaymentRows) {
+      const description = row[1]?.value || '';
+      const match =
+        description.match(
+          /Correction for Supplier Payment #(\d+)\s*-\s*(.*)$/
+        );
+
+      corrections.push({
+        id: Number(row[0]?.value),
+        type: 'supplier_payment',
+        correction_type: 'Supplier Payment Correction',
+        original_id: match ? Number(match[1]) : null,
+        quantity: null,
+        amount: Math.abs(Number(row[2]?.value || 0)),
+        description: match ? match[2] : description,
+        created_at: row[3]?.value || null,
+        party: ''
+      });
+    }
+
+    // 7. Stock adjustments
+    const stockData = await tursoQuery(`
+      SELECT
+        sm.id,
+        sm.product_id,
+        sm.quantity,
+        sm.stock_before,
+        sm.stock_after,
+        sm.note,
+        sm.created_at,
+        p.name,
+        p.unit
+      FROM stock_movements sm
+      LEFT JOIN products p
+        ON p.id = sm.product_id
+      WHERE sm.type = 'stock_adjustment'
+      ORDER BY sm.id DESC
+    `);
+
+    const stockRows =
+      stockData.results?.[0]?.response?.result?.rows || [];
+
+    for (const row of stockRows) {
+      corrections.push({
+        id: Number(row[0]?.value),
+        type: 'stock',
+        correction_type: 'Stock Adjustment',
+        original_id: null,
+        quantity: Number(row[2]?.value || 0),
+        amount: null,
+        description: row[5]?.value || '',
+        created_at: row[6]?.value || null,
+        party: row[7]?.value || '',
+        stock_before: Number(row[3]?.value || 0),
+        stock_after: Number(row[4]?.value || 0),
+        unit: row[8]?.value || ''
+      });
+    }
+
+    corrections.sort((a, b) => {
+      const aTime = a.created_at || '';
+      const bTime = b.created_at || '';
+
+      if (aTime < bTime) return 1;
+      if (aTime > bTime) return -1;
+
+      return Number(b.id || 0) - Number(a.id || 0);
+    });
+
+    res.json({
+      success: true,
+      count: corrections.length,
+      corrections
+    });
+
+  } catch (error) {
+    console.error('Correction status error:', error);
+
+    res.status(500).json({
+      error: 'Failed to load correction status',
+      details: error.message
+    });
+  }
+});
+
+/* =========================================================
+   SUPPLIERS MASTER
+   ========================================================= */
+
+app.get('/api/create-suppliers-table', async (req, res) => {
+  try {
+    await tursoQuery(`
+      CREATE TABLE IF NOT EXISTS suppliers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        phone TEXT,
+        address TEXT,
+        note TEXT,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({
+      success: true,
+      message: 'Suppliers table created successfully'
+    });
+  } catch (error) {
+    console.error('Turso error:', error);
+    res.status(500).json({
+      error: 'Failed to create suppliers table',
+      details: error.message
+    });
+  }
+});
+
+
+/* =========================================================
+   SUPPLIERS API
+   ========================================================= */
+
+app.get('/api/suppliers', async (req, res) => {
+  try {
+    const data = await tursoQuery(`
+      SELECT id, name, phone, address, note, created_at
+      FROM suppliers
+      ORDER BY id DESC
+    `);
+
+    const rows =
+      data.results?.[0]?.response?.result?.rows || [];
+
+    const suppliers = rows.map(row => ({
+      id: Number(row[0].value),
+      name: row[1].value,
+      phone: row[2].value,
+      address: row[3].value,
+      note: row[4].value,
+      created_at: row[5].value
+    }));
+
+    res.json({
+      success: true,
+      count: suppliers.length,
+      suppliers
+    });
+  } catch (error) {
+    console.error('Turso error:', error);
+    res.status(500).json({
+      error: 'Failed to load suppliers',
+      details: error.message
+    });
+  }
+});
+
+app.post('/api/suppliers', async (req, res) => {
+  try {
+    const {
+      name,
+      phone = '',
+      address = '',
+      note = ''
+    } = req.body;
+
+    const supplierName = String(name || '').trim();
+
+    if (!supplierName) {
+      return res.status(400).json({
+        error: 'Supplier name is required'
+      });
+    }
+
+    try {
+      const data = await tursoQuery(
+        `INSERT INTO suppliers
+         (name, phone, address, note)
+         VALUES (?, ?, ?, ?)`,
+        [
+          supplierName,
+          String(phone || '').trim(),
+          String(address || '').trim(),
+          String(note || '').trim()
+        ]
+      );
+
+      const supplierId =
+        data.results?.[0]?.response?.result?.last_insert_rowid || null;
+
+      res.json({
+        success: true,
+        message: 'Supplier created successfully',
+        supplier_id: supplierId
+      });
+    } catch (error) {
+      if (String(error.message).toLowerCase().includes('unique')) {
+        return res.status(409).json({
+          error: 'Supplier already exists'
+        });
+      }
+
+      throw error;
+    }
+  } catch (error) {
+    console.error('Turso error:', error);
+    res.status(500).json({
+      error: 'Failed to create supplier',
+      details: error.message
+    });
+  }
+});
+
+app.delete('/api/suppliers/:id', async (req, res) => {
+  try {
+    const supplierId = Number(req.params.id);
+
+    if (!Number.isInteger(supplierId) || supplierId <= 0) {
+      return res.status(400).json({
+        error: 'Valid supplier id is required'
+      });
+    }
+
+    const existing = await tursoQuery(
+      'SELECT id, name FROM suppliers WHERE id = ?',
+      [supplierId]
+    );
+
+    const rows =
+      existing.results?.[0]?.response?.result?.rows || [];
+
+    if (!rows.length) {
+      return res.status(404).json({
+        error: 'Supplier not found'
+      });
+    }
+
+    await tursoQuery(
+      'DELETE FROM suppliers WHERE id = ?',
+      [supplierId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Supplier deleted successfully',
+      supplier_id: supplierId
+    });
+  } catch (error) {
+    console.error('Turso error:', error);
+    res.status(500).json({
+      error: 'Failed to delete supplier',
+      details: error.message
+    });
+  }
+});
+
